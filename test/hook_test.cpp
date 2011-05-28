@@ -31,6 +31,7 @@
 
 #include <winapi/hook.hpp> // test subject
 
+#include <boost/system/system_error.hpp> // system_error
 #include <boost/test/unit_test.hpp>
 
 BOOST_AUTO_TEST_SUITE(hook_tests)
@@ -42,13 +43,35 @@ LRESULT CALLBACK test_keyboard_proc(int nCode, WPARAM wParam, LPARAM lParam)
 }
 
 /**
- * Install a hook.  Should be destroyed automatically at end of test.
+ * Install a hook for the current thread.
+ * Should be destroyed automatically at end of test.
  */
-BOOST_AUTO_TEST_CASE( hook )
+BOOST_AUTO_TEST_CASE( thread_hook )
 {
     winapi::hhook hook = winapi::windows_hook(
+        WH_KEYBOARD, test_keyboard_proc);
+    BOOST_CHECK(hook);
+}
+
+/**
+ * Install a global hook.  Should be destroyed automatically at end of test.
+ */
+BOOST_AUTO_TEST_CASE( global_hook )
+{
+    winapi::hhook hook = winapi::windows_global_hook(
         WH_KEYBOARD_LL, test_keyboard_proc);
     BOOST_CHECK(hook);
+}
+
+/**
+ * Try to install a global-only hook as a thread hook.
+ * It should throw an exception.
+ */
+BOOST_AUTO_TEST_CASE( thread_hook_fail )
+{
+    BOOST_CHECK_THROW(
+        winapi::windows_hook(
+            WH_KEYBOARD_LL, test_keyboard_proc), boost::system::system_error);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

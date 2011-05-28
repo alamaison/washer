@@ -46,6 +46,21 @@ namespace winapi {
 
 typedef boost::shared_ptr<boost::remove_pointer<HHOOK>::type> hhook;
 
+namespace detail {
+
+inline hhook windows_hook(int type, HOOKPROC hook_function, DWORD thread_id)
+{
+    HHOOK hook = ::SetWindowsHookExW(type, hook_function, NULL, thread_id);
+    if (hook == NULL)
+        BOOST_THROW_EXCEPTION(
+            boost::enable_error_info(last_error()) <<
+            boost::errinfo_api_function("SetWindowsHookExW"));
+
+    return hhook(hook, ::UnhookWindowsHookEx);
+}
+
+}
+
 /**
  * Install a windows hook function for the current thread.
  *
@@ -53,14 +68,17 @@ typedef boost::shared_ptr<boost::remove_pointer<HHOOK>::type> hhook;
  */
 inline hhook windows_hook(int type, HOOKPROC hook_function)
 {
-    HHOOK hook = ::SetWindowsHookExW(
-        type, hook_function, NULL, ::GetCurrentThreadId());
-    if (hook == NULL)
-        BOOST_THROW_EXCEPTION(
-            boost::enable_error_info(last_error()) <<
-            boost::errinfo_api_function("SetWindowsHookExW"));
+    return detail::windows_hook(type, hook_function, ::GetCurrentThreadId());
+}
 
-    return hhook(hook, ::UnhookWindowsHookEx);
+/**
+ * Install a windows hook function globally.
+ *
+ * The hook is uninstalled when the returned hhook goes out of scope.
+ */
+inline hhook windows_global_hook(int type, HOOKPROC hook_function)
+{
+    return detail::windows_hook(type, hook_function, 0);
 }
 
 }
