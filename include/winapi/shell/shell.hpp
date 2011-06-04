@@ -34,6 +34,7 @@
 #pragma once
 
 #include <winapi/detail/path_traits.hpp> // choose_path
+#include <winapi/shell/folder_error_adapters.hpp> // comtype<IShellFolder>
 #include <winapi/shell/pidl.hpp> // cpidl_t, apidl_t
 
 #include <comet/ptr.h> // com_ptr
@@ -50,12 +51,6 @@
 
 #include <shlobj.h> // SHGetSpecialFolderPath, SHGetDesktopFolder
 #include <Shlwapi.h> // StrRetToStr, SHStrDup
-
-template<> struct comet::comtype<IShellFolder>
-{
-    static const IID& uuid() throw() { return IID_IShellFolder; }
-    typedef IUnknown base;
-};
 
 namespace winapi {
 namespace shell {
