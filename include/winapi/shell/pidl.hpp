@@ -43,8 +43,11 @@
 #include <stdexcept> // invalid_argument
 
 #include <Objbase.h> // CoTaskMemAlloc/Free
-#define STRICT_TYPED_ITEMIDS ///< Better type safety for PIDLs (must be
-                             ///< before <shtypes.h> or <shlobj.h>).
+
+#ifndef STRICT_TYPED_ITEMIDS
+#error Currently, winapi requires strict PIDL types: define STRICT_TYPED_ITEMIDS
+#endif
+
 #include <ShTypes.h> // Raw PIDL types
 
 namespace winapi {

@@ -14,7 +14,8 @@ find_package(
 link_directories(${Boost_LIBRARY_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 
-add_definitions(-DWIN32_LEAN_AND_MEAN -DBOOST_FILESYSTEM_VERSION=2)
+add_definitions(
+  -DWIN32_LEAN_AND_MEAN -DBOOST_FILESYSTEM_VERSION=2 -DSTRICT_TYPED_ITEMIDS)
 
 file(GLOB TEST_SOURCES *.cpp *.hpp)
 
