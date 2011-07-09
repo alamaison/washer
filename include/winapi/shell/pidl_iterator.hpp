@@ -33,7 +33,7 @@
 #define WINAPI_SHELL_PIDL_ITERATOR_HPP
 #pragma once
 
-#include <winapi/shell/pidl.hpp> // next, empty
+#include <winapi/shell/pidl.hpp> // next, empty, pidl_t
 
 #include <boost/iterator/iterator_adaptor.hpp> // iterator_adaptor
 
@@ -42,6 +42,7 @@
 
 #define STRICT_TYPED_ITEMIDS ///< Better type safety for PIDLs (must be
                              ///< before <shtypes.h> or <shlobj.h>).
+#include <Shlobj.h> // ILCloneFirst
 #include <ShTypes.h> // Raw PIDL types
 
 namespace winapi {
@@ -124,6 +125,48 @@ private:
         this->base_reference() =
             detail::canonicalise_pidl(raw_pidl::next(this->base()));
     }
+};
+
+/**
+* Iterates over the items in an Item ID List (aka a PIDL).
+*
+* The iteration is complete when the iterator is equal to a default-constructed
+* one.  I.e when @code iterator == pidl_iterator() @endcode
+*
+* The iterator becomes invalid if the IDLIST that it is created from is
+* deallocated.  
+ *
+ * When dereferenced, returns the single item at that point in the original
+ * PIDL.
+ *
+ * Differences between this class as raw_pidl_iterator:
+ * - Returns managed (pidl_t-based) PIDLs.
+ * - Returns a child PIDL to just the current item rather than a relative PIDL
+ *   to the remained of the list.
+ */
+class pidl_iterator :
+    public boost::iterator_adaptor<pidl_iterator, raw_pidl_iterator, cpidl_t>
+{
+public:
+    template<typename T, typename Alloc>
+    explicit pidl_iterator(const basic_pidl<T, Alloc>& pidl)
+        : pidl_iterator::iterator_adaptor_(raw_pidl_iterator(pidl.get())) {}
+
+    explicit pidl_iterator(PCUIDLIST_RELATIVE pidl)
+        : pidl_iterator::iterator_adaptor_(raw_pidl_iterator(pidl)) {}
+
+    pidl_iterator() : pidl_iterator::iterator_adaptor_() {}
+
+private:
+    friend boost::iterator_core_access;
+
+    reference dereference() const
+    {
+        m_item.attach(::ILCloneFirst(*this->base_reference()));
+        return m_item;
+    }
+
+    mutable cpidl_t m_item;
 };
 
 }}} // namespace winapi::shell::pidl

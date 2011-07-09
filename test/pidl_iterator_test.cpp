@@ -85,6 +85,12 @@ namespace {
             data, data + data_length, text.c_str(),
             text.c_str() + strlen(text.c_str()));
     }
+
+    predicate_result pidl_matches_text(
+        const pidl_t& pidl, const std::string& text)
+    {
+        return pidl_matches_text(pidl.get(), text);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE(raw_pidl_iterator_tests)
@@ -159,6 +165,105 @@ BOOST_AUTO_TEST_CASE( iterate_over_multi_item_pidl )
     BOOST_CHECK(pidl_matches_text(*it++, "lamb"));
     BOOST_CHECK_EQUAL(std::distance(it, raw_pidl_iterator()), 0);
     BOOST_CHECK(it == raw_pidl_iterator());
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_AUTO_TEST_SUITE(pidl_iterator_tests)
+
+/**
+ * Default constructor should result in wrapped PIDL being NULL.
+ */
+BOOST_AUTO_TEST_CASE( default_construct )
+{
+    pidl_iterator it;
+    BOOST_CHECK(it == pidl_iterator());
+    BOOST_CHECK_EQUAL(std::distance(it, pidl_iterator()), 0);
+}
+
+/**
+ * Default constructor should result in wrapped PIDL being NULL.
+ */
+BOOST_AUTO_TEST_CASE( desktop_root )
+{
+    apidl_t desktop = special_folder_pidl(CSIDL_DESKTOP);
+    pidl_iterator it(desktop);
+    BOOST_CHECK(it == pidl_iterator());
+    BOOST_CHECK_EQUAL(std::distance(it, pidl_iterator()), 0);
+}
+
+/**
+ * Constructing an iterator with a child PIDL returns that item.
+ *
+ * In addition, incrementing the iterator should work once and should cause
+ * the iterator to be equal to the default-constructed version, i.e., should
+ * signify the end of the iteration.
+ */
+BOOST_AUTO_TEST_CASE( iterate_over_child_pidl )
+{
+    cpidl_t p = child_pidl_from_text("Elizabeth");
+
+    pidl_iterator it(p);
+    BOOST_CHECK(it != pidl_iterator());
+    BOOST_CHECK(pidl_matches_text(*it, "Elizabeth"));
+
+    BOOST_CHECK_EQUAL(std::distance(it, pidl_iterator()), 1);
+
+    ++it;
+    BOOST_CHECK(it == pidl_iterator());
+
+    BOOST_CHECK_EQUAL(std::distance(it, pidl_iterator()), 0);
+
+    BOOST_CHECK_THROW(++it, std::range_error);
+}
+
+/**
+ * Constructing an iterator with a multi-item PIDL points to each item of the
+ * PIDL in turn.
+ */
+BOOST_AUTO_TEST_CASE( iterate_over_multi_item_pidl )
+{
+    apidl_t p =
+        apidl_t() + child_pidl_from_text("Mary") + child_pidl_from_text("had")
+        + child_pidl_from_text("a") + child_pidl_from_text("little")
+        + child_pidl_from_text("lamb");
+
+    pidl_iterator it(p);
+    BOOST_CHECK_EQUAL(std::distance(it, pidl_iterator()), 5);
+    BOOST_CHECK(pidl_matches_text(*it++, "Mary"));
+    BOOST_CHECK_EQUAL(std::distance(it, pidl_iterator()), 4);
+    BOOST_CHECK(pidl_matches_text(*it++, "had"));
+    BOOST_CHECK_EQUAL(std::distance(it, pidl_iterator()), 3);
+    BOOST_CHECK(pidl_matches_text(*it++, "a"));
+    BOOST_CHECK_EQUAL(std::distance(it, pidl_iterator()), 2);
+    BOOST_CHECK(pidl_matches_text(*it++, "little"));
+    BOOST_CHECK_EQUAL(std::distance(it, pidl_iterator()), 1);
+    BOOST_CHECK(pidl_matches_text(*it++, "lamb"));
+    BOOST_CHECK_EQUAL(std::distance(it, pidl_iterator()), 0);
+    BOOST_CHECK(it == pidl_iterator());
+}
+
+/**
+ * The iterator should return one _itemid_ of the original PIDL at a time.
+ * We check this by trying to reconstruct the original PIDL from the
+ * returned items.
+ */
+BOOST_AUTO_TEST_CASE( iterator_returns_single_items )
+{
+    apidl_t p =
+        apidl_t() + child_pidl_from_text("Mary") + child_pidl_from_text("had")
+        + child_pidl_from_text("a") + child_pidl_from_text("little")
+        + child_pidl_from_text("lamb");
+
+    pidl_iterator it(p);
+    apidl_t q;
+    while (it != pidl_iterator())
+    {
+        q += *it++;
+    }
+
+    BOOST_CHECK(::ILIsEqual(p.get(), q.get()));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
