@@ -217,6 +217,11 @@ namespace raw_pidl {
         typedef idlist_type* pidl_type; ///< Type of pointer to ITEMID
         typedef const idlist_type* const_pidl_type; ///< Type of const pointer
                                                     ///< to ITEMID
+        typedef const idlist_type __unaligned* clone_pidl_type;
+                                          ///< Type of PIDL recieved which is
+                                          ///< part of a larger IDLIST and is
+                                          ///< generally a parameter we are
+                                          ///< meant to clone
 
         typedef idlist_type combine_type; ///< Type of IDLIST that results
                                           ///< from appending to one of type
@@ -229,7 +234,7 @@ namespace raw_pidl {
         static const bool is_appendable = true; ///< Can this type of PIDL be
                                                 ///< appended to other pidls
 
-        static void type_check(const_pidl_type) {} ///< Check PIDLs are what
+        static void type_check(clone_pidl_type) {} ///< Check PIDLs are what
                                                    ///< they say they are
     };
 
@@ -239,10 +244,11 @@ namespace raw_pidl {
         typedef ITEMID_CHILD idlist_type;
         typedef idlist_type* pidl_type;
         typedef const idlist_type* const_pidl_type;
+        typedef const idlist_type __unaligned* clone_pidl_type;
         typedef ITEMIDLIST_RELATIVE combine_type;
         typedef ITEMIDLIST_RELATIVE* combine_pidl_type;
         static const bool is_appendable = true;
-        static const void type_check(const_pidl_type pidl)
+        static const void type_check(clone_pidl_type pidl)
         {
             if (!empty(pidl) && !empty(next(pidl)))
                 BOOST_THROW_EXCEPTION(
@@ -257,10 +263,11 @@ namespace raw_pidl {
         typedef ITEMIDLIST_ABSOLUTE idlist_type;
         typedef idlist_type* pidl_type;
         typedef const idlist_type* const_pidl_type;
+        typedef const idlist_type __unaligned* clone_pidl_type;
         typedef idlist_type combine_type;
         typedef pidl_type combine_pidl_type;
         static const bool is_appendable = false;
-        static const void type_check(const_pidl_type) {}
+        static const void type_check(clone_pidl_type) {}
     };
 
     /**
@@ -270,7 +277,7 @@ namespace raw_pidl {
      * be more memory after the null-terminator.
      */
     template<typename T>
-    inline size_t size(const T* pidl)
+    inline size_t size(const T __unaligned* pidl)
     {
         if (!pidl)
             return 0;
@@ -289,7 +296,7 @@ namespace raw_pidl {
      * Clone a raw PIDL.
      */
     template<typename Alloc, typename T>
-    inline T* clone(const T* pidl)
+    inline T* clone(const T __unaligned* pidl)
     {
         if (!pidl)
             return NULL;
@@ -310,7 +317,7 @@ namespace raw_pidl {
      * well as any other type policy the caller chooses to mandate).
      */
     template<typename Alloc, typename T>
-    inline T* type_checked_clone(const T* pidl)
+    inline T* type_checked_clone(const T __unaligned* pidl)
     {
         traits<T>::type_check(pidl);
 
@@ -376,6 +383,14 @@ namespace raw_pidl {
  * to use when creating new PIDLs.  This allows us to use new & delete rather
  * than the COM allocator (the usual allocator for PIDLs) when testing so that
  * we can detect memory leaks.
+ *
+ * PIDLs being copied from elsewhere are always treated as unaligned because
+ * they may be part way through a larger ITEMIDLIST. Although there may be a
+ * performance disadvantage in the case where we are sure the incoming pointer
+ * is aligned, it is negligible because aligned child PIDLs are small and
+ * aligned absolute PIDLs will have to be treated as unaligned from the second
+ * item in the list onwards.  Relative PIDLs should always be treated as
+ * unaligned.
  */
 template<typename T, typename Alloc>
 class basic_pidl
@@ -390,6 +405,7 @@ public:
     typedef typename raw_pidl::traits<T>::combine_pidl_type  join_pidl_type;
     typedef typename allocator::rebind<join_type>::other     join_allocator;
     typedef typename basic_pidl<join_type, join_allocator>   join_pidl;
+    typedef typename raw_pidl::traits<T>::clone_pidl_type    foreign_pidl_type;
 
     basic_pidl() : m_pidl(NULL), m_allocator(Alloc()) {}
 
@@ -407,7 +423,7 @@ public:
     /**
      * Construct by copying a raw PIDL.
      */
-    basic_pidl(const T* raw_pidl) :
+    basic_pidl(const __unaligned T* raw_pidl) :
         m_pidl(typename raw_pidl::type_checked_clone<Alloc>(raw_pidl)) {}
 
     /**
@@ -423,7 +439,7 @@ public:
     /**
      * Copy a raw PIDL into this wrapper instance.
      */
-    basic_pidl& operator=(const T* raw_pidl)
+    basic_pidl& operator=(foreign_pidl_type raw_pidl)
     {
         basic_pidl copy(raw_pidl);
         swap(copy);
@@ -502,6 +518,9 @@ public:
      * @warning  The raw PIDL must have been allocated with the SAME ALLOCATOR
      * as used by the wrapper so that it can be destroyed in the wrapper's
      * destructor.
+     *
+     * The PIDL must @b not be unaligned as that would imply we are attaching
+     * to the middle of an ITEMIDLIST.
      */
     basic_pidl& attach(T* raw_pidl)
     {

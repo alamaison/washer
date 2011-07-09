@@ -33,6 +33,8 @@
 #define WINAPI_SHELL_PIDL_ITERATOR_HPP
 #pragma once
 
+#include <winapi/shell/pidl.hpp> // next, empty
+
 #include <boost/iterator/iterator_adaptor.hpp> // iterator_adaptor
 
 #include <cassert> // assert
@@ -80,7 +82,7 @@ class raw_pidl_iterator :
         boost::forward_traversal_tag>
 {
 public:
-    explicit raw_pidl_iterator(PCIDLIST_RELATIVE pidl)
+    explicit raw_pidl_iterator(PCUIDLIST_RELATIVE pidl)
         :
     raw_pidl_iterator::iterator_adaptor_(detail::canonicalise_pidl(pidl)) {}
 
