@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE( desktop_root )
 
 /**
  * Constructing an iterator with a child PIDL returns that item.
-
+ *
  * In addition, incrementing the iterator should work once and should cause
  * the iterator to be equal to the default-constructed version, i.e., should
  * signify the end of the iteration.
@@ -139,6 +139,56 @@ BOOST_AUTO_TEST_CASE( iterate_over_child_pidl )
     BOOST_CHECK_EQUAL(std::distance(it, raw_pidl_iterator()), 0);
 
     BOOST_CHECK_THROW(++it, std::range_error);
+}
+
+/**
+ * Copies of an iterator should equality compare until one is incremented.
+ * Then they should fail the equality test.  Once both are incremented equally,
+ * they should once again compare as equal.
+ */
+BOOST_AUTO_TEST_CASE( equality )
+{
+    cpidl_t p = child_pidl_from_text("Elizabeth");
+
+    raw_pidl_iterator it1(p.get());
+    raw_pidl_iterator it2(p.get());
+
+    BOOST_CHECK(it1 == it2);
+
+    ++it2;
+
+    BOOST_CHECK(it1 != it2);
+
+    ++it1;
+
+    BOOST_CHECK(it1 == it2);
+    BOOST_CHECK(it1 == raw_pidl_iterator());
+    BOOST_CHECK(it2 == raw_pidl_iterator());
+}
+
+/**
+ * Iterators should equality compare as expected even when the
+ * iterators aren't copies.  The only criterion is that they are iterators
+ * over the same source PIDL.
+ */
+BOOST_AUTO_TEST_CASE( equality_across_separately_constructed_iterators )
+{
+    cpidl_t p = child_pidl_from_text("Elizabeth");
+
+    raw_pidl_iterator it1(p.get());
+    raw_pidl_iterator it2 = it1;
+
+    BOOST_CHECK(it1 == it2);
+
+    ++it2;
+
+    BOOST_CHECK(it1 != it2);
+
+    ++it1;
+
+    BOOST_CHECK(it1 == it2);
+    BOOST_CHECK(it1 == raw_pidl_iterator());
+    BOOST_CHECK(it2 == raw_pidl_iterator());
 }
 
 /**
@@ -219,6 +269,56 @@ BOOST_AUTO_TEST_CASE( iterate_over_child_pidl )
 }
 
 /**
+ * Copies of an iterator should equality compare until one is incremented.
+ * Then they should fail the equality test.  Once both are incremented equally,
+ * they should once again compare as equal.
+ */
+BOOST_AUTO_TEST_CASE( equality )
+{
+    cpidl_t p = child_pidl_from_text("Elizabeth");
+
+    pidl_iterator it1(p.get());
+    pidl_iterator it2 = it1;
+
+    BOOST_CHECK(it1 == it2);
+
+    ++it2;
+
+    BOOST_CHECK(it1 != it2);
+
+    ++it1;
+
+    BOOST_CHECK(it1 == it2);
+    BOOST_CHECK(it1 == pidl_iterator());
+    BOOST_CHECK(it2 == pidl_iterator());
+}
+
+/**
+ * Iterators should equality compare as expected even when the
+ * iterators aren't copies.  The only criterion is that they are iterators
+ * over the same source PIDL.
+ */
+BOOST_AUTO_TEST_CASE( equality_across_separately_constructed_iterators )
+{
+    cpidl_t p = child_pidl_from_text("Elizabeth");
+
+    pidl_iterator it1(p);
+    pidl_iterator it2(p);
+
+    BOOST_CHECK(it1 == it2);
+
+    ++it2;
+
+    BOOST_CHECK(it1 != it2);
+
+    ++it1;
+
+    BOOST_CHECK(it1 == it2);
+    BOOST_CHECK(it1 == pidl_iterator());
+    BOOST_CHECK(it2 == pidl_iterator());
+}
+
+/**
  * Constructing an iterator with a multi-item PIDL points to each item of the
  * PIDL in turn.
  */
@@ -264,6 +364,31 @@ BOOST_AUTO_TEST_CASE( iterator_returns_single_items )
     }
 
     BOOST_CHECK(::ILIsEqual(p.get(), q.get()));
+}
+
+/**
+ * Iterators should equality compare as expected even when one is raw and the
+ * other is not.  The only criterion is that they are iterators
+ * over the same source PIDL.
+ */
+BOOST_AUTO_TEST_CASE( mixed_equality )
+{
+    cpidl_t p = child_pidl_from_text("Elizabeth");
+
+    pidl_iterator it1(p);
+    raw_pidl_iterator it2(p.get());
+
+    BOOST_CHECK(it1 == it2);
+
+    ++it2;
+
+    BOOST_CHECK(it1 != it2);
+
+    ++it1;
+
+    BOOST_CHECK(it1 == it2);
+    BOOST_CHECK(it1 == pidl_iterator());
+    BOOST_CHECK(it2 == pidl_iterator());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

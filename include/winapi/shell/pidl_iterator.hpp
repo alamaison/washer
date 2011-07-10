@@ -169,6 +169,26 @@ private:
     mutable cpidl_t m_item;
 };
 
+inline bool operator==(const raw_pidl_iterator& lhs, const pidl_iterator& rhs)
+{
+    return lhs == rhs.base();
+}
+
+inline bool operator==(const pidl_iterator& lhs, const raw_pidl_iterator& rhs)
+{
+    return rhs == lhs;
+}
+
+inline bool operator!=(const raw_pidl_iterator& lhs, const pidl_iterator& rhs)
+{
+    return !(lhs == rhs);
+}
+
+inline bool operator!=(const pidl_iterator& lhs, const raw_pidl_iterator& rhs)
+{
+    return !(rhs == lhs);
+}
+
 }}} // namespace winapi::shell::pidl
 
 #endif
