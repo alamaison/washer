@@ -23,7 +23,7 @@ add_executable(tests ${TEST_SOURCES})
 get_target_property(test_EXE tests LOCATION)
 
 add_executable(tests_unicode ${TEST_SOURCES})
-get_target_property(test_unicode_EXE tests LOCATION)
+get_target_property(test_unicode_EXE tests_unicode LOCATION)
 set_target_properties(
   tests_unicode PROPERTIES
   COMPILE_DEFINITIONS _UNICODE COMPILE_DEFINITIONS _UNICODE)
