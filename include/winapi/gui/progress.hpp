@@ -49,6 +49,7 @@
 
 #include <ShlObj.h> // IProgressDialog
 
+
 template<> struct comet::comtype<IProgressDialog>
 {
 	static const IID& uuid() throw() { return IID_IProgressDialog; }
@@ -270,6 +271,22 @@ private:
 				com_error_from_interface(m_progress, hr));
 	}
 
+	/*
+	 * Some of the IProgressDialog flags are Windows-version dependent so
+	 * we redefine them here so they aren't #ifdeffed out.
+	 */
+	struct PROGDLG
+	{
+		static const DWORD NORMAL = 0x00000000;
+		static const DWORD MODAL = 0x00000001;
+		static const DWORD AUTOTIME = 0x00000002;
+		static const DWORD NOTIME = 0x00000004;
+		static const DWORD NOMINIMIZE = 0x00000008;
+		static const DWORD NOPROGRESSBAR = 0x00000010;
+		static const DWORD MARQUEEPROGRESS = 0x00000020;
+		static const DWORD NOCANCEL = 0x00000040;
+	};
+
 	DWORD _options_to_progress_flags(
 		BOOST_SCOPED_ENUM(modality) modality,
 		BOOST_SCOPED_ENUM(time_estimation) time_estimation,
@@ -277,12 +294,12 @@ private:
 		BOOST_SCOPED_ENUM(minimisable) minimisable,
 		BOOST_SCOPED_ENUM(cancellability) cancellability)
 	{
-		DWORD flags = PROGDLG_NORMAL;
+		DWORD flags = PROGDLG::NORMAL;
 
 		switch (modality)
 		{
 		case modality::modal:
-			flags |= PROGDLG_MODAL;
+			flags |= PROGDLG::MODAL;
 			break;
 		case modality::non_modal:
 			break;
@@ -294,7 +311,7 @@ private:
 		switch (time_estimation)
 		{
 		case time_estimation::automatic_time_estimate:
-			flags |= PROGDLG_AUTOTIME;
+			flags |= PROGDLG::AUTOTIME;
 			break;
 		case time_estimation::none:
 			break;
@@ -308,10 +325,10 @@ private:
 		case bar_type::progress:
 			break;
 		case bar_type::marquee:
-			flags |= PROGDLG_MARQUEEPROGRESS;
+			flags |= PROGDLG::MARQUEEPROGRESS;
 			break;
 		case bar_type::none:
-			flags |= PROGDLG_NOPROGRESSBAR;
+			flags |= PROGDLG::NOPROGRESSBAR;
 			break;
 		default:
 			BOOST_THROW_EXCEPTION(
@@ -323,7 +340,7 @@ private:
 		case minimisable::yes:
 			break;
 		case minimisable::no:
-			flags |= PROGDLG_NOMINIMIZE;
+			flags |= PROGDLG::NOMINIMIZE;
 			break;
 		default:
 			BOOST_THROW_EXCEPTION(
@@ -335,7 +352,7 @@ private:
 		case cancellability::cancellable:
 			break;
 		case cancellability::uncancellable:
-			flags |= PROGDLG_NOCANCEL;
+			flags |= PROGDLG::NOCANCEL;
 			break;
 		default:
 			BOOST_THROW_EXCEPTION(
