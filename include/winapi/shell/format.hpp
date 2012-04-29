@@ -57,7 +57,21 @@ namespace detail {
 
         inline int sh_format_date_time(
             const FILETIME* pft, DWORD* pdwFlags, wchar_t* buffer, UINT size)
-        { return ::SHFormatDateTimeW(pft, pdwFlags, buffer, size); }
+        {
+			int rc = ::SHFormatDateTimeW(pft, pdwFlags, buffer, size);
+
+			/*
+			 * The wide-string version doesn't include the null character,
+			 * despite what the documentation claims.
+			 *
+			 * XXX: Maybe this is a per-OS bug in which case we have to so
+			 * something cleverer here.
+			 */
+			if (rc != 0)
+				return rc + 1;
+			else
+				return rc;
+		}
 
         inline char* str_format_kb_size(
             LONGLONG file_size, char* buffer, UINT size)
