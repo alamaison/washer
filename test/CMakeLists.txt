@@ -25,6 +25,7 @@ set(LIBRARY_SOURCES
   ${LIBRARY_DIRECTORY}/clipboard.hpp
   ${LIBRARY_DIRECTORY}/dynamic_link.hpp
   ${LIBRARY_DIRECTORY}/error.hpp
+  ${LIBRARY_DIRECTORY}/filesystem.hpp
   ${LIBRARY_DIRECTORY}/global_lock.hpp
   ${LIBRARY_DIRECTORY}/hook.hpp
   ${LIBRARY_DIRECTORY}/message.hpp
@@ -80,6 +81,7 @@ add_custom_target(winapi SOURCES
 set(TEST_SOURCES
   wchar_output.hpp
   dynamic_link_test.cpp
+  filesystem_test.cpp
   folder_error_adapter_test.cpp
   format_test.cpp
   global_lock_test.cpp
