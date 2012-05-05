@@ -41,14 +41,14 @@ using comet::auto_coinit;
 
 namespace {
 
-	class com_fixture
-	{
-	private:
-		auto_coinit com;
-	};
+    class com_fixture
+    {
+    private:
+        auto_coinit com;
+    };
 
-	//const int SLEEP_TIME = 5000;
-	const int SLEEP_TIME = 5;
+    //const int SLEEP_TIME = 5000;
+    const int SLEEP_TIME = 5;
 
 }
 
@@ -60,17 +60,17 @@ BOOST_FIXTURE_TEST_SUITE(progress_tests, com_fixture)
 BOOST_AUTO_TEST_CASE( text )
 {
     progress dialogue(
-		NULL, L"Test title", progress::modality::modal, 
-		progress::time_estimation::none, progress::bar_type::progress,
-		progress::minimisable::yes, progress::cancellability::cancellable);
-	dialogue.line(1, L"Text 1");
-	dialogue.line(2, L"Text 2");
-	dialogue.line(3, L"Text 3");
-	for (int i = 0; i <= SLEEP_TIME; ++i)
-	{
-		dialogue.update(i, SLEEP_TIME);
-		::Sleep(1);
-	}
+        NULL, L"Test title", progress::modality::modal, 
+        progress::time_estimation::none, progress::bar_type::progress,
+        progress::minimisable::yes, progress::cancellability::cancellable);
+    dialogue.line(1, L"Text 1");
+    dialogue.line(2, L"Text 2");
+    dialogue.line(3, L"Text 3");
+    for (int i = 0; i <= SLEEP_TIME; ++i)
+    {
+        dialogue.update(i, SLEEP_TIME);
+        ::Sleep(1);
+    }
 }
 
 /**
@@ -79,21 +79,21 @@ BOOST_AUTO_TEST_CASE( text )
 BOOST_AUTO_TEST_CASE( path )
 {
     progress dialogue(
-		NULL, L"Test title", progress::modality::modal, 
-		progress::time_estimation::none, progress::bar_type::progress,
-		progress::minimisable::yes, progress::cancellability::cancellable);
-	dialogue.line(1, L"Text 1");
-	dialogue.line_as_compressable_path(
-		2, L"C:\\a\\very\\extremely\\indubitably\\"
-		L"supercalifragilistically\\expialidociously\\long\\path");
-	dialogue.line_as_compressable_path(
-		3, L"/a/very/very/extremely/indubitably/"
-		L"supercalifragilistically/expialidociously/long/unix/path");
-	for (int i = 0; i <= SLEEP_TIME; ++i)
-	{
-		dialogue.update(i, SLEEP_TIME);
-		::Sleep(1);
-	}
+        NULL, L"Test title", progress::modality::modal, 
+        progress::time_estimation::none, progress::bar_type::progress,
+        progress::minimisable::yes, progress::cancellability::cancellable);
+    dialogue.line(1, L"Text 1");
+    dialogue.line_as_compressable_path(
+        2, L"C:\\a\\very\\extremely\\indubitably\\"
+        L"supercalifragilistically\\expialidociously\\long\\path");
+    dialogue.line_as_compressable_path(
+        3, L"/a/very/very/extremely/indubitably/"
+        L"supercalifragilistically/expialidociously/long/unix/path");
+    for (int i = 0; i <= SLEEP_TIME; ++i)
+    {
+        dialogue.update(i, SLEEP_TIME);
+        ::Sleep(1);
+    }
 }
 
 /**
@@ -102,17 +102,17 @@ BOOST_AUTO_TEST_CASE( path )
 BOOST_AUTO_TEST_CASE( text_with_time )
 {
     progress dialogue(
-		NULL, L"Test title", progress::modality::modal, 
-		progress::time_estimation::automatic_time_estimate,
-		progress::bar_type::progress,
-		progress::minimisable::yes, progress::cancellability::cancellable);
-	dialogue.line(1, L"Text 1");
-	dialogue.line(2, L"Text 2");
-	for (int i = 0; i <= SLEEP_TIME; ++i)
-	{
-		dialogue.update(i, SLEEP_TIME);
-		::Sleep(3);
-	}
+        NULL, L"Test title", progress::modality::modal, 
+        progress::time_estimation::automatic_time_estimate,
+        progress::bar_type::progress,
+        progress::minimisable::yes, progress::cancellability::cancellable);
+    dialogue.line(1, L"Text 1");
+    dialogue.line(2, L"Text 2");
+    for (int i = 0; i <= SLEEP_TIME; ++i)
+    {
+        dialogue.update(i, SLEEP_TIME);
+        ::Sleep(3);
+    }
 }
 
 /**
@@ -121,17 +121,17 @@ BOOST_AUTO_TEST_CASE( text_with_time )
 BOOST_AUTO_TEST_CASE( text_with_time_and_marquee )
 {
     progress dialogue(
-		NULL, L"Test title", progress::modality::modal, 
-		progress::time_estimation::automatic_time_estimate,
-		progress::bar_type::marquee,
-		progress::minimisable::yes, progress::cancellability::cancellable);
-	dialogue.line(1, L"Text 1");
-	dialogue.line(2, L"Text 2");
-	for (int i = 0; i <= SLEEP_TIME; ++i)
-	{
-		dialogue.update(i, SLEEP_TIME);
-		::Sleep(3);
-	}
+        NULL, L"Test title", progress::modality::modal, 
+        progress::time_estimation::automatic_time_estimate,
+        progress::bar_type::marquee,
+        progress::minimisable::yes, progress::cancellability::cancellable);
+    dialogue.line(1, L"Text 1");
+    dialogue.line(2, L"Text 2");
+    for (int i = 0; i <= SLEEP_TIME; ++i)
+    {
+        dialogue.update(i, SLEEP_TIME);
+        ::Sleep(3);
+    }
 }
 
 /**
@@ -140,17 +140,17 @@ BOOST_AUTO_TEST_CASE( text_with_time_and_marquee )
 BOOST_AUTO_TEST_CASE( text_with_time_only )
 {
     progress dialogue(
-		NULL, L"Test title", progress::modality::modal, 
-		progress::time_estimation::automatic_time_estimate,
-		progress::bar_type::none,
-		progress::minimisable::yes, progress::cancellability::cancellable);
-	dialogue.line(1, L"Text 1");
-	dialogue.line(2, L"Text 2");
-	for (int i = 0; i <= SLEEP_TIME; ++i)
-	{
-		dialogue.update(i, SLEEP_TIME);
-		::Sleep(3);
-	}
+        NULL, L"Test title", progress::modality::modal, 
+        progress::time_estimation::automatic_time_estimate,
+        progress::bar_type::none,
+        progress::minimisable::yes, progress::cancellability::cancellable);
+    dialogue.line(1, L"Text 1");
+    dialogue.line(2, L"Text 2");
+    for (int i = 0; i <= SLEEP_TIME; ++i)
+    {
+        dialogue.update(i, SLEEP_TIME);
+        ::Sleep(3);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END();

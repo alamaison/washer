@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_SUITE(filesystem_tests)
 BOOST_AUTO_TEST_CASE( unique_name )
 {
     BOOST_CHECK(!unique_path<char>().empty());
-	BOOST_CHECK(!unique_path<wchar_t>().empty());
+    BOOST_CHECK(!unique_path<wchar_t>().empty());
 }
 
 /**
@@ -61,13 +61,13 @@ BOOST_AUTO_TEST_CASE( unique_name )
  */
 BOOST_AUTO_TEST_CASE( temp_directory )
 {
-	BOOST_CHECK(!temporary_directory_path<char>().empty());
-	BOOST_CHECK(temporary_directory_path<char>().is_complete());
-	BOOST_CHECK(is_directory(temporary_directory_path<char>()));
+    BOOST_CHECK(!temporary_directory_path<char>().empty());
+    BOOST_CHECK(temporary_directory_path<char>().is_complete());
+    BOOST_CHECK(is_directory(temporary_directory_path<char>()));
 
-	BOOST_CHECK(!temporary_directory_path<wchar_t>().empty());
-	BOOST_CHECK(temporary_directory_path<wchar_t>().is_complete());
-	BOOST_CHECK(is_directory(temporary_directory_path<wchar_t>()));
+    BOOST_CHECK(!temporary_directory_path<wchar_t>().empty());
+    BOOST_CHECK(temporary_directory_path<wchar_t>().is_complete());
+    BOOST_CHECK(is_directory(temporary_directory_path<wchar_t>()));
 }
 
 

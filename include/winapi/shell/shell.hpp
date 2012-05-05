@@ -289,24 +289,24 @@ inline winapi::shell::pidl::apidl_t pidl_from_parsing_name(
  */
 template<typename T>
 inline comet::com_ptr<T> bind_to_handler_object(
-	const winapi::shell::pidl::apidl_t& pidl)
+    const winapi::shell::pidl::apidl_t& pidl)
 {
-	comet::com_ptr<IShellFolder> desktop = winapi::shell::desktop_folder();
-	comet::com_ptr<T> handler;
+    comet::com_ptr<IShellFolder> desktop = winapi::shell::desktop_folder();
+    comet::com_ptr<T> handler;
 
-	if (pidl.empty()) // get handler via QI
-		return try_cast(desktop);
+    if (pidl.empty()) // get handler via QI
+        return try_cast(desktop);
 
-	HRESULT hr = desktop->BindToObject(
-		(pidl.empty()) ? NULL : pidl.get(), NULL, comet::uuidof<T>(), 
-		reinterpret_cast<void**>(handler.out()));
+    HRESULT hr = desktop->BindToObject(
+        (pidl.empty()) ? NULL : pidl.get(), NULL, comet::uuidof<T>(), 
+        reinterpret_cast<void**>(handler.out()));
 
-	if (FAILED(hr))
-		BOOST_THROW_EXCEPTION(comet::com_error_from_interface(desktop, hr));
-	if (!handler)
-		BOOST_THROW_EXCEPTION(comet::com_error(E_FAIL));
+    if (FAILED(hr))
+        BOOST_THROW_EXCEPTION(comet::com_error_from_interface(desktop, hr));
+    if (!handler)
+        BOOST_THROW_EXCEPTION(comet::com_error(E_FAIL));
 
-	return handler;
+    return handler;
 }
 
 /**
@@ -328,36 +328,36 @@ inline comet::com_ptr<T> bind_to_handler_object(
  */
 template<typename T>
 inline std::pair<comet::com_ptr<T>, pidl::cpidl_t> bind_to_parent(
-	const pidl::apidl_t& pidl)
+    const pidl::apidl_t& pidl)
 {
-	if (pidl.empty())
-		BOOST_THROW_EXCEPTION(std::logic_error("Already at top level"));
+    if (pidl.empty())
+        BOOST_THROW_EXCEPTION(std::logic_error("Already at top level"));
 
-	// Create parent of PIDL given
-	pidl::apidl_t parent;
-	pidl::pidl_iterator it(pidl);
-	while (next(it) != pidl::pidl_iterator())
-	{
-		parent += *it++;
-	}
+    // Create parent of PIDL given
+    pidl::apidl_t parent;
+    pidl::pidl_iterator it(pidl);
+    while (next(it) != pidl::pidl_iterator())
+    {
+        parent += *it++;
+    }
 
-	pidl::cpidl_t item = *it;
+    pidl::cpidl_t item = *it;
 
-	comet::com_ptr<T> requested_interface;
-	if (parent.empty())
-	{
-		/*
-		The given PIDL is a child of the desktop so the requested
-		interface is one supported by the desktop folder
-		*/
-		requested_interface = comet::try_cast(desktop_folder());
-	}
-	else
-	{
-		requested_interface = bind_to_handler_object<T>(parent);
-	}
+    comet::com_ptr<T> requested_interface;
+    if (parent.empty())
+    {
+        /*
+        The given PIDL is a child of the desktop so the requested
+        interface is one supported by the desktop folder
+        */
+        requested_interface = comet::try_cast(desktop_folder());
+    }
+    else
+    {
+        requested_interface = bind_to_handler_object<T>(parent);
+    }
 
-	return std::make_pair(requested_interface, item);
+    return std::make_pair(requested_interface, item);
 }
 
 /**
@@ -367,27 +367,27 @@ inline std::pair<comet::com_ptr<T>, pidl::cpidl_t> bind_to_parent(
  */
 inline comet::com_ptr<IStream> stream_from_pidl(const pidl::apidl_t& pidl)
 {
-	std::pair<comet::com_ptr<IShellFolder>, pidl::cpidl_t> parent =
-		bind_to_parent<IShellFolder>(pidl);
+    std::pair<comet::com_ptr<IShellFolder>, pidl::cpidl_t> parent =
+        bind_to_parent<IShellFolder>(pidl);
 
-	comet::com_ptr<IStream> stream;
-	
-	HRESULT hr = parent.first->BindToObject(
-		parent.second.get(), NULL, stream.iid(),
-		reinterpret_cast<void**>(stream.out()));
-	if (FAILED(hr))
-	{
-		hr = parent.first->BindToStorage(
-			parent.second.get(), NULL, stream.iid(),
-			reinterpret_cast<void**>(stream.out()));
-		if (FAILED(hr))
-			BOOST_THROW_EXCEPTION(
-				comet::com_error(
-					L"Couldn't get stream for source file: " +
-					parsing_name_from_pidl(pidl), hr));
-	}
+    comet::com_ptr<IStream> stream;
+    
+    HRESULT hr = parent.first->BindToObject(
+        parent.second.get(), NULL, stream.iid(),
+        reinterpret_cast<void**>(stream.out()));
+    if (FAILED(hr))
+    {
+        hr = parent.first->BindToStorage(
+            parent.second.get(), NULL, stream.iid(),
+            reinterpret_cast<void**>(stream.out()));
+        if (FAILED(hr))
+            BOOST_THROW_EXCEPTION(
+                comet::com_error(
+                    L"Couldn't get stream for source file: " +
+                    parsing_name_from_pidl(pidl), hr));
+    }
 
-	return stream;
+    return stream;
 }
 
 }} // namespace winapi::shell

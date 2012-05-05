@@ -57,15 +57,15 @@ namespace filesystem {
 
 namespace detail {
 
-	inline DWORD get_temp_path(DWORD buffer_length, char* buffer)
-	{
-		return ::GetTempPathA(buffer_length, buffer);
-	}
+    inline DWORD get_temp_path(DWORD buffer_length, char* buffer)
+    {
+        return ::GetTempPathA(buffer_length, buffer);
+    }
 
-	inline DWORD get_temp_path(DWORD buffer_length, wchar_t* buffer)
-	{
-		return ::GetTempPathW(buffer_length, buffer);
-	}
+    inline DWORD get_temp_path(DWORD buffer_length, wchar_t* buffer)
+    {
+        return ::GetTempPathW(buffer_length, buffer);
+    }
 
 }
 
@@ -76,23 +76,23 @@ template<typename T>
 inline typename ::winapi::detail::choose_path<T>::type
 temporary_directory_path()
 {
-	T* null = 0;
-	DWORD required_len = detail::get_temp_path(0, null);
+    T* null = 0;
+    DWORD required_len = detail::get_temp_path(0, null);
     if (required_len == 0)
         BOOST_THROW_EXCEPTION(
             boost::enable_error_info(winapi::last_error()) <<
             boost::errinfo_api_function("GetTempPath"));
 
-	std::vector<T> buffer(required_len);
-	DWORD len = detail::get_temp_path(
-		boost::numeric_cast<DWORD>(buffer.size()), &buffer[0]);
+    std::vector<T> buffer(required_len);
+    DWORD len = detail::get_temp_path(
+        boost::numeric_cast<DWORD>(buffer.size()), &buffer[0]);
     if (len == 0)
         BOOST_THROW_EXCEPTION(
             boost::enable_error_info(winapi::last_error()) <<
             boost::errinfo_api_function("GetTempPath"));
 
-	return typename ::winapi::detail::choose_path<T>::type(
-		buffer.begin(), buffer.begin() + len);
+    return typename ::winapi::detail::choose_path<T>::type(
+        buffer.begin(), buffer.begin() + len);
 }
 
 /**
@@ -105,11 +105,11 @@ temporary_directory_path()
 template<typename T>
 inline typename ::winapi::detail::choose_path<T>::type unique_path()
 {
-	boost::uuids::uuid name = boost::uuids::random_generator()();
+    boost::uuids::uuid name = boost::uuids::random_generator()();
 
-	std::basic_stringstream< T, std::char_traits<T>, std::allocator<T> >  out;
-	out << name;
-	return out.str();
+    std::basic_stringstream< T, std::char_traits<T>, std::allocator<T> >  out;
+    out << name;
+    return out.str();
 }
 
 }}

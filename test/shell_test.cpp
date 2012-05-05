@@ -61,24 +61,24 @@ using std::vector;
 
 namespace { // private
 
-	/**
-	 * Check that a PIDL and a filesystem path refer to the same item.
-	 */
-	predicate_result pidl_path_equivalence(apidl_t pidl, wpath path)
-	{
-		wstring parsing_name = parsing_name_from_pidl(pidl);
+    /**
+     * Check that a PIDL and a filesystem path refer to the same item.
+     */
+    predicate_result pidl_path_equivalence(apidl_t pidl, wpath path)
+    {
+        wstring parsing_name = parsing_name_from_pidl(pidl);
 
-		if (path != parsing_name)
-		{
-			predicate_result res(false);
-			res.message()
-				<< "Different items [" << parsing_name
-				<< " != " << path.file_string() << "]";
-			return res;
-		}
+        if (path != parsing_name)
+        {
+            predicate_result res(false);
+            res.message()
+                << "Different items [" << parsing_name
+                << " != " << path.file_string() << "]";
+            return res;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
 }
 
@@ -136,30 +136,30 @@ BOOST_FIXTURE_TEST_SUITE(file_binding_tests, sandbox_fixture)
 
 BOOST_AUTO_TEST_CASE( stream_from_file_pidl )
 {
-	wpath test_file_path = new_file_in_sandbox();
+    wpath test_file_path = new_file_in_sandbox();
 
-	string test_string = "Mary had a little lamb";
+    string test_string = "Mary had a little lamb";
 
-	ofstream test_file(test_file_path);
-	test_file << test_string;
-	test_file.close();
+    ofstream test_file(test_file_path);
+    test_file << test_string;
+    test_file.close();
 
-	com_ptr<IStream> stream = stream_from_pidl(
-		pidl_from_parsing_name(test_file_path.file_string()));
+    com_ptr<IStream> stream = stream_from_pidl(
+        pidl_from_parsing_name(test_file_path.file_string()));
 
-	vector<char> stream_output(100); // bigger than test input
-	ULONG bytes_read = 0;
-	HRESULT hr = stream->Read(
-		&stream_output[0], (ULONG)stream_output.size(), &bytes_read);
-	BOOST_REQUIRE_EQUAL(hr, S_FALSE); // should be short read
-	// shrink vector to size read
-	stream_output.swap(
-		vector<char>(
-			stream_output.begin(), stream_output.begin() + bytes_read));
+    vector<char> stream_output(100); // bigger than test input
+    ULONG bytes_read = 0;
+    HRESULT hr = stream->Read(
+        &stream_output[0], (ULONG)stream_output.size(), &bytes_read);
+    BOOST_REQUIRE_EQUAL(hr, S_FALSE); // should be short read
+    // shrink vector to size read
+    stream_output.swap(
+        vector<char>(
+            stream_output.begin(), stream_output.begin() + bytes_read));
 
-	BOOST_CHECK_EQUAL_COLLECTIONS(
-		stream_output.begin(), stream_output.end(),
-		test_string.begin(), test_string.end());
+    BOOST_CHECK_EQUAL_COLLECTIONS(
+        stream_output.begin(), stream_output.end(),
+        test_string.begin(), test_string.end());
 }
 
 /**
@@ -170,27 +170,27 @@ BOOST_AUTO_TEST_CASE( stream_from_file_pidl )
  */
 BOOST_AUTO_TEST_CASE( handler_object )
 {
-	wpath file = new_file_in_sandbox();
+    wpath file = new_file_in_sandbox();
 
-	apidl_t sandbox_pidl = pidl_from_parsing_name(sandbox().directory_string());
-	com_ptr<IShellFolder> folder = bind_to_handler_object<IShellFolder>(
-		sandbox_pidl);
+    apidl_t sandbox_pidl = pidl_from_parsing_name(sandbox().directory_string());
+    com_ptr<IShellFolder> folder = bind_to_handler_object<IShellFolder>(
+        sandbox_pidl);
 
-	com_ptr<IEnumIDList> enum_items;
-	HRESULT hr = folder->EnumObjects(
-		NULL, SHCONTF_FOLDERS | SHCONTF_NONFOLDERS, enum_items.out());
-	BOOST_REQUIRE_EQUAL(hr, S_OK);
+    com_ptr<IEnumIDList> enum_items;
+    HRESULT hr = folder->EnumObjects(
+        NULL, SHCONTF_FOLDERS | SHCONTF_NONFOLDERS, enum_items.out());
+    BOOST_REQUIRE_EQUAL(hr, S_OK);
 
-	enum_items->Reset();
+    enum_items->Reset();
 
-	PITEMID_CHILD child_pidl;
-	hr = enum_items->Next(1, &child_pidl, NULL);
-	BOOST_REQUIRE_EQUAL(hr, S_OK);
+    PITEMID_CHILD child_pidl;
+    hr = enum_items->Next(1, &child_pidl, NULL);
+    BOOST_REQUIRE_EQUAL(hr, S_OK);
 
-	apidl_t pidl = sandbox_pidl + child_pidl;
+    apidl_t pidl = sandbox_pidl + child_pidl;
 
-	BOOST_REQUIRE(pidl_path_equivalence(pidl, file));
-	BOOST_REQUIRE_NE(enum_items->Next(1, &child_pidl, NULL), S_OK);
+    BOOST_REQUIRE(pidl_path_equivalence(pidl, file));
+    BOOST_REQUIRE_NE(enum_items->Next(1, &child_pidl, NULL), S_OK);
 }
 
 BOOST_AUTO_TEST_SUITE_END();
@@ -206,11 +206,11 @@ BOOST_AUTO_TEST_SUITE_END();
  */
 BOOST_AUTO_TEST_CASE( handler_object_null_pidl )
 {
-	auto_coinit com; // to make desktop folder return same object
-	com_ptr<IShellFolder> desktop = desktop_folder();
-	com_ptr<IShellFolder> folder = bind_to_handler_object<IShellFolder>(NULL);
+    auto_coinit com; // to make desktop folder return same object
+    com_ptr<IShellFolder> desktop = desktop_folder();
+    com_ptr<IShellFolder> folder = bind_to_handler_object<IShellFolder>(NULL);
 
-	BOOST_REQUIRE(folder == desktop);
+    BOOST_REQUIRE(folder == desktop);
 }
 
 /**
@@ -224,14 +224,14 @@ BOOST_AUTO_TEST_CASE( handler_object_null_pidl )
  */
 BOOST_AUTO_TEST_CASE( handler_object_empty_pidl )
 {
-	auto_coinit com; // to make desktop folder return same object
-	com_ptr<IShellFolder> desktop = desktop_folder();
-	SHITEMID empty = {0, {0}};
-	PCIDLIST_ABSOLUTE pidl = reinterpret_cast<PCIDLIST_ABSOLUTE>(&empty);
+    auto_coinit com; // to make desktop folder return same object
+    com_ptr<IShellFolder> desktop = desktop_folder();
+    SHITEMID empty = {0, {0}};
+    PCIDLIST_ABSOLUTE pidl = reinterpret_cast<PCIDLIST_ABSOLUTE>(&empty);
 
-	com_ptr<IShellFolder> folder = bind_to_handler_object<IShellFolder>(pidl);
+    com_ptr<IShellFolder> folder = bind_to_handler_object<IShellFolder>(pidl);
 
-	BOOST_REQUIRE(folder == desktop);
+    BOOST_REQUIRE(folder == desktop);
 }
 
 BOOST_AUTO_TEST_SUITE_END();
