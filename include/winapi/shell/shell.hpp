@@ -152,8 +152,12 @@ inline winapi::shell::pidl::apidl_t special_folder_pidl(int folder)
 }
 
 /**
-* Return the desktop folder IShellFolder handler.
-*/
+ * Return the desktop folder IShellFolder handler.
+ *
+ * There is no guarantee that the same object is returned each time.  It appears
+ * that if you call CoInitialize before calling this function, the same object
+ * is returned on every call.  Otherwise, it isn't.
+ */
 inline comet::com_ptr<IShellFolder> desktop_folder()
 {
     comet::com_ptr<IShellFolder> folder;

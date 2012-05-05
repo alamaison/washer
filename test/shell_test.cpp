@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2010, 2011  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,11 +30,11 @@
 */
 
 #include "wchar_output.hpp" // wstring output
+#include "sandbox_fixture.hpp" // sandbox_fixture
 
 #include <winapi/shell/shell.hpp> // test subject
 
-#include <winapi/filesystem.hpp> // unique_path, temporary_directory_path
-
+#include <comet/ptr.h> // com_ptr
 #include <comet/util.h> // auto_coinit
 
 #include <boost/filesystem/path.hpp> // wpath
@@ -47,17 +47,40 @@
 using comet::auto_coinit;
 using comet::com_ptr;
 
-using winapi::filesystem::temporary_directory_path;
-using winapi::filesystem::unique_path;
 using namespace winapi::shell;
 using winapi::shell::pidl::apidl_t;
+using winapi::test::sandbox_fixture;
 
 using boost::filesystem::ofstream;
 using boost::filesystem::wpath;
+using boost::test_tools::predicate_result;
 
 using std::string;
 using std::wstring;
 using std::vector;
+
+namespace { // private
+
+	/**
+	 * Check that a PIDL and a filesystem path refer to the same item.
+	 */
+	predicate_result pidl_path_equivalence(apidl_t pidl, wpath path)
+	{
+		wstring parsing_name = parsing_name_from_pidl(pidl);
+
+		if (path != parsing_name)
+		{
+			predicate_result res(false);
+			res.message()
+				<< "Different items [" << parsing_name
+				<< " != " << path.file_string() << "]";
+			return res;
+		}
+
+		return true;
+	}
+
+}
 
 BOOST_AUTO_TEST_SUITE(shell_tests)
 
@@ -109,10 +132,11 @@ BOOST_AUTO_TEST_CASE( parse_name_from_virtual_pidl )
     BOOST_CHECK_EQUAL(L"::{20D04FE0-3AEA-1069-A2D8-08002B30309D}", name);
 }
 
+BOOST_FIXTURE_TEST_SUITE(file_binding_tests, sandbox_fixture)
+
 BOOST_AUTO_TEST_CASE( stream_from_file_pidl )
 {
-	wpath test_file_path =
-		temporary_directory_path<wchar_t>() / unique_path<wchar_t>();
+	wpath test_file_path = new_file_in_sandbox();
 
 	string test_string = "Mary had a little lamb";
 
@@ -136,6 +160,78 @@ BOOST_AUTO_TEST_CASE( stream_from_file_pidl )
 	BOOST_CHECK_EQUAL_COLLECTIONS(
 		stream_output.begin(), stream_output.end(),
 		test_string.begin(), test_string.end());
+}
+
+/**
+ * Ask for the IShellFolder handler of the sandbox folder. Check that the
+ * enumeration of this folder has the expected contents.
+ *
+ * Tests bind_to_handler_object().
+ */
+BOOST_AUTO_TEST_CASE( handler_object )
+{
+	wpath file = new_file_in_sandbox();
+
+	apidl_t sandbox_pidl = pidl_from_parsing_name(sandbox().directory_string());
+	com_ptr<IShellFolder> folder = bind_to_handler_object<IShellFolder>(
+		sandbox_pidl);
+
+	com_ptr<IEnumIDList> enum_items;
+	HRESULT hr = folder->EnumObjects(
+		NULL, SHCONTF_FOLDERS | SHCONTF_NONFOLDERS, enum_items.out());
+	BOOST_REQUIRE_EQUAL(hr, S_OK);
+
+	enum_items->Reset();
+
+	PITEMID_CHILD child_pidl;
+	hr = enum_items->Next(1, &child_pidl, NULL);
+	BOOST_REQUIRE_EQUAL(hr, S_OK);
+
+	apidl_t pidl = sandbox_pidl + child_pidl;
+
+	BOOST_REQUIRE(pidl_path_equivalence(pidl, file));
+	BOOST_REQUIRE_NE(enum_items->Next(1, &child_pidl, NULL), S_OK);
+}
+
+BOOST_AUTO_TEST_SUITE_END();
+
+/**
+ * Ask for an IShellFolder handler using a NULL PIDL.  This should return
+ * the handler of the Desktop folder.
+ *
+ * Tests bind_to_handler_object().
+ *
+ * This relies on desktop_folder returning the same object.  A better way
+ * would be to make use of IPersistFolder to get its identity.
+ */
+BOOST_AUTO_TEST_CASE( handler_object_null_pidl )
+{
+	auto_coinit com; // to make desktop folder return same object
+	com_ptr<IShellFolder> desktop = desktop_folder();
+	com_ptr<IShellFolder> folder = bind_to_handler_object<IShellFolder>(NULL);
+
+	BOOST_REQUIRE(folder == desktop);
+}
+
+/**
+ * Ask for an IShellFolder handler using an empty PIDL.  This should return
+ * the handler of the Desktop folder.
+ *
+ * Tests bind_to_handler_object().
+ *
+ * This relies on desktop_folder returning the same object.  A better way
+ * would be to make use of IPersistFolder to get its identity.
+ */
+BOOST_AUTO_TEST_CASE( handler_object_empty_pidl )
+{
+	auto_coinit com; // to make desktop folder return same object
+	com_ptr<IShellFolder> desktop = desktop_folder();
+	SHITEMID empty = {0, {0}};
+	PCIDLIST_ABSOLUTE pidl = reinterpret_cast<PCIDLIST_ABSOLUTE>(&empty);
+
+	com_ptr<IShellFolder> folder = bind_to_handler_object<IShellFolder>(pidl);
+
+	BOOST_REQUIRE(folder == desktop);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

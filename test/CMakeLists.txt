@@ -80,6 +80,7 @@ add_custom_target(winapi SOURCES
   
 set(TEST_SOURCES
   wchar_output.hpp
+  sandbox_fixture.hpp
   dynamic_link_test.cpp
   filesystem_test.cpp
   folder_error_adapter_test.cpp
