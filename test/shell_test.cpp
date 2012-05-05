@@ -33,20 +33,31 @@
 
 #include <winapi/shell/shell.hpp> // test subject
 
+#include <winapi/filesystem.hpp> // unique_path, temporary_directory_path
+
 #include <comet/util.h> // auto_coinit
 
-#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/path.hpp> // wpath
+#include <boost/filesystem/fstream.hpp> // ofstream
 #include <boost/test/unit_test.hpp>
+
+#include <string>
+#include <vector>
 
 using comet::auto_coinit;
 using comet::com_ptr;
 
+using winapi::filesystem::temporary_directory_path;
+using winapi::filesystem::unique_path;
 using namespace winapi::shell;
 using winapi::shell::pidl::apidl_t;
 
+using boost::filesystem::ofstream;
 using boost::filesystem::wpath;
 
+using std::string;
 using std::wstring;
+using std::vector;
 
 BOOST_AUTO_TEST_SUITE(shell_tests)
 
@@ -98,5 +109,33 @@ BOOST_AUTO_TEST_CASE( parse_name_from_virtual_pidl )
     BOOST_CHECK_EQUAL(L"::{20D04FE0-3AEA-1069-A2D8-08002B30309D}", name);
 }
 
+BOOST_AUTO_TEST_CASE( stream_from_file_pidl )
+{
+	wpath test_file_path =
+		temporary_directory_path<wchar_t>() / unique_path<wchar_t>();
+
+	string test_string = "Mary had a little lamb";
+
+	ofstream test_file(test_file_path);
+	test_file << test_string;
+	test_file.close();
+
+	com_ptr<IStream> stream = stream_from_pidl(
+		pidl_from_parsing_name(test_file_path.file_string()));
+
+	vector<char> stream_output(100); // bigger than test input
+	ULONG bytes_read = 0;
+	HRESULT hr = stream->Read(
+		&stream_output[0], (ULONG)stream_output.size(), &bytes_read);
+	BOOST_REQUIRE_EQUAL(hr, S_FALSE); // should be short read
+	// shrink vector to size read
+	stream_output.swap(
+		vector<char>(
+			stream_output.begin(), stream_output.begin() + bytes_read));
+
+	BOOST_CHECK_EQUAL_COLLECTIONS(
+		stream_output.begin(), stream_output.end(),
+		test_string.begin(), test_string.end());
+}
 
 BOOST_AUTO_TEST_SUITE_END();

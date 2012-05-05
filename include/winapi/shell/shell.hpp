@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2010, 2011  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 #pragma once
 
 #include <winapi/detail/path_traits.hpp> // choose_path
+#include <winapi/shell/pidl_iterator.hpp> // pidl_iterator
 #include <winapi/shell/folder_error_adapters.hpp> // comtype<IShellFolder>
 #include <winapi/shell/pidl.hpp> // cpidl_t, apidl_t
 
@@ -44,6 +45,7 @@
 #include <boost/exception/info.hpp> // errinfo
 #include <boost/shared_ptr.hpp> // shared_ptr
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
+#include <boost/utility.hpp> // next
 
 #include <cassert> // assert
 #include <stdexcept> // runtime_error, logic_error
@@ -264,6 +266,124 @@ inline winapi::shell::pidl::apidl_t pidl_from_parsing_name(
         BOOST_THROW_EXCEPTION(comet::com_error_from_interface(desktop, hr));
 
     return pidl;
+}
+
+/**
+ * Bind to the handler object of an item.
+ *
+ * This handler object is usually an IShellFolder implementation but may be
+ * an IStream as well as other handler types.  The type of handler is
+ * determined by the template parameter.
+ *
+ * Analogous to BindToObject().
+ *
+ * @tparam T  Type of handler to return.
+ *
+ * @param pidl  The item for which the handler is being requested.  Usually a
+ *              PIDL for a folder when T is IShellFolder.
+ *              If pidl is empty, the item is the Desktop (namespace root).
+ */
+template<typename T>
+inline comet::com_ptr<T> bind_to_handler_object(
+	const winapi::shell::pidl::apidl_t& pidl)
+{
+	comet::com_ptr<IShellFolder> desktop = winapi::shell::desktop_folder();
+	comet::com_ptr<T> handler;
+
+	if (pidl.empty()) // get handler via QI
+		return try_cast(desktop);
+
+	HRESULT hr = desktop->BindToObject(
+		(pidl.empty()) ? NULL : pidl.get(), NULL, comet::uuidof<T>(), 
+		reinterpret_cast<void**>(handler.out()));
+
+	if (FAILED(hr))
+		BOOST_THROW_EXCEPTION(comet::com_error_from_interface(desktop, hr));
+	if (!handler)
+		BOOST_THROW_EXCEPTION(comet::com_error(E_FAIL));
+
+	return handler;
+}
+
+/**
+ * Bind to the parent object of an absolute PIDL.
+ *
+ * Analogous to SHBindToParent.
+ *
+ * The implementation doesn't call SHBindToParent and Windows 9x doesn't have
+ * that API function.  This is different to SHBindToParent (or at least the
+ * Wine version: http://source.winehq.org/source/dlls/shell32/pidl.c#L1282) in
+ * that the desktop (empty) PIDL is not a legal argument.  It makes no sense to
+ * ask for the parent of the top level and makes even less sense when we try and
+ * return its item (child PIDL).
+ *
+ * @tparam T  Type of interface on the parent object to return.
+ *
+ * @returns  The requested interface of the parent object along
+ *           with a copy of the last item in the given PIDL.
+ */
+template<typename T>
+inline std::pair<comet::com_ptr<T>, pidl::cpidl_t> bind_to_parent(
+	const pidl::apidl_t& pidl)
+{
+	if (pidl.empty())
+		BOOST_THROW_EXCEPTION(std::logic_error("Already at top level"));
+
+	// Create parent of PIDL given
+	pidl::apidl_t parent;
+	pidl::pidl_iterator it(pidl);
+	while (next(it) != pidl::pidl_iterator())
+	{
+		parent += *it++;
+	}
+
+	pidl::cpidl_t item = *it;
+
+	comet::com_ptr<T> requested_interface;
+	if (parent.empty())
+	{
+		/*
+		The given PIDL is a child of the desktop so the requested
+		interface is one supported by the desktop folder
+		*/
+		requested_interface = comet::try_cast(desktop_folder());
+	}
+	else
+	{
+		requested_interface = bind_to_handler_object<T>(parent);
+	}
+
+	return std::make_pair(requested_interface, item);
+}
+
+/**
+ * Given a PIDL, return an IStream to it.
+ *
+ * @note  This fails with E_NOTIMPL on Windows 2000 and below.
+ */
+inline comet::com_ptr<IStream> stream_from_pidl(const pidl::apidl_t& pidl)
+{
+	std::pair<comet::com_ptr<IShellFolder>, pidl::cpidl_t> parent =
+		bind_to_parent<IShellFolder>(pidl);
+
+	comet::com_ptr<IStream> stream;
+	
+	HRESULT hr = parent.first->BindToObject(
+		parent.second.get(), NULL, stream.iid(),
+		reinterpret_cast<void**>(stream.out()));
+	if (FAILED(hr))
+	{
+		hr = parent.first->BindToStorage(
+			parent.second.get(), NULL, stream.iid(),
+			reinterpret_cast<void**>(stream.out()));
+		if (FAILED(hr))
+			BOOST_THROW_EXCEPTION(
+				comet::com_error(
+					L"Couldn't get stream for source file: " +
+					parsing_name_from_pidl(pidl), hr));
+	}
+
+	return stream;
 }
 
 }} // namespace winapi::shell
