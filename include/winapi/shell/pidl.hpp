@@ -199,6 +199,22 @@ namespace raw_pidl {
     }
 
     /**
+     * Return address of the last item in the PIDL.
+     */
+    template<typename T>
+    inline const ITEMID_CHILD* last(const T* pidl)
+    {
+        const T* p = pidl;
+
+        while (!empty(next(p)))
+        {
+            p = next(p);
+        }
+
+        return reinterpret_cast<const ITEMID_CHILD*>(p);
+    }
+
+    /**
      * Return if PIDL is considered empty (aka. desktop folder).
      */
     template<typename T>
@@ -567,6 +583,22 @@ public:
     }
 
     /**
+     * The single child pidl of this namespace item.
+     */
+    inline basic_pidl<
+        ITEMID_CHILD, typename allocator::rebind<ITEMID_CHILD>::other>
+        last_item() const
+    {
+        if (empty())
+            BOOST_THROW_EXCEPTION(
+                std::logic_error("Empty PIDL cannot have a last item"));
+
+        return basic_pidl<
+            ITEMID_CHILD, typename allocator::rebind<ITEMID_CHILD>::other>(
+                raw_pidl::last(m_pidl));
+    }
+
+    /**
      * Upwards navigation.
      */
     inline basic_pidl parent() const
@@ -577,14 +609,12 @@ public:
 
         basic_pidl copy(*this);
 
-        const T* p = copy.m_pidl;
-        while (!raw_pidl::empty(raw_pidl::next(p)))
-        {
-            p = raw_pidl::next(p);
-        }
+        // Force-terminate the copy's last item, then re-clone to get
+        // clean version
 
-        // Force-terminate the copy, then re-clone to get clean version
-        const_cast<T*>(p)->mkid.cb = 0;
+        const ITEMID_CHILD* last = raw_pidl::last(copy.m_pidl);
+
+        const_cast<ITEMID_CHILD*>(last)->mkid.cb = 0;
 
         return copy;
     }

@@ -740,6 +740,59 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( parent_of_null_pidl, T, pidl_types )
     BOOST_CHECK_THROW(pidl.parent(), std::logic_error);
 }
 
+template<typename T, typename Alloc>
+void do_last_item_test(basic_pidl<T, Alloc>& pidl)
+{
+    shared_ptr<IDCHILD> expected(
+        reinterpret_cast<IDCHILD*>(
+            ::ILClone(::ILFindLastID(pidl.get()))), ::ILFree);
+
+    BOOST_REQUIRE(binary_equal_pidls(pidl.last_item().get(), expected.get()));
+}
+
+/**
+ * Last item of multi-item PIDL.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( last_item_compound_pidl, T, adult_pidl_types )
+{
+    heap_pidl<T>::type pidl(fake_pidl<T>());
+    pidl += fake_pidl<IDRELATIVE>();
+
+    do_last_item_test(pidl);
+}
+
+/**
+ * Last item of single-item PIDL.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( last_item_of_simple_pidl, T, pidl_types )
+{
+    heap_pidl<T>::type pidl(fake_pidl<T>());
+
+    do_last_item_test(pidl);
+}
+
+/**
+ * Last item of empty pidl is non-sensical.  Must throw.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( last_item_of_empty_pidl, T, pidl_types )
+{
+    SHITEMID empty = {0, {0}};
+    heap_pidl<T>::type pidl = reinterpret_cast<const T*>(&empty);
+
+    BOOST_CHECK_THROW(pidl.last_item(), std::logic_error);
+}
+
+/**
+ * Last item of NULL pidl is non-sensical.  Must throw.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( last_item_of_null_pidl, T, pidl_types )
+{
+    heap_pidl<T>::type pidl(NULL);
+
+    BOOST_CHECK_THROW(pidl.last_item(), std::logic_error);
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
 #pragma endregion
 
