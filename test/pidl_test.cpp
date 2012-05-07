@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2010, 2011  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,8 +40,9 @@
 
 #include <ShlObj.h>  // ILClone etc.
 
+#include <cstring> // memset, memcpy
+#include <stdexcept> // logic_error
 #include <string>
-#include <cstring>  // memset, memcpy
 #include <vector>
 
 using namespace winapi::shell::pidl;
@@ -685,6 +686,58 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( append_raw, T, relative_pidl_types )
     hpidl_t pidl1(fake_pidl<IDRELATIVE>());
 
     do_append_test(pidl1, fake_pidl<T>());
+}
+
+template<typename T, typename Alloc>
+void do_parent_test(basic_pidl<T, Alloc>& pidl)
+{
+    shared_ptr<T> expected(
+        reinterpret_cast<T*>(::ILClone(pidl.get())), ::ILFree);
+    BOOST_REQUIRE(::ILRemoveLastID(expected.get()));
+
+    BOOST_REQUIRE(binary_equal_pidls(pidl.parent().get(), expected.get()));
+}
+
+/**
+ * Parent of different types of multi-item PIDL.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( parent_of_compound_pidl, T, adult_pidl_types )
+{
+    heap_pidl<T>::type pidl(fake_pidl<T>());
+    pidl += fake_pidl<IDRELATIVE>();
+
+    do_parent_test(pidl);
+}
+
+/**
+ * Parent of different types of single-item PIDL.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( parent_of_simple_pidl, T, pidl_types )
+{
+    heap_pidl<T>::type pidl(fake_pidl<T>());
+
+    do_parent_test(pidl);
+}
+
+/**
+ * Parent of empty pidl is non-sensical.  Must throw.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( parent_of_empty_pidl, T, pidl_types )
+{
+    SHITEMID empty = {0, {0}};
+    heap_pidl<T>::type pidl = reinterpret_cast<const T*>(&empty);
+
+    BOOST_CHECK_THROW(pidl.parent(), std::logic_error);
+}
+
+/**
+ * Parent of NULL pidl is non-sensical.  Must throw.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( parent_of_null_pidl, T, pidl_types )
+{
+    heap_pidl<T>::type pidl(NULL);
+
+    BOOST_CHECK_THROW(pidl.parent(), std::logic_error);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

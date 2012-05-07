@@ -5,7 +5,8 @@
 
     @if license
 
-    Copyright (C) 2009, 2010, 2011  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2009, 2010, 2011, 2012
+    Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,7 +41,7 @@
 #include <cassert> // assert
 #include <cstring> // memcpy
 #include <exception> // bad_alloc
-#include <stdexcept> // invalid_argument
+#include <stdexcept> // invalid_argument, logic_error
 
 #include <Objbase.h> // CoTaskMemAlloc/Free
 
@@ -563,6 +564,29 @@ public:
     bool empty() const
     {
         return raw_pidl::empty(m_pidl);
+    }
+
+    /**
+     * Upwards navigation.
+     */
+    inline basic_pidl parent() const
+    {
+        if (empty())
+            BOOST_THROW_EXCEPTION(
+                std::logic_error("Empty PIDL cannot have a parent"));
+
+        basic_pidl copy(*this);
+
+        const T* p = copy.m_pidl;
+        while (!raw_pidl::empty(raw_pidl::next(p)))
+        {
+            p = raw_pidl::next(p);
+        }
+
+        // Force-terminate the copy, then re-clone to get clean version
+        const_cast<T*>(p)->mkid.cb = 0;
+
+        return copy;
     }
 
     /**
