@@ -218,32 +218,6 @@ inline STRRET string_to_strret(const std::wstring& str)
 { return detail::string_to_strret(str); }
 
 /**
- * Return the FORPARSING name of the given PIDL.
- *
- * For filesystem items this will be the absolute path.
- */
-inline std::wstring parsing_name_from_pidl(
-    const winapi::shell::pidl::apidl_t& pidl)
-{
-    comet::com_ptr<IShellFolder> folder;
-    PCUITEMID_CHILD child_pidl;
-    HRESULT hr = ::SHBindToParent(
-        pidl.get(), folder.iid(), reinterpret_cast<void**>(folder.out()),
-        &child_pidl);
-    if (FAILED(hr))
-        BOOST_THROW_EXCEPTION(
-            boost::enable_error_info(comet::com_error(hr)) <<
-            boost::errinfo_api_function("SHBindToParent"));
-
-    STRRET str;
-    hr = folder->GetDisplayNameOf(child_pidl, SHGDN_FORPARSING, &str);
-    if (FAILED(hr))
-        BOOST_THROW_EXCEPTION(comet::com_error_from_interface(folder, hr));
-
-    return strret_to_string<wchar_t>(str, child_pidl);
-}
-
-/**
  * Fetch a PIDL from a display name.
  */
 inline winapi::shell::pidl::apidl_t pidl_from_parsing_name(
@@ -314,6 +288,10 @@ inline comet::com_ptr<T> bind_to_handler_object(
  *
  * Analogous to SHBindToParent.
  *
+ * This function doesn't also return the last item (the way SHBindToParent)
+ * does as it can easily be obtained from calling last_item() on the
+ * pidl passed to this fuction.
+ *
  * The implementation doesn't call SHBindToParent and Windows 9x doesn't have
  * that API function.  This is different to SHBindToParent (or at least the
  * Wine version: http://source.winehq.org/source/dlls/shell32/pidl.c#L1282) in
@@ -323,25 +301,16 @@ inline comet::com_ptr<T> bind_to_handler_object(
  *
  * @tparam T  Type of interface on the parent object to return.
  *
- * @returns  The requested interface of the parent object along
- *           with a copy of the last item in the given PIDL.
+ * @returns  The requested interface of the parent object.
  */
 template<typename T>
-inline std::pair<comet::com_ptr<T>, pidl::cpidl_t> bind_to_parent(
-    const pidl::apidl_t& pidl)
+inline comet::com_ptr<T> bind_to_parent(const pidl::apidl_t& pidl)
 {
     if (pidl.empty())
         BOOST_THROW_EXCEPTION(std::logic_error("Already at top level"));
 
     // Create parent of PIDL given
-    pidl::apidl_t parent;
-    pidl::pidl_iterator it(pidl);
-    while (next(it) != pidl::pidl_iterator())
-    {
-        parent += *it++;
-    }
-
-    pidl::cpidl_t item = *it;
+    pidl::apidl_t parent = pidl.parent();
 
     comet::com_ptr<T> requested_interface;
     if (parent.empty())
@@ -357,7 +326,26 @@ inline std::pair<comet::com_ptr<T>, pidl::cpidl_t> bind_to_parent(
         requested_interface = bind_to_handler_object<T>(parent);
     }
 
-    return std::make_pair(requested_interface, item);
+    return requested_interface;
+}
+
+/**
+ * Return the FORPARSING name of the given PIDL.
+ *
+ * For filesystem items this will be the absolute path.
+ */
+inline std::wstring parsing_name_from_pidl(
+    const winapi::shell::pidl::apidl_t& pidl)
+{
+    comet::com_ptr<IShellFolder> folder = bind_to_parent<IShellFolder>(pidl);
+
+    STRRET str;
+    HRESULT hr = folder->GetDisplayNameOf(
+        pidl.last_item().get(), SHGDN_FORPARSING, &str);
+    if (FAILED(hr))
+        BOOST_THROW_EXCEPTION(comet::com_error_from_interface(folder, hr));
+
+    return strret_to_string<wchar_t>(str, pidl.last_item());
 }
 
 /**
@@ -367,18 +355,17 @@ inline std::pair<comet::com_ptr<T>, pidl::cpidl_t> bind_to_parent(
  */
 inline comet::com_ptr<IStream> stream_from_pidl(const pidl::apidl_t& pidl)
 {
-    std::pair<comet::com_ptr<IShellFolder>, pidl::cpidl_t> parent =
-        bind_to_parent<IShellFolder>(pidl);
+    comet::com_ptr<IShellFolder> parent = bind_to_parent<IShellFolder>(pidl);
 
     comet::com_ptr<IStream> stream;
     
-    HRESULT hr = parent.first->BindToObject(
-        parent.second.get(), NULL, stream.iid(),
+    HRESULT hr = parent->BindToObject(
+        pidl.last_item().get(), NULL, stream.iid(),
         reinterpret_cast<void**>(stream.out()));
     if (FAILED(hr))
     {
-        hr = parent.first->BindToStorage(
-            parent.second.get(), NULL, stream.iid(),
+        hr = parent->BindToStorage(
+            pidl.last_item().get(), NULL, stream.iid(),
             reinterpret_cast<void**>(stream.out()));
         if (FAILED(hr))
             BOOST_THROW_EXCEPTION(
