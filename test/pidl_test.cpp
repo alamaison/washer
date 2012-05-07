@@ -33,6 +33,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/test/test_case_template.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/mpl/list.hpp>
 #include <boost/shared_ptr.hpp>  // shared_ptr
 #include <boost/numeric/conversion/cast.hpp>  // numeric_cast
@@ -41,13 +42,17 @@
 
 #include <string>
 #include <cstring>  // memset, memcpy
-
+#include <vector>
 
 using namespace winapi::shell::pidl;
 
+using boost::lexical_cast;
+using boost::numeric_cast;
 using boost::shared_ptr;
 using boost::test_tools::predicate_result;
-using boost::numeric_cast;
+
+using std::string;
+using std::vector;
 
 namespace {
 
@@ -99,43 +104,61 @@ namespace {
     public:
 
         /**
-         * Allocate a PIDL large enough to hold the test data as well as the
+         * Return pointer to chunk of memory initialised with data as a PIDL.
+         *
+         * Allocates a PIDL large enough to hold the test data as well as the
          * size field prefix (USHORT) and the null-terminator suffix (USHORT).
-         */
-        PidlFixture() :
-            m_pidl(
-                static_cast<ITEMIDLIST*>(::CoTaskMemAlloc(fake_pidl_size())),
-                ::CoTaskMemFree)
-        {
-            BOOST_REQUIRE(m_pidl);
-
-            std::memset(m_pidl.get(), 0, fake_pidl_size());
-            m_pidl.get()->mkid.cb = numeric_cast<USHORT>(
-                fake_pidl_size() - sizeof(USHORT));
-
-            std::memcpy(m_pidl.get()->mkid.abID, data.c_str(), data.size());
-        }
-
-        /**
-         * Return pointer to chunk of memory intialised with data as a PIDL.
+         *
+         * Each instance is slightly different; a tag is incremented on each
+         * creation.
          */
         template<typename T>
-        const T* fake_pidl() const
+        const T* fake_pidl()
         {
-            return static_cast<const T*>(m_pidl.get());
+            string tag = lexical_cast<string>(instance_tag++);
+
+            size_t size = fake_pidl_size(tag);
+
+            // We need to keep a copy of these 'heterogenous' PIDLs in the
+            // cache so we build them all as plain PIDLs and just pretend
+            // they have a specific type when we return them.
+            shared_ptr<ITEMIDLIST> pidl(
+                static_cast<ITEMIDLIST*>(::CoTaskMemAlloc(size)),
+                ::CoTaskMemFree);
+            BOOST_REQUIRE(pidl);
+
+            m_fake_pidl_cache.push_back(pidl);
+
+            std::memset(pidl.get(), 0, size);
+            pidl.get()->mkid.cb = numeric_cast<USHORT>(size - sizeof(USHORT));
+
+            std::memcpy(pidl.get()->mkid.abID, data.c_str(), data.size());
+            std::memcpy(
+                pidl.get()->mkid.abID + data.size(), tag.c_str(), tag.size());
+
+            return static_cast<const T*>(pidl.get());
         }
+
+    private:
 
         /**
          * Size of the chunk of memory used as a fake PIDL.
          */
-        size_t fake_pidl_size() const
+        size_t fake_pidl_size(const string& tag) const
         {
-            return data.size() + 2 * sizeof(USHORT);
+            return data.size() + tag.size() + 2 * sizeof(USHORT);
         }
 
-    private:
-        shared_ptr<ITEMIDLIST> m_pidl;
+        /**
+         * The only reason for keeping these PIDLs alive is so tests can treat
+         * them as simple pointers without worrying about their lifetime.
+         */
+        vector< shared_ptr<ITEMIDLIST> > m_fake_pidl_cache;
+
+        static int instance_tag;
     };
+
+    int PidlFixture::instance_tag = 0;
 
 
     /**
@@ -335,11 +358,13 @@ BOOST_FIXTURE_TEST_SUITE(basic_pidl_tests, PidlFixture)
  */
 BOOST_AUTO_TEST_CASE_TEMPLATE( initialise, T, pidl_types )
 {
-    heap_pidl<T>::type pidl(fake_pidl<T>());
+    const T* raw = fake_pidl<T>();
 
-    BOOST_REQUIRE(binary_equal_pidls(pidl.get(), fake_pidl<T>()));
+    heap_pidl<T>::type pidl(raw);
 
-    BOOST_REQUIRE_NE(pidl.get(), fake_pidl<T>());
+    BOOST_REQUIRE(binary_equal_pidls(pidl.get(), raw));
+
+    BOOST_REQUIRE_NE(pidl.get(), raw);
 }
 
 /**
@@ -365,12 +390,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( initialise_empty, T, pidl_types )
  */
 BOOST_AUTO_TEST_CASE_TEMPLATE( assign, T, pidl_types )
 {
+    const T* raw = fake_pidl<T>();
+
     heap_pidl<T>::type pidl;
-    pidl = fake_pidl<T>();
+    pidl = raw;
 
-    BOOST_REQUIRE(binary_equal_pidls(pidl.get(), fake_pidl<T>()));
+    BOOST_REQUIRE(binary_equal_pidls(pidl.get(), raw));
 
-    BOOST_REQUIRE_NE(pidl.get(), fake_pidl<T>());
+    BOOST_REQUIRE_NE(pidl.get(), raw);
 }
 
 /**
