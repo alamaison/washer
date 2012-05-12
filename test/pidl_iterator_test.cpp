@@ -62,9 +62,13 @@ namespace {
             // size field + string length + terminator
             sizeof(USHORT) + strlen(text.c_str()) + sizeof(SHITEMID);
         vector<char> buffer(pidl_length, '\0');
+
+#pragma warning(push)
+#pragma warning(disable : 4996)
         copy(
             text.c_str(), text.c_str() + strlen(text.c_str()),
             &buffer[sizeof(USHORT)]);
+#pragma warning(pop)
 
         PUITEMID_CHILD pidl = reinterpret_cast<PUITEMID_CHILD>(&buffer[0]);
         pidl->mkid.cb = pidl_length - sizeof(SHITEMID);
