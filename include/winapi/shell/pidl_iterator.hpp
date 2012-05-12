@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2010, 2011  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,8 +40,9 @@
 #include <cassert> // assert
 #include <stdexcept> // range_error
 
-#define STRICT_TYPED_ITEMIDS ///< Better type safety for PIDLs (must be
-                             ///< before <shtypes.h> or <shlobj.h>).
+#ifndef STRICT_TYPED_ITEMIDS
+#error Currently, winapi requires strict PIDL types: define STRICT_TYPED_ITEMIDS
+#endif
 #include <Shlobj.h> // ILCloneFirst
 #include <ShTypes.h> // Raw PIDL types
 
