@@ -67,7 +67,8 @@ set(LIBRARY_SOURCES_shell
   ${LIBRARY_DIRECTORY}/shell/pidl_iterator.hpp
   ${LIBRARY_DIRECTORY}/shell/property_key.hpp
   ${LIBRARY_DIRECTORY}/shell/services.hpp
-  ${LIBRARY_DIRECTORY}/shell/shell.hpp)
+  ${LIBRARY_DIRECTORY}/shell/shell.hpp
+  ${LIBRARY_DIRECTORY}/shell/shell_item.hpp)
 source_group(winapi\\shell FILES ${LIBRARY_SOURCES_shell})
 
 add_custom_target(winapi SOURCES
@@ -93,6 +94,7 @@ set(TEST_SOURCES
   pidl_test.cpp
   progress_test.cpp
   shell_test.cpp
+  shell_item_test.cpp
   task_dialog_test.cpp
   window_test.cpp)
 

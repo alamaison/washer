@@ -34,9 +34,8 @@
 #pragma once
 
 #include <winapi/detail/path_traits.hpp> // choose_path
-#include <winapi/shell/pidl_iterator.hpp> // pidl_iterator
-#include <winapi/shell/folder_error_adapters.hpp> // comtype<IShellFolder>
 #include <winapi/shell/pidl.hpp> // cpidl_t, apidl_t
+#include <winapi/shell/shell_item.hpp> // pidl_shell_item
 
 #include <comet/ptr.h> // com_ptr
 #include <comet/error.h> // com_error
@@ -45,7 +44,6 @@
 #include <boost/exception/info.hpp> // errinfo
 #include <boost/shared_ptr.hpp> // shared_ptr
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
-#include <boost/utility.hpp> // next
 
 #include <cassert> // assert
 #include <stdexcept> // runtime_error, logic_error
@@ -330,25 +328,6 @@ inline comet::com_ptr<T> bind_to_parent(const pidl::apidl_t& pidl)
 }
 
 /**
- * Return the FORPARSING name of the given PIDL.
- *
- * For filesystem items this will be the absolute path.
- */
-inline std::wstring parsing_name_from_pidl(
-    const winapi::shell::pidl::apidl_t& pidl)
-{
-    comet::com_ptr<IShellFolder> folder = bind_to_parent<IShellFolder>(pidl);
-
-    STRRET str;
-    HRESULT hr = folder->GetDisplayNameOf(
-        pidl.last_item().get(), SHGDN_FORPARSING, &str);
-    if (FAILED(hr))
-        BOOST_THROW_EXCEPTION(comet::com_error_from_interface(folder, hr));
-
-    return strret_to_string<wchar_t>(str, pidl.last_item());
-}
-
-/**
  * Given a PIDL, return an IStream to it.
  *
  * @note  This fails with E_NOTIMPL on Windows 2000 and below.
@@ -371,7 +350,7 @@ inline comet::com_ptr<IStream> stream_from_pidl(const pidl::apidl_t& pidl)
             BOOST_THROW_EXCEPTION(
                 comet::com_error(
                     L"Couldn't get stream for source file: " +
-                    parsing_name_from_pidl(pidl), hr));
+                    pidl_shell_item(pidl).parsing_name(), hr));
     }
 
     return stream;

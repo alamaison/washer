@@ -33,6 +33,7 @@
 #include "sandbox_fixture.hpp" // sandbox_fixture
 
 #include <winapi/shell/shell.hpp> // test subject
+#include <winapi/shell/shell_item.hpp> // pidl_shell_item
 
 #include <comet/ptr.h> // com_ptr
 #include <comet/util.h> // auto_coinit
@@ -66,7 +67,7 @@ namespace { // private
      */
     predicate_result pidl_path_equivalence(apidl_t pidl, wpath path)
     {
-        wstring parsing_name = parsing_name_from_pidl(pidl);
+        wstring parsing_name = pidl_shell_item(pidl).parsing_name();
 
         if (path != parsing_name)
         {
@@ -111,25 +112,6 @@ BOOST_AUTO_TEST_CASE( desktop_ishellfolder )
     auto_coinit com;
     com_ptr<IShellFolder> desktop = desktop_folder();
     BOOST_REQUIRE(desktop);
-}
-
-BOOST_AUTO_TEST_CASE( parse_name_from_filesystem_pidl )
-{
-    auto_coinit com;
-    wpath prog_files = special_folder_path<wchar_t>(CSIDL_PROGRAM_FILES);
-    apidl_t pidl = pidl_from_parsing_name(prog_files.external_file_string());
-    wstring name = parsing_name_from_pidl(pidl);
-
-    BOOST_CHECK_EQUAL(prog_files, name);
-}
-
-BOOST_AUTO_TEST_CASE( parse_name_from_virtual_pidl )
-{
-    auto_coinit com;
-    apidl_t pidl = special_folder_pidl(CSIDL_DRIVES);
-    wstring name = parsing_name_from_pidl(pidl);
-
-    BOOST_CHECK_EQUAL(L"::{20D04FE0-3AEA-1069-A2D8-08002B30309D}", name);
 }
 
 BOOST_FIXTURE_TEST_SUITE(file_binding_tests, sandbox_fixture)

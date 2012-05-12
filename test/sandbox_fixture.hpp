@@ -54,13 +54,29 @@ namespace detail {
     /**
      * Return the path to the sandbox directory.
      */
-    boost::filesystem::wpath sandbox_directory()
+    inline boost::filesystem::wpath sandbox_directory()
     {
         boost::shared_ptr<wchar_t> name(
             _wtempnam(NULL, SANDBOX_NAME.c_str()), free);
         BOOST_REQUIRE(name);
         
         return name.get();
+    }
+
+    inline bool is_child_path(
+        const boost::filesystem::wpath& parent,
+        const boost::filesystem::wpath& child)
+    {
+        boost::filesystem::wpath lhs = complete(parent);
+        boost::filesystem::wpath rhs = complete(child);
+
+        boost::filesystem::wpath::iterator left(lhs.begin());
+        boost::filesystem::wpath::iterator right(rhs.begin());
+
+        for (;*left == *right && left != lhs.end() && right != rhs.end();
+            ++left, ++right);
+
+        return left == lhs.end();
     }
 }
 
@@ -93,19 +109,61 @@ public:
      * Create a new empty file in the fixture sandbox with a random name
      * and return the path.
      */
-    boost::filesystem::wpath new_file_in_sandbox()
+    boost::filesystem::wpath new_file_in_sandbox(
+        const boost::filesystem::wpath& subdirectory,
+        const std::wstring& extension)
     {
+        BOOST_REQUIRE_MESSAGE(
+            detail::is_child_path(sandbox(), subdirectory),
+            "Test file must not stray outside sandbox");
+
+        boost::filesystem::wpath filename =
+            winapi::filesystem::unique_path<wchar_t>();
         boost::filesystem::wpath p =
-            sandbox() / winapi::filesystem::unique_path<wchar_t>();
+            subdirectory / (filename.string() + extension);
+
+        BOOST_REQUIRE(!exists(p));
+        BOOST_REQUIRE(p.is_complete());
 
         boost::filesystem::wofstream s(p);
 
+        BOOST_REQUIRE(exists(p));
+        BOOST_REQUIRE(is_regular_file(p));
+
+        return p;
+    }
+
+    boost::filesystem::wpath new_file_in_sandbox()
+    {
+        return new_file_in_sandbox(sandbox(), std::wstring());
+    }
+
+    /**
+     * Create a new empty directory in the fixture sandbox with a random name
+     * and return the path.
+     */
+    boost::filesystem::wpath new_directory_in_sandbox(
+        const boost::filesystem::wpath& subdirectory)
+    {
+        BOOST_REQUIRE_MESSAGE(
+            detail::is_child_path(sandbox(), subdirectory),
+            "Test directory must not stray outside sandbox");
+
+        boost::filesystem::wpath p =
+            subdirectory / winapi::filesystem::unique_path<wchar_t>();
+
+        create_directory(p);
+
         BOOST_CHECK(exists(p));
-        BOOST_CHECK(is_regular_file(p));
+        BOOST_CHECK(is_directory(p));
         BOOST_CHECK(p.is_complete());
         return p;
     }
 
+    boost::filesystem::wpath new_directory_in_sandbox()
+    {
+        return new_directory_in_sandbox(sandbox());
+    }
 
 private:
     boost::filesystem::wpath m_sandbox;
