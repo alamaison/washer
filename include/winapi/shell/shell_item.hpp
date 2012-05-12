@@ -60,10 +60,10 @@ inline std::basic_string<T> strret_to_string(
 /**
  * Interface to items in the shell namespace.
  *
- * Purpose: to encapsulate those operations common to all shell namespace
+ * **Purpose:** to encapsulate those operations common to all shell namespace
  * inhabitants.
  *
- * Note, there is no assumption that the shell item is linked to a PIDL though,
+ * @note There is no assumption that the shell item is linked to a PIDL though,
  * of course, that is the case internally.
  */
 class shell_item
@@ -90,14 +90,16 @@ public:
          * two files with the same stem but different extensions give the same
          * name.
          *
-         * Equivalent to: @link SIGDN_NORMALDISPLAY
-         * Equivalent to: @link SHGDN_NORMAL
+         * - Equivalent to: `SIGDN_NORMALDISPLAY`
+         * - Equivalent to: `SHGDN_NORMAL`
          *
-         * Examples:
-         * ---------
-         * C:\directory\file.txt    : file
-         * C:\                      : Local Disk (C:)
-         * Control Panel\Printers   : Printers
+         * *Examples:*
+         *
+         * Item                      | Name
+         * ------------------------- | ---------------
+         * C:\\directory\\file.txt   | file
+         * C:\\                      | Local Disk (C:)
+         * Control Panel\\Printers   | Printers
          */
         in_global_context,
 
@@ -113,16 +115,16 @@ public:
          * two files with the same stem but different extensions give the same
          * name.
          *
-         * Equivalent to: @link SIGDN_PARENTRELATIVE
-         * Equivalent to: @link SHGDN_INFOLDER
+         * - Equivalent to: `SIGDN_PARENTRELATIVE`
+         * - Equivalent to: `SHGDN_INFOLDER`
          *
-         * Examples:
-         * ---------
-         * C:\directory\file.txt    : file
-         * C:\                      : Local Disk (C:)
-         * Control Panel\Printers   : Printers
-         * Control Panel\Printers   : ::{21EC2020-3AEA-1069-A2DD-08002B30309D}\
-         *                            ::{2227A280-3AEA-1069-A2DE-08002B30309D}
+         * *Examples:*
+         *
+         * Item                      | Name
+         * ------------------------- | ---------------
+         * C:\\directory\\file.txt   | file
+         * C:\\                      | Local Disk (C:)
+         * Control Panel\\Printers   | Printers
          */
          in_folder_context,
 
@@ -136,14 +138,16 @@ public:
          * The name does not have to be the *full* name of the item, however.
          * Files, for example, might not include the file extension.
          *
-         * Equivalent to: @link SIGDN_PARENTRELATIVEEDITING
-         * Equivalent to: @link SHGDN_INFOLDER | SHGDN_FOREDITING
+         * - Equivalent to: `SIGDN_PARENTRELATIVEEDITING`
+         * - Equivalent to: `SHGDN_INFOLDER | SHGDN_FOREDITING`
          *
-         * Examples:
-         * ---------
-         * C:\directory\file.txt    : file
-         * C:\                      : Local Disk
-         * Control Panel\Printers   : Printers
+         * *Examples:*
+         *
+         * Item                      | Name
+         * ------------------------- | ---------------
+         * C:\\directory\\file.txt   | file
+         * C:\\                      | Local Disk
+         * Control Panel\\Printers   | Printers
          */
          editable,
 
@@ -163,14 +167,16 @@ public:
          * unfriendly GUID-style name.  Sometime it will be the same as the 
          * normal display name such as "Computer".
          *
-         * Equivalent to: @link SIGDN_DESKTOPABSOLUTEEDITING
-         * Equivalent to: @link SHGDN_FORPARSING | SHGDN_FORADDRESSBAR
+         * - Equivalent to: `SIGDN_DESKTOPABSOLUTEEDITING`
+         * - Equivalent to: `SHGDN_FORPARSING | SHGDN_FORADDRESSBAR`
          *
-         * Examples:
-         * ---------
-         * C:\directory\file.txt    : C:\directory\file.txt
-         * C:\                      : C:\
-         * Control Panel\Printers   : Control Panel\Printers
+         * *Examples:*
+         *
+         * Item                      | Name
+         * ------------------------- | ---------------
+         * C:\\directory\\file.txt   | C:\\directory\\file.txt
+         * C:\\                      | C:\\
+         * Control Panel\\Printers   | Control Panel\\Printers
          */
         absolute,
 
@@ -186,15 +192,17 @@ public:
          * For some reason, drives don't get a trailing slash here unlike the
          * absolute name.
          *
-         * Equivalent to: @link SIGDN_PARENTRELATIVEFORADDRESSBAR
-         * Equivalent to: @link SHGDN_INFOLDER | SHGDN_FORPARSING |
-         *                      SHGDN_FORADDRESSBAR
+         * - Equivalent to: `SIGDN_PARENTRELATIVEFORADDRESSBAR`
+         * - Equivalent to: `SHGDN_INFOLDER | SHGDN_FORPARSING |
+         *                   SHGDN_FORADDRESSBAR`
          *
-         * Examples:
-         * ---------
-         * C:\directory\file.txt    : file.txt
-         * C:\                      : C:
-         * Control Panel\Printers   : Printers
+         * *Examples:*
+         *
+         * Item                      | Name
+         * ------------------------- | ---------------
+         * C:\\directory\\file.txt   | file.txt
+         * C:\\                      | C:
+         * Control Panel\\Printers   | Printers
          */
         relative,
 
@@ -217,14 +225,16 @@ public:
          * The name is not suitable for use in UI but is suitable for passing
          * to SHParseDisplayName to return the item's PIDL.
          *
-         * Equivalent to: @link SIGDN_DESKTOPABSOLUTEPARSING
-         * Equivalent to: @link SHGDN_FORPARSING
+         * -  Equivalent to: `SIGDN_DESKTOPABSOLUTEPARSING`
+         * -  Equivalent to: `SHGDN_FORPARSING`
          *
-         * Examples:
-         * ---------
-         * C:\directory\file.txt    : C:\directory\file.txt
-         * C:\                      : C:\
-         * Control Panel\Printers   : ::{21EC2020-3AEA-1069-A2DD-08002B30309D}\
+         * *Examples:*
+         *
+         * Item                     | Name
+         * ------------------------ | ---------------
+         * C:\\directory\\file.txt  | C:\\directory\\file.txt
+         * C:\\                     | C:\\
+         * Control Panel\\Printers  | ::{21EC2020-3AEA-1069-A2DD-08002B30309D}\\
          *                            ::{2227A280-3AEA-1069-A2DE-08002B30309D}
          */
         absolute,
@@ -238,14 +248,16 @@ public:
          * For some reason, drives don't get a trailing slash here unlike the
          * absolute name.
          *
-         * Equivalent to: @link SIGDN_PARENTRELATIVE
-         * Equivalent to: @link SHGDN_FORPARSING | SHGDN_INFOLDER
+         * - Equivalent to: `SIGDN_PARENTRELATIVE`
+         * - Equivalent to: `SHGDN_FORPARSING | SHGDN_INFOLDER`
          *
-         * Examples:
-         * ---------
-         * C:\directory\file.txt    : file.txt
-         * C:\                      : C:
-         * Control Panel\Printers   : ::{2227A280-3AEA-1069-A2DE-08002B30309D}
+         * *Examples:*
+         *
+         * Item                     | Name
+         * ------------------------ | ---------------
+         * C:\\directory\\file.txt  | file.txt
+         * C:\\                     | C:
+         * Control Panel\\Printers  | ::{2227A280-3AEA-1069-A2DE-08002B30309D}
          */
         relative,
 

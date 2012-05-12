@@ -111,9 +111,10 @@ namespace detail {
 /**
  * Common system folder path by CSIDL.
  *
- * @example
- *   @code known_folder_path(CSIDL_PROFILE) @endcode returns something like
- *   @code C:\\Users\\Username @endcode
+ * *Example*
+ *
+ * `known_folder_path(CSIDL_PROFILE)` returns something like
+ * `C:\\Users\\Username`
  */
 template<typename T>
 inline typename winapi::detail::choose_path<T>::type special_folder_path(

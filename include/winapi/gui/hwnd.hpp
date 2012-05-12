@@ -164,15 +164,16 @@ inline U set_window_field(HWND hwnd, int field, const U& value)
  *
  * The value type must be no bigger than a LONG_PTR.
  *
- * @param hwnd   Window handle whose data we are getting.
- * @param field  Which data field are we getting the value of.
+ * @param hwnd      Window handle whose data we are getting.
+ * @param field     Which data field are we getting the value of.
+ * @param no_throw  Controls whether this function can throw.
  *
- * @throws  A system_error if @c no_throw is @c false and there is an
+ * @throws  A system_error if `no_throw` is `false` and there is an
  *          error or if no value has yet been stored.  If no_throw is true
  *          it returns 0 instead.
  *
  * @note  Storing 0 will count as not having a previous value so will
- *        throw an exception unless @no_throw is @c true.
+ *        throw an exception unless `no_throw` is `true`.
  */
 template<typename T, typename U>
 inline U window_field(HWND hwnd, int field, bool no_throw=false)

@@ -558,8 +558,8 @@ public:
      *
      * The desired detail is specified by a column index.
      *
-     * @note  This method is present in @c IShellDetails as well as
-     *        @IShellFolder2.
+     * @note  This method is present in `IShellDetails` as well as
+     *        `IShellFolder2`.
      *
      * This function operates in two distinctly different ways:
      *  - if pidl is NULL:
@@ -570,7 +570,7 @@ public:
      * The caller indicates which detail they want by specifying a column index
      * in column_index.  If this column does not exist, return an error.
      *
-     * @retval  A SHELLDETAILS structure holding the requested detail as a
+     * @retval  A `SHELLDETAILS` structure holding the requested detail as a
      *          string along with various metadata.
      *
      * @note  Typically, a folder view calls this method repeatedly,
@@ -636,8 +636,8 @@ public:
      *
      * The desired detail is specified by a column index.
      *
-     * @note  This method is present in @c IShellDetails as well as
-     *        @IShellFolder2.
+     * @note  This method is present in `IShellDetails` as well as
+     *        `IShellFolder2`.
      *
      * This function operates in two distinctly different ways:
      *  - if pidl is NULL:
@@ -648,7 +648,7 @@ public:
      * The caller indicates which detail they want by specifying a column index
      * in @a iColumn.  If this column does not exist, return an error.
      *
-     * @retval  A SHELLDETAILS structure holding the requested detail as a
+     * @retval  A `SHELLDETAILS` structure holding the requested detail as a
      *          string along with various metadata.
      *
      * @note  Typically, a folder view calls this method repeatedly,

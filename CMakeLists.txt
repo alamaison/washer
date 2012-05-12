@@ -79,3 +79,27 @@ add_custom_target(winapi SOURCES
   ${LIBRARY_SOURCES_shell})
 
 add_subdirectory(test)
+
+# Target to generate documentation with Doxygen
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+
+  get_property(
+    INCLUDE_LIST
+    DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
+    PROPERTY INCLUDE_DIRECTORIES)
+
+  foreach(arg ${INCLUDE_LIST})
+    set(DOXY_INCLUDE_DIRS "${DOXY_INCLUDE_DIRS} \"${arg}\"")
+  endforeach()
+
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+    ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+
+  add_custom_target(
+    doc ALL
+    ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "Generating documentation with Doxygen" VERBATIM)
+endif()
