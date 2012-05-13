@@ -197,27 +197,26 @@ public:
     {
         HRESULT hr = m_progress->SetLine(index, text.c_str(), FALSE, NULL);
         if (FAILED(hr))
-            BOOST_THROW_EXCEPTION(
-                com_error_from_interface(m_progress, hr));
+            BOOST_THROW_EXCEPTION(com_error_from_interface(m_progress, hr));
     }
 
     /**
-     * Set the indexth line of the display to the given path but compress it.
+     * Set the indexth line of the display to the given text and compress paths
+     * if needed.
      *
-     * The path must be a Windows filesystem path and will only be compressed
-     * if too wide to fit in the dialogue window.
+     * If the next is too big to fit in the dialogue, the text will be searched
+     * for strings that look like Windows filesystem path (have backslashes)
+     * and they will be compressed using elipses.
      *
      * Setting a third line will throw an exception if automatic time estimation
      * is enabled.  The third line is used to display that estimate.
      */
     void line_as_compressable_path(
-        DWORD index, const boost::filesystem::wpath& path)
+        DWORD index, const std::wstring& text)
     {
-        HRESULT hr = m_progress->SetLine(
-            index, path.file_string().c_str(), TRUE, NULL);
+        HRESULT hr = m_progress->SetLine(index, text.c_str(), TRUE, NULL);
         if (FAILED(hr))
-            BOOST_THROW_EXCEPTION(
-                com_error_from_interface(m_progress, hr));
+            BOOST_THROW_EXCEPTION(com_error_from_interface(m_progress, hr));
     }
 
     /**
@@ -227,8 +226,7 @@ public:
     {
         HRESULT hr = m_progress->SetProgress64(so_far, out_of);
         if (FAILED(hr))
-            BOOST_THROW_EXCEPTION(
-                com_error_from_interface(m_progress, hr));
+            BOOST_THROW_EXCEPTION(com_error_from_interface(m_progress, hr));
     }
 
     /**
