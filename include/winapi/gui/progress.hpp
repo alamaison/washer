@@ -211,8 +211,7 @@ public:
      * Setting a third line will throw an exception if automatic time estimation
      * is enabled.  The third line is used to display that estimate.
      */
-    void line_as_compressable_path(
-        DWORD index, const std::wstring& text)
+    void line_compress_paths_if_needed(DWORD index, const std::wstring& text)
     {
         HRESULT hr = m_progress->SetLine(index, text.c_str(), TRUE, NULL);
         if (FAILED(hr))

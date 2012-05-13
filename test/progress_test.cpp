@@ -83,10 +83,10 @@ BOOST_AUTO_TEST_CASE( path )
         progress::time_estimation::none, progress::bar_type::progress,
         progress::minimisable::yes, progress::cancellability::cancellable);
     dialogue.line(1, L"Text 1");
-    dialogue.line_as_compressable_path(
+    dialogue.line_compress_paths_if_needed(
         2, L"C:\\a\\very\\extremely\\indubitably\\"
         L"supercalifragilistically\\expialidociously\\long\\path");
-    dialogue.line_as_compressable_path(
+    dialogue.line_compress_paths_if_needed(
         3, L"/a/very/very/extremely/indubitably/"
         L"supercalifragilistically/expialidociously/long/unix/path");
     for (int i = 0; i <= SLEEP_TIME; ++i)
