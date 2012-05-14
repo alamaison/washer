@@ -177,23 +177,24 @@ namespace raw_pidl {
      * Return address of the PIDL offset by the given amount in bytes.
      */
     template<typename T>
-    inline T* skip(T* pidl, size_t offset)
+    inline T __unaligned* skip(T __unaligned* pidl, size_t offset)
     {
-        return reinterpret_cast<T*>(reinterpret_cast<BYTE*>(pidl) + offset);
+        return reinterpret_cast<T __unaligned*>(
+            reinterpret_cast<BYTE __unaligned*>(pidl) + offset);
     }
 
     template<typename T>
-    inline const T* skip(const T* pidl, size_t offset)
+    inline const T __unaligned* skip(const T __unaligned* pidl, size_t offset)
     {
-        return reinterpret_cast<const T*>(
-            reinterpret_cast<const BYTE*>(pidl) + offset);
+        return reinterpret_cast<const T __unaligned*>(
+            reinterpret_cast<const BYTE __unaligned*>(pidl) + offset);
     }
 
     /**
      * Return address of the next item in the PIDL.
      */
     template<typename T>
-    inline const T* next(const T* pidl)
+    inline const T __unaligned* next(const T __unaligned* pidl)
     {
         return skip(pidl, pidl->mkid.cb);
     }
@@ -202,23 +203,23 @@ namespace raw_pidl {
      * Return address of the last item in the PIDL.
      */
     template<typename T>
-    inline const ITEMID_CHILD* last(const T* pidl)
+    inline const ITEMID_CHILD __unaligned* last(const T __unaligned* pidl)
     {
-        const T* p = pidl;
+        const T __unaligned* p = pidl;
 
         while (!empty(next(p)))
         {
             p = next(p);
         }
 
-        return reinterpret_cast<const ITEMID_CHILD*>(p);
+        return reinterpret_cast<const ITEMID_CHILD __unaligned*>(p);
     }
 
     /**
      * Return if PIDL is considered empty (aka. desktop folder).
      */
     template<typename T>
-    inline bool empty(const T* pidl)
+    inline bool empty(const T __unaligned* pidl)
     {
         return (pidl == NULL) || (pidl->mkid.cb == 0);
     }
@@ -359,7 +360,7 @@ namespace raw_pidl {
      */
     template<typename Alloc, typename T, typename U>
     inline typename traits<T>::combine_pidl_type combine(
-        const T* lhs_pidl, const U* rhs_pidl,
+        const T __unaligned* lhs_pidl, const U __unaligned* rhs_pidl,
         typename boost::enable_if_c<traits<U>::is_appendable>::type* dummy=0)
     {
         (void) dummy;
@@ -612,9 +613,9 @@ public:
         // Force-terminate the copy's last item, then re-clone to get
         // clean version
 
-        const ITEMID_CHILD* last = raw_pidl::last(copy.m_pidl);
+        const ITEMID_CHILD __unaligned* last = raw_pidl::last(copy.m_pidl);
 
-        const_cast<ITEMID_CHILD*>(last)->mkid.cb = 0;
+        const_cast<ITEMID_CHILD __unaligned*>(last)->mkid.cb = 0;
 
         return copy;
     }
@@ -667,7 +668,7 @@ inline typename basic_pidl<T, Alloc>::join_pidl operator+(
 
 template<typename T, typename U, typename Alloc>
 inline typename basic_pidl<T, Alloc>::join_pidl operator+(
-    const basic_pidl<T, Alloc>& lhs, const U* rhs)
+    const basic_pidl<T, Alloc>& lhs, const U __unaligned* rhs)
 {
     typedef basic_pidl<U, basic_pidl<T, Alloc>::allocator::rebind<U>::other>
         wrapped_type;
@@ -676,7 +677,7 @@ inline typename basic_pidl<T, Alloc>::join_pidl operator+(
 
 template<typename T, typename U, typename Alloc>
 inline typename basic_pidl<T, Alloc>::join_pidl operator+(
-    const U* lhs, const basic_pidl<T, Alloc>& rhs)
+    const U __unaligned* lhs, const basic_pidl<T, Alloc>& rhs)
 {
     typedef basic_pidl<U, basic_pidl<T, Alloc>::allocator::rebind<U>::other>
         wrapped_type;
