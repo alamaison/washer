@@ -95,11 +95,28 @@ private:
     RECT m_rect;
 };
 
-
+/**
+ * C++ interface to the Win32 window object.
+ *
+ * Purpose: to safely wrap the HWND and associated functions.
+ *
+ * @tparam T  The character width of the window.  Windows has both 'ANSI' and
+ *            Unicode window objects; strange but true.
+ */
 template<typename T>
 class window
 {
 public:
+
+    /**
+     * Wrap a window and take ownership of its underlying Win32 object.
+     *
+     * This is the safest of the two constructors as it makes sure the window
+     * is destroyed after the wrapper is destroyed.  The Win32 window must not
+     * be destroyed after passing to this constructor.  Doing so will likely
+     * result in a crash.
+     */
+    explicit window(hwnd_t hwnd) : m_hwnd(hwnd) {}
 
     /**
      * Wrap a raw HWND without controlling its lifetime.
@@ -108,7 +125,7 @@ public:
      * that we didn't create and whose lifetime we don't own.  An example
      * would be an HWND passed to us by the windows API.
      *
-     * This contructor fakes a shared_ptr to the window by creating an hwnd_t
+     * This constructor fakes a shared_ptr to the window by creating an hwnd_t
      * with a destructor that doesn't destroy the window.
      *
      * The Win32 window must outlive this wrapper.  If any methods are called
@@ -119,7 +136,6 @@ public:
      * as the wrapper.
      */
     explicit window(HWND hwnd) : m_hwnd(hwnd, detail::null_deleter()) {}
-    explicit window(hwnd_t hwnd) : m_hwnd(hwnd) {}
 
     bool is_visible() const
     {
@@ -200,7 +216,7 @@ public:
      * Change the function that handles window messages.
      *
      * This method is used to 'subclass' a window by passing any messages,
-     * not handled by the new wndproc, throught to the previous window message
+     * not handled by the new wndproc, through to the previous window message
      * procedure (returned by this method).
      *
      * @returns  Pointer to previous window message procedure.
