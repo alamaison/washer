@@ -34,6 +34,7 @@
 #pragma once
 
 #include <winapi/gui/menu/detail/menu.hpp> // menu_handle, safe_destroy_menu
+#include <winapi/gui/menu/detail/menu_common_core.hpp>
 #include <winapi/gui/menu/detail/menu_item_iterator.hpp>
 #include <winapi/gui/menu/detail/menu_win32.hpp> // create_popup_menu
 #include <winapi/gui/menu/menu_item.hpp>
@@ -50,10 +51,11 @@ namespace menu {
  *
  * @todo  Add a method that can insert at an iterator position.
  */
-class menu
+class menu : private detail::menu_common_core<menu_item>
 {
     template<typename T> friend class sub_menu;
 
+    typedef detail::menu_common_core<menu_item> core;
     typedef int iterator_type;
 
 public:
@@ -63,7 +65,7 @@ public:
      */
     menu()
         :
-    m_menu(
+    core(
         detail::menu_handle(
             detail::win32::create_popup_menu(), detail::safe_destroy_menu))
     {}
@@ -71,33 +73,27 @@ public:
     /**
      * Returns the number of items in the menu.
      */
-    size_t size() const
-    {
-        return detail::win32::get_menu_item_count(m_menu.get());
-    }
+    using core::size;
 
     /**
      * Appends an item onto the end of the menu.
      */
-    void append(const menu_item& menu)
-    {
-        insert_at_position(menu, -1);
-    }
+    using core::append;
 
-    iterator_type begin() { return 1; }
-    iterator_type end() { return 1; }
+    /**
+     * Insert an item into the menu at the given iterator position.
+     *
+     * Shuffles existing items along.
+     */
+    using core::insert;
+
+    using core::begin;
+    using core::end;
 
 private:
 
-    void insert_at_position(const menu_item& menu, UINT position)
-    {
-        MENUITEMINFOW info = menu.as_menuiteminfo();
-        // BUG: this function takes ownership of the submenu HMENU but the
-        // passed-in menu will still try to destroy it
-        detail::win32::insert_menu_item(m_menu.get(), position, TRUE, &info);
-    }
-
-    const detail::menu_handle m_menu;
+    /** To allow sub_menu::as_menuiteminfo to access raw HWND. */
+    using core::handle;
 };
 
 }}} // namespace winapi::gui::menu

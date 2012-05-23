@@ -41,12 +41,19 @@ namespace winapi {
 namespace gui {
 namespace menu {
 
+namespace detail {
+
+template<typename>
+class menu_common_core;
+
+}
+
 /**
  * Interface to items which can only be added to regular menus, not menu bars.
  */
 class menu_item
 {
-    friend class menu;
+    friend class detail::menu_common_core<menu_item>;
 
 public:
 

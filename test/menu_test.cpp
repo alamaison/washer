@@ -30,6 +30,7 @@
 */
 
 #include <winapi/gui/menu/menu.hpp> // test subject
+#include <winapi/gui/menu/menu_items.hpp> // test subject
 
 #include <winapi/dynamic_link.hpp> // module_handle
 #include <winapi/gui/windows/window.hpp>

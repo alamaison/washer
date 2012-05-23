@@ -1,7 +1,7 @@
 /**
     @file
 
-    Windows menu bar HMENU wrapper.
+    Code common to both menus and menu bars.
 
     @if license
 
@@ -29,80 +29,85 @@
     @endif
 */
 
-#ifndef WINAPI_GUI_MENU_MENU_BAR_HPP
-#define WINAPI_GUI_MENU_MENU_BAR_HPP
+#ifndef WINAPI_GUI_MENU_DETAIL_MENU_COMMON_CORE_HPP
+#define WINAPI_GUI_MENU_DETAIL_MENU_COMMON_CORE_HPP
 #pragma once
 
-#include <winapi/gui/menu/detail/menu.hpp> // menu_handle, safe_destroy_menu
-#include <winapi/gui/menu/detail/menu_common_core.hpp>
+#include <winapi/gui/menu/detail/menu.hpp> // menu_handle
 #include <winapi/gui/menu/detail/menu_item_iterator.hpp>
-#include <winapi/gui/menu/detail/menu_win32.hpp> // create_menu
-#include <winapi/gui/menu/menu_bar_item.hpp>
 
 #include <Windows.h> // MENUITEMINFO
 
 namespace winapi {
 namespace gui {
-
-template<typename>
-class window;
-
 namespace menu {
+namespace detail {
 
 /**
- * Main application window menu bar.
+ * Object implementing the common aspects of wrapping a menu and a menu bar.
+ *
+ * @todo  Add a method that can insert at an iterator position.
  */
-class menu_bar : private detail::menu_common_core<menu_bar_item>
+template<typename ItemType>
+class menu_common_core
 {
-#if defined (_MSC_VER) && (_MSC_VER > 1400)
-    template<typename>
-    friend class window;
-#else
-    // HACK to workaround VC8 (2005) and presumably earlier that can't
-    // befriend a template class in a parent namespace.
-    // See: http://stackoverflow.com/q/10694416/67013
-    friend class window<char>;
-    friend class window<wchar_t>;
-#endif
 
-    typedef detail::menu_common_core<menu_bar_item> core;
+    typedef ItemType item_type;
     typedef int iterator_type;
 
 public:
 
-    menu_bar()
-        :
-    core(
-        detail::menu_handle(
-            detail::win32::create_menu(), detail::safe_destroy_menu))
-    {}
+    menu_common_core(menu_handle menu) : m_menu(menu) {}
 
     /**
      * Returns the number of items in the menu.
      */
-    using core::size;
+    size_t size() const
+    {
+        return detail::win32::get_menu_item_count(m_menu.get());
+    }
 
     /**
      * Appends an item onto the end of the menu.
      */
-    using core::append;
+    void append(const item_type& menu)
+    {
+        insert_at_position(menu, -1);
+    }
 
     /**
      * Insert an item into the menu at the given iterator position.
      *
      * Shuffles existing items along.
      */
-    using core::insert;
+    void insert(const item_type& item, const iterator_type& position)
+    {
+        insert_at_position(item, position);
+    }
 
-    using core::begin;
-    using core::end;
+    iterator_type begin() { return 1; }
+    iterator_type end() { return 1; }
+
+protected:
+
+    const detail::menu_handle handle() const
+    {
+        return m_menu;
+    }
 
 private:
 
-    /** To allow window<T>::menu to access raw HWND. */
-    using core::handle;
+    void insert_at_position(const item_type& menu, UINT position)
+    {
+        MENUITEMINFOW info = menu.as_menuiteminfo();
+        // BUG: this function takes ownership of the submenu HMENU but the
+        // passed-in menu will still try to destroy it
+        detail::win32::insert_menu_item(m_menu.get(), position, TRUE, &info);
+    }
+
+    const detail::menu_handle m_menu;
 };
 
-}}} // namespace winapi::gui::menu
+}}}} // namespace winapi::gui::menu::detail
 
 #endif

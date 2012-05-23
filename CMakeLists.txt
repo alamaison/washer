@@ -66,6 +66,8 @@ source_group(winapi\\gui\\menu FILES ${LIBRARY_SOURCES_gui_menu})
 
 set(LIBRARY_SOURCES_gui_menu_detail
   ${LIBRARY_DIRECTORY}/gui/menu/detail/menu.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/detail/menu_common_core.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/detail/menu_item_iterator.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/menu_win32.hpp)
 source_group(winapi\\gui\\menu\\detail FILES ${LIBRARY_SOURCES_gui_menu_detail})
 

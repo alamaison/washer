@@ -33,12 +33,17 @@
 #define WINAPI_GUI_MENU_MENU_ITEMS_HPP
 #pragma once
 
+#include <winapi/gui/menu/detail/menu_win32.hpp> // get_menu_item_info
+#include <winapi/gui/menu/detail/menu.hpp> // menu_handle
 #include <winapi/gui/menu/menu.hpp>
 #include <winapi/gui/menu/menu_bar_item.hpp>
 #include <winapi/gui/menu/menu_item.hpp>
 #include <winapi/gui/menu/menu_buttons.hpp> // menu_button_nature
 
 #include <cassert> // assert
+#include <memory> // auto_ptr
+#include <string>
+#include <vector>
 
 #include <Windows.h> // MENUITEMINFO
 
@@ -127,7 +132,7 @@ private:
         MENUITEMINFOW info = button.as_menuiteminfo();
 
         info.fMask |= MIIM_SUBMENU;
-        info.hSubMenu = m_menu.m_menu.get();
+        info.hSubMenu = m_menu.handle().get();
 
         return info;
     }
@@ -178,6 +183,50 @@ private:
         return new separator_menu_item(*this);
     }
 };
+
+namespace detail {
+
+    inline std::auto_ptr<menu_item> menu_item_from_position(
+        const menu_handle& menu, UINT pos)
+    {
+        MENUITEMINFOW info = MENUITEMINFOW();
+        info.cbSize = sizeof(MENUITEMINFOW);
+        detail::win32::get_menu_item_info(menu.get(), pos, TRUE, &info);
+
+        // MSDN doesn't say that MFT_OWNERDRAWN is part of the
+        // mutually exclusive set of flags but I don't see how it couldn't
+        // be.  These flags specify the meaning of dwTypeData and cch which
+        // MFT_OWNERDRAWN gives a user-defined meaning.
+        if (info.fType & MFT_BITMAP)
+        {
+            HBITMAP bitmap = reinterpret_cast<HBITMAP>(info.dwTypeData);
+            return make_command_menu_item(
+                bitmap_menu_button(bitmap), info.wID).clone();
+        }
+        else if (info.fType & MFT_OWNERDRAW)
+        {
+            return make_command_menu_item(
+                owner_drawn_menu_button(), info.wID).clone();
+        }
+        else if (info.fType & MFT_SEPARATOR)
+        {
+            assert(info.wID == 0);
+            return new separator_menu_item();
+        }
+        else
+        {
+            // MFT_STRING which is zero so can only be detected by elimination
+            std::vector<wchar_t> buffer(info.cch);
+            info.cch = buffer.size();
+            detail::win32::get_menu_item_info(menu.get(), pos, TRUE, &info);
+
+            return make_command_menu_item(
+                string_menu_button(std::wstring(info.dwTypeData, info.cch)),
+                info.wID).clone();
+        }
+    }
+
+}
 
 }}} // namespace winapi::gui::menu
 

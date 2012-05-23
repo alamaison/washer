@@ -203,7 +203,7 @@ public:
      */
     void menu(const menu::menu_bar& menu)
     {
-        detail::win32::set_menu(hwnd(), menu.m_menu.get());
+        detail::win32::set_menu(hwnd(), menu.handle().get());
     }
 
     /**
