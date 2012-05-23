@@ -97,6 +97,25 @@ public:
     using core::begin;
     using core::end;
 
+    /**
+     * Test if objects wrap the same Win32 menu.
+     */
+    bool operator==(const menu_bar& other) const
+    {
+        const core& other_core = other;
+        const core& this_core = *this;
+        return this_core == other_core;
+    }
+
+    /**
+     * Tests if the underlying Win32 menu still exists.
+     *
+     * Windows take over the lifetime of a menu and destroy the menu when they
+     * themselves are destroyed.  Therefore it is possible for this menu to
+     * become invalid outside the control of this wrapper.
+     */
+    using core::valid;
+
 private:
 
     /** To allow window<T>::menu to access raw HWND. */

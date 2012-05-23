@@ -88,6 +88,26 @@ public:
     iterator_type begin() { return 1; }
     iterator_type end() { return 1; }
 
+    /**
+     * Test if objects wrap the same Win32 menu.
+     */
+    bool operator==(const menu_common_core& other) const
+    {
+        return m_menu.get() == other.m_menu.get();
+    }
+
+    /**
+     * Tests if the underlying Win32 menu still exists.
+     *
+     * Windows take over the lifetime of a menu and destroy the menu when they
+     * themselves are destroyed.  Therefore it is possible for this menu to
+     * become invalid outside the control of this wrapper.
+     */
+    bool valid() const
+    {
+        return detail::win32::is_menu(m_menu.get());
+    }
+
 protected:
 
     const detail::menu_handle handle() const

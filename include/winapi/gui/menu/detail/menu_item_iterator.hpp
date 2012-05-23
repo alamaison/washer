@@ -36,6 +36,7 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
 
+#include <cassert> // assert
 #include <memory> // auto_ptr
 
 namespace winapi {
@@ -55,12 +56,19 @@ class menu_item_iterator :
 
 public:
 
-    explicit menu_item_iterator(const T& menu)
-        :
-    m_menu(menu), m_pos(0),
-    m_current_item(menu_item_from_position(m_menu, m_pos)) {}
+    explicit menu_item_iterator(const T& menu) : m_menu(menu), m_pos(0) {}
+
+    static menu_item_iterator end(const T& menu)
+    {
+        return menu_item_iterator(menu, end_tag());
+    }
 
 private:
+
+    class end_tag {};
+
+    menu_item_iterator(const T& menu, const end_tag&)
+        : m_menu(menu), m_pos(m_menu.size()) {}
 
     bool equal(menu_item_iterator const& other) const
     {
@@ -69,22 +77,33 @@ private:
 
     reference dereference() const
     {
-        if (m_pos > m_menu.size() - 1)
+        if (m_pos >= m_menu.size())
             BOOST_THROW_EXCEPTION(
-                std::logic_error(
-                    "Dereferencing past the end of the menu"));
+                std::logic_error("Dereferencing past the end of the menu"));
+
+        // Fetch item on demand: keeps logic simple (safe) and incrementing fast
+        if (!m_current_item)
+        {
+            m_current_item = m_menu[m_pos];
+        }
+
+        assert(m_current_item);
 
         return *m_current_item;
     }
 
     void increment()
     {
-        if (m_pos > m_menu.size())
+        size_t size = m_menu.size();
+
+        if (m_pos >= size) // leaves iterator unchanged
+        {
             BOOST_THROW_EXCEPTION(
                 std::range_error("Cannot increment past end of the menu"));
+        }
 
-        ++m_pos;
-        m_current_item = menu_item_from_position(m_menu, m_pos);
+        ++m_pos; // iterator changed from here
+        m_current_item.reset();
     }
 
     const T m_menu;

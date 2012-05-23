@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE( empty_menu_bar_assigned )
     w.menu(m);
     BOOST_CHECK(m.begin() == m.end());
 
-    show_window(w);
+    //show_window(w);
 }
 
 BOOST_AUTO_TEST_CASE( string_command_in_bar )
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE( string_command_in_bar )
 
     window<> w = create_test_window();
     w.menu(b);
-    show_window(w);
+    //show_window(w);
 }
 
 BOOST_AUTO_TEST_CASE( bitmap_command_in_bar )
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE( bitmap_command_in_bar )
 
     window<> w = create_test_window();
     w.menu(b);
-    show_window(w);
+    //show_window(w);
 }
 
 BOOST_AUTO_TEST_CASE( string_popup_in_bar )
@@ -204,7 +204,7 @@ BOOST_AUTO_TEST_CASE( string_popup_in_bar )
 
     window<> w = create_test_window();
     w.menu(b);
-    show_window(w);
+    //show_window(w);
 }
 
 BOOST_AUTO_TEST_CASE( bitmap_popup_in_bar )
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE( bitmap_popup_in_bar )
 
     window<> w = create_test_window();
     w.menu(b);
-    show_window(w);
+    //show_window(w);
 }
 
 BOOST_AUTO_TEST_SUITE_END();
@@ -243,6 +243,8 @@ public:
     static void do_test(menu& m)
     {
         // do nothing
+
+        BOOST_CHECK(m.valid());
     }
 };
 
@@ -261,6 +263,9 @@ public:
         menu_bar b;
         b.append(make_sub_menu(string_menu_button(L"Menu"), m));
         BOOST_CHECK(b.begin() != b.end());
+
+        BOOST_CHECK(m.valid());
+        BOOST_CHECK(b.valid());
     }
 };
 
@@ -279,9 +284,17 @@ public:
         b.append(make_sub_menu(string_menu_button(L"Menu"), m));
         BOOST_CHECK(b.begin() != b.end());
 
-        window<> w = create_test_window();
-        w.menu(b);
-        show_window(w);
+        BOOST_CHECK(m.valid());
+        BOOST_CHECK(b.valid());
+
+        {
+            window<> w = create_test_window();
+            w.menu(b);
+            //show_window(w);
+        }
+
+        BOOST_CHECK(!m.valid());
+        BOOST_CHECK(!b.valid());
     }
 };
 
@@ -302,8 +315,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( empty_menu, F, fixtures )
     BOOST_CHECK(m.begin() == m.end());
 
     F::do_test(m);
-
-    BOOST_CHECK(m.begin() == m.end());
 }
 
 /**
@@ -317,8 +328,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( string_command, F, fixtures )
     BOOST_CHECK(m.begin() != m.end());
 
     F::do_test(m);
-
-    BOOST_CHECK(m.begin() != m.end());
 }
 
 /**
@@ -332,8 +341,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_command, F, fixtures )
     BOOST_CHECK(m.begin() != m.end());
 
     F::do_test(m);
-
-    BOOST_CHECK(m.begin() != m.end());
 }
 
 /**
@@ -347,8 +354,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( separator, F, fixtures )
     BOOST_CHECK(m.begin() != m.end());
 
     F::do_test(m);
-
-    BOOST_CHECK(m.begin() != m.end());
 }
 
 /**
@@ -366,8 +371,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( string_submenu, F, fixtures )
     BOOST_CHECK(m.begin() != m.end());
 
     F::do_test(m);
-
-    BOOST_CHECK(m.begin() != m.end());
 }
 
 /**
@@ -388,8 +391,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_submenu, F, fixtures )
     BOOST_CHECK(m.begin() != m.end());
 
     F::do_test(m);
-
-    BOOST_CHECK(m.begin() != m.end());
 }
 
 /**

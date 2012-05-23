@@ -39,11 +39,20 @@
 #include <winapi/gui/menu/detail/menu_win32.hpp> // create_popup_menu
 #include <winapi/gui/menu/menu_item.hpp>
 
+#include <memory> // auto_ptr
+
 #include <Windows.h> // MENUITEMINFO
 
 namespace winapi {
 namespace gui {
 namespace menu {
+
+namespace detail {
+
+    std::auto_ptr<menu_item> menu_item_from_position(
+        const menu_handle& menu, UINT pos);
+
+}
 
 /**
  * Menu that can be used as a context menu, as a sub-menu of a menu bar or as
@@ -56,7 +65,7 @@ class menu : private detail::menu_common_core<menu_item>
     template<typename T> friend class sub_menu;
 
     typedef detail::menu_common_core<menu_item> core;
-    typedef int iterator_type;
+    typedef detail::menu_item_iterator<menu> iterator_type;
 
 public:
 
@@ -87,8 +96,39 @@ public:
      */
     using core::insert;
 
-    using core::begin;
-    using core::end;
+    std::auto_ptr<menu_item> operator[](size_t position) const
+    {
+        return detail::menu_item_from_position(handle(), position);
+    }
+
+    iterator_type begin()
+    {
+        return iterator_type(*this);
+    }
+
+    iterator_type end()
+    {
+        return iterator_type::end(*this);
+    }
+
+    /**
+     * Test if objects wrap the same Win32 menu.
+     */
+    bool operator==(const menu& other) const
+    {
+        const core& other_core = other;
+        const core& this_core = *this;
+        return this_core == other_core;
+    }
+
+    /**
+     * Tests if the underlying Win32 menu still exists.
+     *
+     * Windows take over the lifetime of a menu and destroy the menu when they
+     * themselves are destroyed.  Therefore it is possible for this menu to
+     * become invalid outside the control of this wrapper.
+     */
+    using core::valid;
 
 private:
 

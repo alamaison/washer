@@ -121,6 +121,11 @@ inline int get_menu_item_count(HMENU menu)
     return count;
 }
 
+inline bool is_menu(HMENU menu)
+{
+    return ::IsMenu(menu) != FALSE;
+}
+
 }}}}} // namespace winapi::gui::menu::detail::win32
 
 #endif
