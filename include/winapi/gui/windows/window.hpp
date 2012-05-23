@@ -33,11 +33,10 @@
 #define WINAPI_GUI_WINDOWS_WINDOW_HPP
 #pragma once
 
-#include <winapi/error.hpp> // last_error
+#include <winapi/gui/detail/window_win32.hpp> // set_menu, get_window_rect
 #include <winapi/gui/hwnd.hpp> // HWND-manipulating functions
+#include <winapi/gui/menu/menu_bar.hpp> // menu_bar
 
-#include <boost/exception/errinfo_api_function.hpp> // errinfo_api_function
-#include <boost/exception/info.hpp> // errinfo
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
 #include <boost/type_traits/remove_pointer.hpp> // remove_pointer
 
@@ -51,10 +50,6 @@ namespace gui {
 typedef boost::shared_ptr<boost::remove_pointer<HWND>::type> hwnd_t;
 
 namespace detail {
-
-    namespace native {
-
-    }
 
     struct null_deleter
     {
@@ -103,7 +98,7 @@ private:
  * @tparam T  The character width of the window.  Windows has both 'ANSI' and
  *            Unicode window objects; strange but true.
  */
-template<typename T>
+template<typename T=wchar_t>
 class window
 {
 public:
@@ -196,12 +191,19 @@ public:
     rectangle position() const
     {
         rectangle rect;
-        if (::GetWindowRect(m_hwnd.get(), rect.out()) == 0)
-            BOOST_THROW_EXCEPTION(
-                boost::enable_error_info(winapi::last_error()) <<
-                boost::errinfo_api_function("GetWindowRect"));
-
+        detail::win32::get_window_rect(m_hwnd.get(), rect.out());
         return rect;
+    }
+
+    /**
+     * Set the window menu.
+     *
+     * @todo  Move to a specialised app window class.
+     * @todo  Deal with destroying the old window.
+     */
+    void menu(const menu::menu_bar& menu)
+    {
+        detail::win32::set_menu(hwnd(), menu.m_menu.get());
     }
 
     /**

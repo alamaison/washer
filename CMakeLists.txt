@@ -51,6 +51,24 @@ set(LIBRARY_SOURCES_gui
   ${LIBRARY_DIRECTORY}/gui/task_dialog.hpp)
 source_group(winapi\\gui FILES ${LIBRARY_SOURCES_gui})
 
+set(LIBRARY_SOURCES_gui_detail
+  ${LIBRARY_DIRECTORY}/gui/detail/window_win32.hpp)
+source_group(winapi\\gui\\detail FILES ${LIBRARY_SOURCES_gui_detail})
+
+set(LIBRARY_SOURCES_gui_menu
+  ${LIBRARY_DIRECTORY}/gui/menu/menu.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/menu_bar.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/menu_buttons.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/menu_item.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/menu_bar_item.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/menu_items.hpp)
+source_group(winapi\\gui\\menu FILES ${LIBRARY_SOURCES_gui_menu})
+
+set(LIBRARY_SOURCES_gui_menu_detail
+  ${LIBRARY_DIRECTORY}/gui/menu/detail/menu.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/detail/menu_win32.hpp)
+source_group(winapi\\gui\\menu\\detail FILES ${LIBRARY_SOURCES_gui_menu_detail})
+
 set(LIBRARY_SOURCES_gui_windows
   ${LIBRARY_DIRECTORY}/gui/windows/dialog.hpp
   ${LIBRARY_DIRECTORY}/gui/windows/icon.hpp
@@ -75,6 +93,9 @@ add_custom_target(winapi SOURCES
   ${LIBRARY_SOURCES_com}
   ${LIBRARY_SOURCES_detail}
   ${LIBRARY_SOURCES_gui}
+  ${LIBRARY_SOURCES_gui_detail}
+  ${LIBRARY_SOURCES_gui_menu}
+  ${LIBRARY_SOURCES_gui_menu_detail}
   ${LIBRARY_SOURCES_gui_windows}
   ${LIBRARY_SOURCES_shell})
 

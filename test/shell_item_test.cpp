@@ -89,21 +89,21 @@ BOOST_FIXTURE_TEST_SUITE(
 
 BOOST_AUTO_TEST_CASE( absolute_parsing_name )
 {
-    wstring	name = item().parsing_name(shell_item::parsing_name_type::absolute);
+    wstring name = item().parsing_name(shell_item::parsing_name_type::absolute);
 
     BOOST_CHECK_EQUAL(name, file().file_string());
 }
 
 BOOST_AUTO_TEST_CASE( relative_parsing_name )
 {
-    wstring	name = item().parsing_name(shell_item::parsing_name_type::relative);
+    wstring name = item().parsing_name(shell_item::parsing_name_type::relative);
 
     BOOST_CHECK_EQUAL(name, file().filename());
 }
 
 BOOST_AUTO_TEST_CASE( global_friendly_name )
 {
-    wstring	name = item().friendly_name(
+    wstring name = item().friendly_name(
         shell_item::friendly_name_type::in_global_context);
 
     BOOST_CHECK_EQUAL(name, file().stem()); // no extension
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE( global_friendly_name )
 
 BOOST_AUTO_TEST_CASE( in_folder_friendly_name )
 {
-    wstring	name = item().friendly_name(
+    wstring name = item().friendly_name(
         shell_item::friendly_name_type::in_folder_context);
 
     BOOST_CHECK_EQUAL(name, file().stem()); // no extension
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE( in_folder_friendly_name )
 
 BOOST_AUTO_TEST_CASE( editable_friendly_name )
 {
-    wstring	name = item().friendly_name(
+    wstring name = item().friendly_name(
         shell_item::friendly_name_type::editable);
 
     BOOST_CHECK_EQUAL(name, file().stem()); // no extension
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE( editable_friendly_name )
 
 BOOST_AUTO_TEST_CASE( absolute_friendly_name )
 {
-    wstring	name = item().friendly_name(
+    wstring name = item().friendly_name(
         shell_item::friendly_name_type::absolute);
 
     BOOST_CHECK_EQUAL(name, file().file_string()); // includes extension
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE( absolute_friendly_name )
 
 BOOST_AUTO_TEST_CASE( relative_friendly_name )
 {
-    wstring	name = item().friendly_name(
+    wstring name = item().friendly_name(
         shell_item::friendly_name_type::relative);
 
     BOOST_CHECK_EQUAL(name, file().filename()); // includes extension
@@ -170,7 +170,7 @@ BOOST_FIXTURE_TEST_SUITE(
 
 BOOST_AUTO_TEST_CASE( absolute_parsing_name )
 {
-    wstring	name = item().parsing_name(shell_item::parsing_name_type::absolute);
+    wstring name = item().parsing_name(shell_item::parsing_name_type::absolute);
 
     BOOST_CHECK_EQUAL(
         name,
@@ -180,14 +180,14 @@ BOOST_AUTO_TEST_CASE( absolute_parsing_name )
 
 BOOST_AUTO_TEST_CASE( relative_parsing_name )
 {
-    wstring	name = item().parsing_name(shell_item::parsing_name_type::relative);
+    wstring name = item().parsing_name(shell_item::parsing_name_type::relative);
 
     BOOST_CHECK_EQUAL(name, L"::{2227A280-3AEA-1069-A2DE-08002B30309D}");
 }
 
 BOOST_AUTO_TEST_CASE( global_friendly_name )
 {
-    wstring	name = item().friendly_name(
+    wstring name = item().friendly_name(
         shell_item::friendly_name_type::in_global_context);
 
     BOOST_CHECK_EQUAL(name, L"Printers");
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE( global_friendly_name )
 
 BOOST_AUTO_TEST_CASE( in_folder_friendly_name )
 {
-    wstring	name = item().friendly_name(
+    wstring name = item().friendly_name(
         shell_item::friendly_name_type::in_folder_context);
 
     BOOST_CHECK_EQUAL(name, L"Printers");
@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE( in_folder_friendly_name )
 
 BOOST_AUTO_TEST_CASE( editable_friendly_name )
 {
-    wstring	name = item().friendly_name(
+    wstring name = item().friendly_name(
         shell_item::friendly_name_type::editable);
 
     BOOST_CHECK_EQUAL(name, L"Printers");
@@ -211,7 +211,7 @@ BOOST_AUTO_TEST_CASE( editable_friendly_name )
 
 BOOST_AUTO_TEST_CASE( absolute_friendly_name )
 {
-    wstring	name = item().friendly_name(
+    wstring name = item().friendly_name(
         shell_item::friendly_name_type::absolute);
 
     BOOST_CHECK_EQUAL(name, L"All Control Panel Items\\Printers");
@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE( absolute_friendly_name )
 
 BOOST_AUTO_TEST_CASE( relative_friendly_name )
 {
-    wstring	name = item().friendly_name(
+    wstring name = item().friendly_name(
         shell_item::friendly_name_type::relative);
 
     BOOST_CHECK_EQUAL(name, L"Printers");
@@ -253,14 +253,14 @@ BOOST_FIXTURE_TEST_SUITE(shell_item_drive_tests, drive_item_fixture)
 
 BOOST_AUTO_TEST_CASE( absolute_parsing_name )
 {
-    wstring	name = item().parsing_name(shell_item::parsing_name_type::absolute);
+    wstring name = item().parsing_name(shell_item::parsing_name_type::absolute);
 
     BOOST_CHECK_EQUAL(name, L"C:\\");
 }
 
 BOOST_AUTO_TEST_CASE( relative_parsing_name )
 {
-    wstring	name = item().parsing_name(shell_item::parsing_name_type::relative);
+    wstring name = item().parsing_name(shell_item::parsing_name_type::relative);
 
     // For some reason, drives don't get a trailing slash here unlike the
     // absolute name.
@@ -269,7 +269,7 @@ BOOST_AUTO_TEST_CASE( relative_parsing_name )
 
 BOOST_AUTO_TEST_CASE( global_friendly_name )
 {
-    wstring	name = item().friendly_name(
+    wstring name = item().friendly_name(
         shell_item::friendly_name_type::in_global_context);
 
     BOOST_CHECK_NE(name, L"C:\\");
@@ -280,7 +280,7 @@ BOOST_AUTO_TEST_CASE( global_friendly_name )
 
 BOOST_AUTO_TEST_CASE( in_folder_friendly_name )
 {
-    wstring	name = item().friendly_name(
+    wstring name = item().friendly_name(
         shell_item::friendly_name_type::in_folder_context);
 
     BOOST_CHECK_NE(name, L"C:\\");
@@ -291,7 +291,7 @@ BOOST_AUTO_TEST_CASE( in_folder_friendly_name )
 
 BOOST_AUTO_TEST_CASE( editable_friendly_name )
 {
-    wstring	name = item().friendly_name(
+    wstring name = item().friendly_name(
         shell_item::friendly_name_type::editable);
 
     BOOST_CHECK_NE(name, L"C:\\");
@@ -302,7 +302,7 @@ BOOST_AUTO_TEST_CASE( editable_friendly_name )
 
 BOOST_AUTO_TEST_CASE( absolute_friendly_name )
 {
-    wstring	name = item().friendly_name(
+    wstring name = item().friendly_name(
         shell_item::friendly_name_type::absolute);
 
     BOOST_CHECK_EQUAL(name, L"C:\\");
@@ -310,7 +310,7 @@ BOOST_AUTO_TEST_CASE( absolute_friendly_name )
 
 BOOST_AUTO_TEST_CASE( relative_friendly_name )
 {
-    wstring	name = item().friendly_name(
+    wstring name = item().friendly_name(
         shell_item::friendly_name_type::relative);
 
     // For some reason, drives don't get a trailing slash here unlike the
