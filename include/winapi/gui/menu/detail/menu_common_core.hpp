@@ -36,12 +36,18 @@
 #include <winapi/gui/menu/detail/menu.hpp> // menu_handle
 #include <winapi/gui/menu/detail/menu_item_iterator.hpp>
 
+#include <memory> // auto_ptr
+
 #include <Windows.h> // MENUITEMINFO
 
 namespace winapi {
 namespace gui {
 namespace menu {
 namespace detail {
+
+template<typename ItemType>
+inline std::auto_ptr<ItemType> menu_item_from_position(
+    const menu_handle& menu, UINT pos);
 
 /**
  * Object implementing the common aspects of wrapping a menu and a menu bar.
@@ -53,7 +59,7 @@ class menu_common_core
 {
 
     typedef ItemType item_type;
-    typedef int iterator_type;
+    typedef detail::menu_item_iterator<menu_common_core> iterator;
 
 public:
 
@@ -80,13 +86,25 @@ public:
      *
      * Shuffles existing items along.
      */
-    void insert(const item_type& item, const iterator_type& position)
+    void insert(const item_type& item, const iterator& position)
     {
         insert_at_position(item, position);
     }
 
-    iterator_type begin() { return 1; }
-    iterator_type end() { return 1; }
+    std::auto_ptr<item_type> operator[](size_t position) const
+    {
+        return detail::menu_item_from_position(handle(), position);
+    }
+
+    iterator begin()
+    {
+        return iterator(*this);
+    }
+
+    iterator end()
+    {
+        return iterator::end(*this);
+    }
 
     /**
      * Test if objects wrap the same Win32 menu.

@@ -94,6 +94,8 @@ public:
      */
     using core::insert;
 
+    using core::operator[];
+
     using core::begin;
     using core::end;
 
