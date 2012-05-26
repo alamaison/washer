@@ -148,6 +148,7 @@ BOOST_AUTO_TEST_SUITE(menu_bar_tests)
 BOOST_AUTO_TEST_CASE( empty_menu_bar )
 {
     menu_bar m;
+    BOOST_CHECK_EQUAL(m.size(), 0);
     BOOST_CHECK(m.begin() == m.end());
 }
 
@@ -159,6 +160,8 @@ BOOST_AUTO_TEST_CASE( empty_menu_bar_assigned )
     menu_bar m;
     window<> w = create_test_window();
     w.menu(m);
+
+    BOOST_CHECK_EQUAL(m.size(), 0);
     BOOST_CHECK(m.begin() == m.end());
 
     //show_window(w);
@@ -171,6 +174,7 @@ BOOST_AUTO_TEST_CASE( string_command_in_bar )
     b.append(make_command_menu_item(
         string_menu_button(L"string command in bar"), 14));
 
+    BOOST_CHECK_EQUAL(b.size(), 1);
     BOOST_CHECK(b.begin() != b.end());
 
     window<> w = create_test_window();
@@ -182,8 +186,12 @@ BOOST_AUTO_TEST_CASE( bitmap_command_in_bar )
 {
     menu_bar b;
 
-    b.append(make_command_menu_item(bitmap_menu_button(test_bitmap()), 13));
+    command_menu_item<bitmap_menu_button> item =
+        make_command_menu_item(bitmap_menu_button(test_bitmap()), 13);
 
+    b.append(item);
+
+    BOOST_CHECK_EQUAL(b.size(), 1);
     BOOST_CHECK(b.begin() != b.end());
 
     window<> w = create_test_window();
@@ -198,8 +206,12 @@ BOOST_AUTO_TEST_CASE( string_popup_in_bar )
     menu m;
     m.append(make_command_menu_item(string_menu_button(L"Pop"), 1));
 
-    b.append(make_sub_menu(string_menu_button(L"string command in bar"), m));
+    sub_menu<string_menu_button> item =
+        make_sub_menu(string_menu_button(L"string popup in bar"), m);
 
+    b.append(item);
+
+    BOOST_CHECK_EQUAL(b.size(), 1);
     BOOST_CHECK(b.begin() != b.end());
 
     window<> w = create_test_window();
