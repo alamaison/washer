@@ -1,7 +1,7 @@
 /**
     @file
 
-    Menu wrapper implementation details.
+    HMENU lifetime management.
 
     @if license
 
@@ -29,34 +29,57 @@
     @endif
 */
 
-#ifndef WINAPI_GUI_MENU_DETAIL_MENU_HPP
-#define WINAPI_GUI_MENU_DETAIL_MENU_HPP
+#ifndef WINAPI_GUI_MENU_MENU_HANDLE_HPP
+#define WINAPI_GUI_MENU_MENU_HANDLE_HPP
 #pragma once
 
-#include <winapi/gui/menu/detail/menu_win32.hpp> // destroy_menu
-#include <winapi/trace.hpp>
+#include <winapi/gui/menu/detail/menu.hpp> // safe_destroy_menu
+
+#include <boost/shared_ptr.hpp>
+#include <boost/type_traits/remove_pointer.hpp>
 
 namespace winapi {
 namespace gui {
 namespace menu {
-namespace detail {
 
-inline void safe_destroy_menu(HMENU hmenu)
+/**
+ * Lifetime characteristics for wrapped menu handle.
+ *
+ * Purpose: to offer two different ways of managing a wrapped HMENU; one that
+ * takes ownership of its lifetime and one that does not take responsibility for
+ * managing its lifetime.
+ */
+class menu_handle
 {
-    try
-    {
-        win32::destroy_menu(hmenu);
-    }
-    catch (const std::exception& e)
-    {
-        winapi::trace("Exception while destroying menu: %s") % e.what();
-    }
-}
+    typedef boost::shared_ptr<boost::remove_pointer<HMENU>::type>
+        shared_menu_handle;
 
-inline void no_destroy_menu(HMENU hmenu)
-{
-}
+public:
 
-}}}} // namespace winapi::gui::menu::detail
+    static menu_handle foster_handle(HMENU handle)
+    {
+        return menu_handle(
+            shared_menu_handle(handle, detail::no_destroy_menu));
+    }
+
+    static menu_handle adopt_handle(HMENU handle)
+    {
+        return menu_handle(
+            shared_menu_handle(handle, detail::safe_destroy_menu));
+    }
+
+    HMENU get() const
+    {
+        return m_handle.get();
+    }
+
+private:
+
+    menu_handle(shared_menu_handle handle) : m_handle(handle) {}
+
+    shared_menu_handle m_handle;
+};
+
+}}} // namespace winapi::gui::menu
 
 #endif

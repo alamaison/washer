@@ -33,10 +33,10 @@
 #define WINAPI_GUI_MENU_MENU_HPP
 #pragma once
 
-#include <winapi/gui/menu/detail/menu.hpp> // menu_handle, safe_destroy_menu
 #include <winapi/gui/menu/detail/menu_common_core.hpp>
 #include <winapi/gui/menu/detail/menu_item_iterator.hpp>
 #include <winapi/gui/menu/detail/menu_win32.hpp> // create_popup_menu
+#include <winapi/gui/menu/menu_handle.hpp> // menu_handle
 #include <winapi/gui/menu/menu_item.hpp>
 
 #include <Windows.h> // MENUITEMINFO
@@ -63,12 +63,18 @@ public:
     /**
      * Create empty menu.
      */
-    menu()
-        :
-    core(
-        detail::menu_handle(
-            detail::win32::create_popup_menu(), detail::safe_destroy_menu))
+    menu() : core(menu_handle::adopt_handle(detail::win32::create_popup_menu()))
     {}
+
+    /**
+     * Accept an existing menu.
+     *
+     * @warning  Do not pass a menu *bar* handle to this constructor.
+     *           Ideally this would check that the handle passed in is to a
+     *           menu, not a menu bar, but there is no way to tell them apart
+     *           once they have been created.  
+     */
+    menu(const menu_handle& handle) : core(handle) {}
 
     /**
      * Returns the number of items in the menu.

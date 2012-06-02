@@ -127,6 +127,14 @@ public:
     explicit string_menu_button(const std::wstring& caption)
         : m_caption(caption) {}
 
+    /**
+     * The text displayed on the button.
+     */
+    std::wstring caption() const
+    {
+        return m_caption;
+    }
+
 private:
 
     virtual MENUITEMINFOW as_menuiteminfo() const

@@ -40,6 +40,9 @@
 #include <winapi/gui/menu/menu_item.hpp>
 #include <winapi/gui/menu/menu_buttons.hpp> // menu_button_nature
 
+#include <boost/type_traits/is_convertible.hpp>
+#include <boost/utility/enable_if.hpp>
+
 #include <cassert> // assert
 #include <memory> // auto_ptr
 #include <stdexcept> // logic_error
@@ -67,6 +70,23 @@ public:
 
     command_menu_item(const T& button_nature, UINT command_id)
         : m_button(button_nature), m_command_id(command_id) {}
+
+    /**
+     * The button description for this command item.
+     */
+    const T& button() const
+    {
+        return m_button;
+    }
+
+    /**
+     * The ID sent to the owner windows when this command on the menu is
+     * selected.
+     */
+    UINT command_id() const
+    {
+        return m_command_id;
+    }
 
 private:
 
@@ -125,6 +145,16 @@ public:
     sub_menu(const T& button_nature, const menu& menu)
         : m_button(button_nature), m_menu(menu) {}
 
+    menu menu() const
+    {
+        return m_menu;
+    }
+
+    T button() const
+    {
+        return m_button;
+    }
+
 private:
 
     MENUITEMINFOW as_menuiteminfo() const
@@ -144,7 +174,7 @@ private:
     }
 
     const T m_button;
-    const menu m_menu;
+    const ::winapi::gui::menu::menu m_menu;
 };
 
 /**
@@ -187,58 +217,93 @@ private:
 
 namespace detail {
 
-    template<UINT Mft, typename ItemType>
-    inline std::auto_ptr<ItemType> item_type_converter(
-        const MENUITEMINFOW& info, const menu_handle& menu, UINT pos)
+    template<UINT Mft, typename ItemType, typename Enabled=void>
+    struct item_type_converter
     {
-        BOOST_THROW_EXCEPTION(
-            std::logic_error("No menu item conversion for combination"));
-    }
+        static std::auto_ptr<ItemType> convert(
+            const MENUITEMINFOW& /*info*/, const menu_handle& /*menu*/,
+            UINT /*pos*/)
+        {
+            BOOST_THROW_EXCEPTION(
+                std::logic_error("No menu item conversion for combination"));
+        }
+    };
 
-    template<>
-    inline std::auto_ptr<menu_bar_item>
-    item_type_converter<MFT_BITMAP, menu_bar_item>(
-        const MENUITEMINFOW& info, const menu_handle& menu, UINT pos)
+    template<typename ItemType>
+    struct item_type_converter<MFT_BITMAP, ItemType> 
     {
-        HBITMAP bitmap = reinterpret_cast<HBITMAP>(info.dwTypeData);
-        return make_command_menu_item(
-            bitmap_menu_button(bitmap), info.wID).clone();
-    }
+        static std::auto_ptr<ItemType> convert(
+            const MENUITEMINFOW& info, const menu_handle& /*menu*/,
+            UINT /*pos*/)
+        {
+            HBITMAP bitmap = reinterpret_cast<HBITMAP>(info.dwTypeData);
+            return make_command_menu_item(
+                bitmap_menu_button(bitmap), info.wID).clone();
+        }
+    };
 
-    template<>
-    inline std::auto_ptr<menu_bar_item>
-    item_type_converter<MFT_OWNERDRAW, menu_bar_item>(
-        const MENUITEMINFOW& info, const menu_handle& menu, UINT pos)
+    template<typename ItemType>
+    struct item_type_converter<MFT_OWNERDRAW, ItemType>
     {
-        return make_command_menu_item(
-            owner_drawn_menu_button(), info.wID).clone();
-    }
+        static std::auto_ptr<ItemType> convert(
+            const MENUITEMINFOW& info, const menu_handle& /*menu*/,
+            UINT /*pos*/)
+        {
+            return make_command_menu_item(
+                owner_drawn_menu_button(), info.wID).clone();
+        }
+    };
 
     // Note: this specialisation is for menu_item rather than menu_bar_item
-    template<>
-    inline std::auto_ptr<menu_item>
-    item_type_converter<MFT_SEPARATOR, menu_item>(
-        const MENUITEMINFOW& info, const menu_handle& menu, UINT pos)
+    template<typename ItemType>
+    struct item_type_converter<
+        MFT_SEPARATOR, ItemType,
+        boost::enable_if<
+            typename boost::is_convertible<ItemType, menu_item>::type> >
     {
-        assert(info.wID == 0);
-        return new separator_menu_item();
-    }
+        static std::auto_ptr<menu_item> convert(
+            const MENUITEMINFOW& info, const menu_handle& /*menu*/,
+            UINT /*pos*/)
+        {
+            (void)info.wID;
+            assert(info.wID == 0);
+            return new separator_menu_item();
+        }
+    };
 
-    template<>
-    inline std::auto_ptr<menu_bar_item>
-    item_type_converter<MFT_STRING, menu_bar_item>(
-        const MENUITEMINFOW& info, const menu_handle& menu, UINT pos)
+    template<typename ItemType>
+    struct item_type_converter<MFT_STRING, ItemType>
     {
-        std::vector<wchar_t> buffer(info.cch);
-        MENUITEMINFOW new_info = info;
-        new_info.cch = buffer.size();
-        detail::win32::get_menu_item_info(menu.get(), pos, TRUE, &new_info);
+        static std::auto_ptr<ItemType> convert(
+            const MENUITEMINFOW& /*info*/, const menu_handle& menu, UINT pos)
+        {
+            MENUITEMINFOW info = MENUITEMINFOW();
+            info.cbSize = sizeof(MENUITEMINFOW);
+            // FIXME: conflated commandness with stringness
+            info.fMask = MIIM_FTYPE | MIIM_ID | MIIM_STRING;
+            detail::win32::get_menu_item_info(menu.get(), pos, TRUE, &info);
 
-        return make_command_menu_item(
-            string_menu_button(std::wstring(new_info.dwTypeData, new_info.cch)),
-            new_info.wID).clone();
-    }
+            assert(
+                (info.fType & (MFT_BITMAP | MFT_OWNERDRAW | MFT_SEPARATOR))
+                == 0);
 
+            std::vector<wchar_t> buffer(info.cch + 1);
+            info.cch = buffer.size();
+            info.dwTypeData = (!buffer.empty()) ? &buffer[0] : NULL;
+            detail::win32::get_menu_item_info(menu.get(), pos, TRUE, &info);
+
+            std::wstring caption;
+            if (info.cch > 0)
+            {
+                assert(info.dwTypeData);
+                caption = std::wstring(info.dwTypeData, info.cch);
+            }
+
+            return std::auto_ptr<ItemType>(
+                make_command_menu_item(
+                    string_menu_button(caption), info.wID).clone());
+        }
+    };
 
     template<typename ItemType>
     inline std::auto_ptr<ItemType> menu_item_from_position(
@@ -246,6 +311,7 @@ namespace detail {
     {
         MENUITEMINFOW info = MENUITEMINFOW();
         info.cbSize = sizeof(MENUITEMINFOW);
+        info.fMask = MIIM_FTYPE;
         detail::win32::get_menu_item_info(menu.get(), pos, TRUE, &info);
 
         // MSDN doesn't say that MFT_OWNERDRAWN is part of the
@@ -254,20 +320,24 @@ namespace detail {
         // MFT_OWNERDRAWN gives a user-defined meaning.
         if (info.fType & MFT_BITMAP)
         {
-            return item_type_converter<MFT_BITMAP, ItemType>(info);
+            return item_type_converter<MFT_BITMAP, ItemType>::convert(
+                info, menu, pos);
         }
         else if (info.fType & MFT_OWNERDRAW)
         {
-            return item_type_converter<MFT_OWNERDRAW, ItemType>(info);
+            return item_type_converter<MFT_OWNERDRAW, ItemType>::convert(
+                info, menu, pos);
         }
         else if (info.fType & MFT_SEPARATOR)
         {
-            return item_type_converter<MFT_SEPARATOR, ItemType>(info);
+            return item_type_converter<MFT_SEPARATOR, ItemType>::convert(
+                info, menu, pos);
         }
         else
         {
             // MFT_STRING which is zero so can only be detected by elimination
-            return item_type_converter<MFT_STRING, ItemType>(info);
+            return item_type_converter<MFT_STRING, ItemType>::convert(
+                info, menu, pos);
         }
     }
 

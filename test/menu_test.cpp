@@ -29,6 +29,8 @@
     @endif
 */
 
+#include "wchar_output.hpp" // wchar_t test output
+
 #include <winapi/gui/menu/menu.hpp> // test subject
 #include <winapi/gui/menu/menu_items.hpp> // test subject
 
@@ -36,9 +38,14 @@
 #include <winapi/gui/windows/window.hpp>
 #include <winapi/error.hpp> // last_error
 
+#include <boost/cast.hpp> // polymorphic_cast
 #include <boost/exception/errinfo_api_function.hpp> // errinfo_api_function
 #include <boost/exception/info.hpp> // errinfo
-#include <boost/mpl/list.hpp>
+#include <boost/mpl/apply.hpp>
+#include <boost/mpl/copy.hpp>
+#include <boost/mpl/fold.hpp>
+#include <boost/mpl/push_back.hpp>
+#include <boost/mpl/vector.hpp>
 #include <boost/test/unit_test.hpp>
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
 
@@ -48,6 +55,8 @@ using winapi::gui::hwnd_t;
 using namespace winapi::gui::menu;
 using winapi::gui::window;
 using winapi::module_handle;
+
+using boost::polymorphic_cast;
 
 using std::string;
 using std::wstring;
@@ -121,7 +130,7 @@ namespace {
     {
         w.visible(true);
         w.text(boost::unit_test::framework::current_test_case().p_name);
-        pump_thread_messages();
+        //pump_thread_messages();
     }
 
     HBITMAP test_bitmap()
@@ -137,107 +146,7 @@ namespace {
         return bitmap;
     }
 
-
 }
-
-BOOST_AUTO_TEST_SUITE(menu_bar_tests)
-
-/**
- * An empty menu bar; not attached to window.
- */
-BOOST_AUTO_TEST_CASE( empty_menu_bar )
-{
-    menu_bar m;
-    BOOST_CHECK_EQUAL(m.size(), 0);
-    BOOST_CHECK(m.begin() == m.end());
-}
-
-/**
- * An empty menu bar added to a window
- */
-BOOST_AUTO_TEST_CASE( empty_menu_bar_assigned )
-{
-    menu_bar m;
-    window<> w = create_test_window();
-    w.menu(m);
-
-    BOOST_CHECK_EQUAL(m.size(), 0);
-    BOOST_CHECK(m.begin() == m.end());
-
-    //show_window(w);
-}
-
-BOOST_AUTO_TEST_CASE( string_command_in_bar )
-{
-    menu_bar b;
-
-    b.append(make_command_menu_item(
-        string_menu_button(L"string command in bar"), 14));
-
-    BOOST_CHECK_EQUAL(b.size(), 1);
-    BOOST_CHECK(b.begin() != b.end());
-
-    window<> w = create_test_window();
-    w.menu(b);
-    //show_window(w);
-}
-
-BOOST_AUTO_TEST_CASE( bitmap_command_in_bar )
-{
-    menu_bar b;
-
-    command_menu_item<bitmap_menu_button> item =
-        make_command_menu_item(bitmap_menu_button(test_bitmap()), 13);
-
-    b.append(item);
-
-    BOOST_CHECK_EQUAL(b.size(), 1);
-    BOOST_CHECK(b.begin() != b.end());
-
-    window<> w = create_test_window();
-    w.menu(b);
-    //show_window(w);
-}
-
-BOOST_AUTO_TEST_CASE( string_popup_in_bar )
-{
-    menu_bar b;
-
-    menu m;
-    m.append(make_command_menu_item(string_menu_button(L"Pop"), 1));
-
-    sub_menu<string_menu_button> item =
-        make_sub_menu(string_menu_button(L"string popup in bar"), m);
-
-    b.append(item);
-
-    BOOST_CHECK_EQUAL(b.size(), 1);
-    BOOST_CHECK(b.begin() != b.end());
-
-    window<> w = create_test_window();
-    w.menu(b);
-    //show_window(w);
-}
-
-BOOST_AUTO_TEST_CASE( bitmap_popup_in_bar )
-{
-    menu_bar b;
-
-    menu m;
-    m.append(make_command_menu_item(string_menu_button(L"Pop"), 1));
-
-    b.append(make_sub_menu(bitmap_menu_button(test_bitmap()), m));
-
-    BOOST_CHECK(b.begin() != b.end());
-
-    window<> w = create_test_window();
-    w.menu(b);
-    //show_window(w);
-}
-
-BOOST_AUTO_TEST_SUITE_END();
-
-namespace {
 
 /**
  * Fixture that tests the behaviour of a menu that isn't given to a menu bar or
@@ -302,7 +211,7 @@ public:
         {
             window<> w = create_test_window();
             w.menu(b);
-            //show_window(w);
+            show_window(w);
         }
 
         BOOST_CHECK(!m.valid());
@@ -310,10 +219,349 @@ public:
     }
 };
 
-typedef boost::mpl::list<
+typedef boost::mpl::vector<
     lonely_fixture, no_window_fixture, normal_usage_fixture> fixtures;
 
+
+/**
+ * Tests where the menu was created externally and passed to the wrapper as a
+ * raw menu.
+ *
+ * Thest test make sure that, given a menu, we can extra items from it
+ * correctly.
+ */
+BOOST_AUTO_TEST_SUITE(raw_menu_tests)
+
+/**
+ * Wrap an empty menu.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( empty_menu, F, fixtures )
+{
+    menu_handle handle = menu_handle::adopt_handle(::CreatePopupMenu());
+    menu m(handle);
+
+    BOOST_CHECK(m.begin() == m.end());
+
+    F::do_test(m);
 }
+
+template<typename Outer>
+struct fixtures_loop
+{
+    template<typename T>
+    struct use : boost::mpl::apply<Outer, T> {};
+
+    typedef typename boost::mpl::fold<
+        fixtures, boost::mpl::vector<>,
+        boost::mpl::push_back< boost::mpl::_1, use<boost::mpl::_2> >
+    >::type type;
+};
+
+/**
+ * Allows fixtures to be combined with the windows ownership fixtures
+ */
+template<typename T>
+struct fixture_combinator
+{
+    typedef typename boost::mpl::fold<
+        T, boost::mpl::vector<>,
+        boost::mpl::copy<
+        fixtures_loop<boost::mpl::_2>,
+        boost::mpl::back_inserter<boost::mpl::_1>
+        >
+    >::type type;
+};
+
+/**
+ * Does insertion via the old insertion API.
+ * The menu items are always retrieved using the new API so this tests that
+ * the translation goes smoothly.
+ */
+template<typename F>
+struct old_style_string_command : public F
+{
+    static void do_insert(HMENU handle, wstring caption, UINT command_id)
+    {
+        ::InsertMenuW(
+            handle, 0, MF_BYPOSITION | MF_STRING, command_id, caption.c_str());
+    }
+};
+
+void do_command_string_insertion(
+    HMENU handle, wstring caption, UINT command_id, UINT fMask, UINT fType)
+{
+    MENUITEMINFOW info = MENUITEMINFOW();
+    info.cbSize = sizeof(MENUITEMINFOW);
+    info.fMask = fMask;
+    info.fType = fType;
+    info.wID = command_id;
+    info.dwTypeData = const_cast<wchar_t*>(caption.c_str());
+    ::InsertMenuItemW(handle, 0, MF_BYPOSITION, &info);
+}
+
+/**
+ * Inserts string command using the new API.
+ *
+ * This version specifies the MIIM_FTYPE flag which may be redundant.  MSDN
+ * implies that only MIIM_STRING is needed.  Testing this combination to make
+ * sure its presence doesn't affect our extraction.
+ */
+template<typename F>
+struct new_style_string_command : public F
+{
+    static void do_insert(HMENU handle, wstring caption, UINT command_id)
+    {
+        do_command_string_insertion(
+            handle, caption, command_id,
+            MIIM_FTYPE | MIIM_ID | MIIM_STRING,
+            MFT_STRING);
+    }
+};
+
+/**
+ * Inserts string command using the new API.
+ *
+ * This version does *not* specifiy the MIIM_FTYPE flag that MSDN implies
+ * may be redundant.  Testing this combination to make sure its absence
+ * doesn't affect our extraction.
+ */
+template<typename F>
+struct new_style_string_command_no_ftype_set : public F
+{
+    static void do_insert(HMENU handle, wstring caption, UINT command_id)
+    {
+        do_command_string_insertion(
+            handle, caption, command_id,
+            MIIM_ID | MIIM_STRING, // No FTYPE flag
+            MFT_STRING); // Zero so makes no difference
+    }
+};
+
+typedef boost::mpl::vector<
+    old_style_string_command<boost::mpl::_>,
+    new_style_string_command<boost::mpl::_>,
+    new_style_string_command_no_ftype_set<boost::mpl::_> >
+    string_command_inserter_list;
+
+typedef fixture_combinator<string_command_inserter_list>::type
+    string_command_fixtures;
+
+/**
+ * Wrap a simple string command.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( extract_string_command, F, string_command_fixtures )
+{
+    HMENU handle = ::CreatePopupMenu();
+
+    F::do_insert(handle, L"Bob", 42);
+
+    menu m(menu_handle::adopt_handle(handle));
+
+    BOOST_CHECK(m.begin() != m.end());
+    BOOST_CHECK(m[0]);
+
+    typedef const command_menu_item<string_menu_button> item_type;
+    BOOST_CHECK_EQUAL(
+        boost::shared_polymorphic_cast<item_type>(m[0])->command_id(), 42);
+    BOOST_CHECK_EQUAL(
+        boost::shared_polymorphic_cast<item_type>(m[0])->button().caption(),
+        L"Bob");
+
+    F::do_test(m);
+}
+
+/**
+ * Does string popup insertion via the old insertion API.
+ * The menu items are always retrieved using the new API so this tests that
+ * the translation goes smoothly.
+ */
+template<typename F>
+struct old_style_string_popup : public F
+{
+    static void do_insert(HMENU handle, wstring caption, HMENU sub_menu)
+    {
+        ::InsertMenuW(
+            handle, 0, MF_BYPOSITION | MF_STRING, (UINT_PTR)sub_menu,
+            caption.c_str());
+    }
+};
+
+void do_popup_string_insertion(
+    HMENU handle, wstring caption, HMENU sub_menu, UINT fMask, UINT fType)
+{
+    MENUITEMINFOW info = MENUITEMINFOW();
+    info.cbSize = sizeof(MENUITEMINFOW);
+    info.fMask = fMask;
+    info.fType = fType;
+    info.hSubMenu = sub_menu;
+    info.dwTypeData = const_cast<wchar_t*>(caption.c_str());
+    ::InsertMenuItemW(handle, 0, MF_BYPOSITION, &info);
+}
+
+/**
+ * Inserts string popup using the new API.
+ */
+template<typename F>
+struct new_style_string_popup : public F
+{
+    static void do_insert(HMENU handle, wstring caption, HMENU sub_menu)
+    {
+        do_popup_string_insertion(
+            handle, caption, sub_menu,
+            MIIM_SUBMENU | MIIM_STRING,
+            MFT_STRING);
+    }
+};
+
+typedef boost::mpl::vector<
+    old_style_string_popup<boost::mpl::_>,
+    new_style_string_popup<boost::mpl::_> >
+    string_popup_inserter_list;
+
+typedef fixture_combinator<string_popup_inserter_list>::type
+    string_popup_fixtures;
+
+/**
+ * Wrap a string item that pops open a menu.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( extract_string_popup, F, string_popup_fixtures )
+{
+    HMENU handle = ::CreatePopupMenu();
+    menu_handle submenu_handle = menu_handle::adopt_handle(::CreatePopupMenu());
+    do_command_string_insertion(
+        submenu_handle.get(), L"Pop", 7, MIIM_STRING, MFT_STRING);
+
+    F::do_insert(handle, L"Bob", submenu_handle.get());
+
+    menu m(menu_handle::adopt_handle(handle));
+
+    BOOST_CHECK(m.begin() != m.end());
+    BOOST_CHECK(m[0]);
+
+    typedef const sub_menu<string_menu_button> item_type;
+
+    BOOST_CHECK_EQUAL(
+        boost::shared_polymorphic_cast<item_type>(m[0])->button().caption(),
+        L"Bob");
+
+    menu& submenu = boost::shared_polymorphic_cast<item_type>(m[0])->menu();
+    BOOST_CHECK(submenu.valid());
+    BOOST_CHECK_EQUAL(submenu.size(), 1);
+    BOOST_CHECK(submenu.begin() != submenu.end());
+    BOOST_CHECK(submenu[0]);
+
+    typedef const command_menu_item<string_menu_button> sub_item_type;
+    BOOST_CHECK_EQUAL(
+        boost::shared_polymorphic_cast<sub_item_type>(
+            submenu[0])->command_id(), 7);
+    BOOST_CHECK_EQUAL(
+        boost::shared_polymorphic_cast<sub_item_type>(
+            submenu[0])->button().caption(),
+        L"Pop");
+
+    F::do_test(m);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_AUTO_TEST_SUITE(menu_bar_tests)
+
+/**
+ * An empty menu bar; not attached to window.
+ */
+BOOST_AUTO_TEST_CASE( empty_menu_bar )
+{
+    menu_bar m;
+    BOOST_CHECK_EQUAL(m.size(), 0);
+    BOOST_CHECK(m.begin() == m.end());
+}
+
+/**
+ * An empty menu bar added to a window
+ */
+BOOST_AUTO_TEST_CASE( empty_menu_bar_assigned )
+{
+    menu_bar m;
+    window<> w = create_test_window();
+    w.menu(m);
+
+    BOOST_CHECK_EQUAL(m.size(), 0);
+    BOOST_CHECK(m.begin() == m.end());
+
+    show_window(w);
+}
+
+BOOST_AUTO_TEST_CASE( string_command_in_bar )
+{
+    menu_bar b;
+
+    b.append(make_command_menu_item(
+        string_menu_button(L"string command in bar"), 14));
+
+    BOOST_CHECK_EQUAL(b.size(), 1);
+    BOOST_CHECK(b.begin() != b.end());
+
+    window<> w = create_test_window();
+    w.menu(b);
+    show_window(w);
+}
+
+BOOST_AUTO_TEST_CASE( bitmap_command_in_bar )
+{
+    menu_bar b;
+
+    command_menu_item<bitmap_menu_button> item =
+        make_command_menu_item(bitmap_menu_button(test_bitmap()), 13);
+
+    b.append(item);
+
+    BOOST_CHECK_EQUAL(b.size(), 1);
+    BOOST_CHECK(b.begin() != b.end());
+
+    window<> w = create_test_window();
+    w.menu(b);
+    show_window(w);
+}
+
+BOOST_AUTO_TEST_CASE( string_popup_in_bar )
+{
+    menu_bar b;
+
+    menu m;
+    m.append(make_command_menu_item(string_menu_button(L"Pop"), 1));
+
+    sub_menu<string_menu_button> item =
+        make_sub_menu(string_menu_button(L"string popup in bar"), m);
+
+    b.append(item);
+
+    BOOST_CHECK_EQUAL(b.size(), 1);
+    BOOST_CHECK(b.begin() != b.end());
+
+    window<> w = create_test_window();
+    w.menu(b);
+    show_window(w);
+}
+
+BOOST_AUTO_TEST_CASE( bitmap_popup_in_bar )
+{
+    menu_bar b;
+
+    menu m;
+    m.append(make_command_menu_item(string_menu_button(L"Pop"), 1));
+
+    b.append(make_sub_menu(bitmap_menu_button(test_bitmap()), m));
+
+    BOOST_CHECK(b.begin() != b.end());
+
+    window<> w = create_test_window();
+    w.menu(b);
+    show_window(w);
+}
+
+BOOST_AUTO_TEST_SUITE_END();
+
 
 BOOST_AUTO_TEST_SUITE(menu_tests)
 

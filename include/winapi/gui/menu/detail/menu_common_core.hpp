@@ -33,8 +33,10 @@
 #define WINAPI_GUI_MENU_DETAIL_MENU_COMMON_CORE_HPP
 #pragma once
 
-#include <winapi/gui/menu/detail/menu.hpp> // menu_handle
 #include <winapi/gui/menu/detail/menu_item_iterator.hpp>
+#include <winapi/gui/menu/menu_handle.hpp> // menu_handle
+
+#include <boost/shared_ptr.hpp>
 
 #include <memory> // auto_ptr
 
@@ -91,9 +93,10 @@ public:
         insert_at_position(item, position);
     }
 
-    std::auto_ptr<item_type> operator[](size_t position) const
+    boost::shared_ptr<item_type> operator[](size_t position) const
     {
-        return detail::menu_item_from_position(handle(), position);
+        return boost::shared_ptr<item_type>(
+            detail::menu_item_from_position<item_type>(handle(), position));
     }
 
     iterator begin()
@@ -128,7 +131,7 @@ public:
 
 protected:
 
-    const detail::menu_handle handle() const
+    const menu_handle handle() const
     {
         return m_menu;
     }
@@ -143,7 +146,7 @@ private:
         detail::win32::insert_menu_item(m_menu.get(), position, TRUE, &info);
     }
 
-    const detail::menu_handle m_menu;
+    const menu_handle m_menu;
 };
 
 }}}} // namespace winapi::gui::menu::detail
