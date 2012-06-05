@@ -146,6 +146,19 @@ namespace {
         return bitmap;
     }
 
+    void do_insertion(
+        HMENU handle, const wchar_t* caption, UINT command_id,
+        HMENU sub_menu, UINT fMask, UINT fType)
+    {
+        MENUITEMINFOW info = MENUITEMINFOW();
+        info.cbSize = sizeof(MENUITEMINFOW);
+        info.fMask = fMask;
+        info.fType = fType;
+        info.wID = command_id;
+        info.hSubMenu = sub_menu;
+        info.dwTypeData = const_cast<wchar_t*>(caption);
+        detail::win32::insert_menu_item(handle, 0, MF_BYPOSITION, &info);
+    }
 }
 
 /**
@@ -222,29 +235,6 @@ public:
 typedef boost::mpl::vector<
     lonely_fixture, no_window_fixture, normal_usage_fixture> fixtures;
 
-
-/**
- * Tests where the menu was created externally and passed to the wrapper as a
- * raw menu.
- *
- * Thest test make sure that, given a menu, we can extra items from it
- * correctly.
- */
-BOOST_AUTO_TEST_SUITE(raw_menu_tests)
-
-/**
- * Wrap an empty menu.
- */
-BOOST_AUTO_TEST_CASE_TEMPLATE( empty_menu, F, fixtures )
-{
-    menu_handle handle = menu_handle::adopt_handle(::CreatePopupMenu());
-    menu m(handle);
-
-    BOOST_CHECK(m.begin() == m.end());
-
-    F::do_test(m);
-}
-
 template<typename Outer>
 struct fixtures_loop
 {
@@ -266,11 +256,34 @@ struct fixture_combinator
     typedef typename boost::mpl::fold<
         T, boost::mpl::vector<>,
         boost::mpl::copy<
-        fixtures_loop<boost::mpl::_2>,
-        boost::mpl::back_inserter<boost::mpl::_1>
+            fixtures_loop<boost::mpl::_2>,
+            boost::mpl::back_inserter<boost::mpl::_1>
         >
     >::type type;
 };
+
+/**
+ * Tests where the menu was created externally and passed to the wrapper as a
+ * raw menu.
+ *
+ * Thest test make sure that, given a menu, we can extra items from it
+ * correctly.
+ */
+BOOST_AUTO_TEST_SUITE(raw_menu_tests)
+
+/**
+ * Wrap an empty menu.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( empty_menu, F, fixtures )
+{
+    menu_handle handle = menu_handle::adopt_handle(
+        detail::win32::create_popup_menu());
+    menu m(handle);
+
+    BOOST_CHECK(m.begin() == m.end());
+
+    F::do_test(m);
+}
 
 /**
  * Does insertion via the old insertion API.
@@ -282,22 +295,10 @@ struct old_style_string_command : public F
 {
     static void do_insert(HMENU handle, wstring caption, UINT command_id)
     {
-        ::InsertMenuW(
+        detail::win32::insert_menu(
             handle, 0, MF_BYPOSITION | MF_STRING, command_id, caption.c_str());
     }
 };
-
-void do_command_string_insertion(
-    HMENU handle, wstring caption, UINT command_id, UINT fMask, UINT fType)
-{
-    MENUITEMINFOW info = MENUITEMINFOW();
-    info.cbSize = sizeof(MENUITEMINFOW);
-    info.fMask = fMask;
-    info.fType = fType;
-    info.wID = command_id;
-    info.dwTypeData = const_cast<wchar_t*>(caption.c_str());
-    ::InsertMenuItemW(handle, 0, MF_BYPOSITION, &info);
-}
 
 /**
  * Inserts string command using the new API.
@@ -311,8 +312,8 @@ struct new_style_string_command : public F
 {
     static void do_insert(HMENU handle, wstring caption, UINT command_id)
     {
-        do_command_string_insertion(
-            handle, caption, command_id,
+        do_insertion(
+            handle, caption.c_str(), command_id, NULL,
             MIIM_FTYPE | MIIM_ID | MIIM_STRING,
             MFT_STRING);
     }
@@ -330,28 +331,28 @@ struct new_style_string_command_no_ftype_set : public F
 {
     static void do_insert(HMENU handle, wstring caption, UINT command_id)
     {
-        do_command_string_insertion(
-            handle, caption, command_id,
+        do_insertion(
+            handle, caption.c_str(), command_id, NULL,
             MIIM_ID | MIIM_STRING, // No FTYPE flag
             MFT_STRING); // Zero so makes no difference
     }
 };
 
-typedef boost::mpl::vector<
-    old_style_string_command<boost::mpl::_>,
-    new_style_string_command<boost::mpl::_>,
-    new_style_string_command_no_ftype_set<boost::mpl::_> >
-    string_command_inserter_list;
-
-typedef fixture_combinator<string_command_inserter_list>::type
-    string_command_fixtures;
+typedef fixture_combinator<
+    boost::mpl::vector<
+        old_style_string_command<boost::mpl::_>,
+        new_style_string_command<boost::mpl::_>,
+        new_style_string_command_no_ftype_set<boost::mpl::_>
+    >
+>::type string_command_fixtures;
 
 /**
  * Wrap a simple string command.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( extract_string_command, F, string_command_fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    extract_command_item_with_string_button, F, string_command_fixtures )
 {
-    HMENU handle = ::CreatePopupMenu();
+    HMENU handle = detail::win32::create_popup_menu();
 
     F::do_insert(handle, L"Bob", 42);
 
@@ -380,23 +381,11 @@ struct old_style_string_popup : public F
 {
     static void do_insert(HMENU handle, wstring caption, HMENU sub_menu)
     {
-        ::InsertMenuW(
+        detail::win32::insert_menu(
             handle, 0, MF_BYPOSITION | MF_STRING, (UINT_PTR)sub_menu,
             caption.c_str());
     }
 };
-
-void do_popup_string_insertion(
-    HMENU handle, wstring caption, HMENU sub_menu, UINT fMask, UINT fType)
-{
-    MENUITEMINFOW info = MENUITEMINFOW();
-    info.cbSize = sizeof(MENUITEMINFOW);
-    info.fMask = fMask;
-    info.fType = fType;
-    info.hSubMenu = sub_menu;
-    info.dwTypeData = const_cast<wchar_t*>(caption.c_str());
-    ::InsertMenuItemW(handle, 0, MF_BYPOSITION, &info);
-}
 
 /**
  * Inserts string popup using the new API.
@@ -406,30 +395,32 @@ struct new_style_string_popup : public F
 {
     static void do_insert(HMENU handle, wstring caption, HMENU sub_menu)
     {
-        do_popup_string_insertion(
-            handle, caption, sub_menu,
+        do_insertion(
+            handle, caption.c_str(), 0, sub_menu,
             MIIM_SUBMENU | MIIM_STRING,
             MFT_STRING);
     }
 };
 
-typedef boost::mpl::vector<
-    old_style_string_popup<boost::mpl::_>,
-    new_style_string_popup<boost::mpl::_> >
-    string_popup_inserter_list;
 
-typedef fixture_combinator<string_popup_inserter_list>::type
-    string_popup_fixtures;
+typedef fixture_combinator<
+    boost::mpl::vector<
+        old_style_string_popup<boost::mpl::_>,
+        new_style_string_popup<boost::mpl::_>
+    >
+>::type string_popup_fixtures;
 
 /**
  * Wrap a string item that pops open a menu.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( extract_string_popup, F, string_popup_fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    extract_popup_item_with_string_button, F, string_popup_fixtures )
 {
-    HMENU handle = ::CreatePopupMenu();
-    menu_handle submenu_handle = menu_handle::adopt_handle(::CreatePopupMenu());
-    do_command_string_insertion(
-        submenu_handle.get(), L"Pop", 7, MIIM_STRING, MFT_STRING);
+    HMENU handle = detail::win32::create_popup_menu();
+    menu_handle submenu_handle = menu_handle::adopt_handle(
+        detail::win32::create_popup_menu());
+    do_insertion(
+        submenu_handle.get(), L"Pop", 7, NULL, MIIM_STRING, MFT_STRING);
 
     F::do_insert(handle, L"Bob", submenu_handle.get());
 
@@ -458,6 +449,113 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( extract_string_popup, F, string_popup_fixtures )
         boost::shared_polymorphic_cast<sub_item_type>(
             submenu[0])->button().caption(),
         L"Pop");
+
+    F::do_test(m);
+}
+
+template<typename F>
+struct old_style_separator : public F
+{
+    static void do_insert(HMENU handle)
+    {
+        detail::win32::insert_menu(
+            handle, 0, MF_BYPOSITION | MF_SEPARATOR, 0, (wchar_t*)(NULL));
+    }
+};
+
+template<typename F>
+struct new_style_separator : public F
+{
+    static void do_insert(HMENU handle)
+    {
+        do_insertion(handle, NULL, 0, NULL, MIIM_FTYPE, MFT_SEPARATOR);
+    }
+};
+
+template<typename F>
+struct weird_old_style_separator1 : public F
+{
+    static void do_insert(HMENU handle)
+    {
+        detail::win32::insert_menu(
+            handle, 42, MF_BYPOSITION | MF_STRING | MF_SEPARATOR, 42,
+            L"I'm an odd separator with a caption");
+    }
+};
+
+template<typename F>
+struct weird_new_style_separator1 : public F
+{
+    static void do_insert(HMENU handle)
+    {
+        do_insertion(
+            handle, L"I'm an odd separator with a caption", 43, NULL,
+            MIIM_FTYPE | MIIM_ID | MIIM_STRING,
+            MFT_STRING | MFT_SEPARATOR);
+    }
+};
+
+template<typename F>
+struct weird_old_style_separator2 : public F
+{
+    static void do_insert(HMENU handle)
+    {
+        HMENU submenu = detail::win32::create_popup_menu();
+        do_insertion(
+            submenu, L"Supposedly, I'm a submenu of a separator", 7, NULL,
+            MIIM_FTYPE | MIIM_ID | MIIM_STRING, MFT_STRING);
+
+        detail::win32::insert_menu(
+            handle, 42, MF_BYPOSITION | MF_SEPARATOR, (UINT_PTR)submenu,
+            (const wchar_t*)NULL);
+        detail::win32::enable_menu_item(handle, 0, MF_BYPOSITION);
+    }
+};
+
+template<typename F>
+struct weird_new_style_separator2 : public F
+{
+    static void do_insert(HMENU handle)
+    {
+        HMENU submenu = detail::win32::create_popup_menu();
+        do_insertion(
+            submenu, L"Supposedly, I'm a submenu of a separator", 7, NULL,
+            MIIM_FTYPE | MIIM_ID | MIIM_STRING, MFT_STRING);
+
+        do_insertion(
+            handle, NULL, 101, submenu, MIIM_FTYPE | MIIM_SUBMENU,
+            MFT_SEPARATOR);
+        detail::win32::enable_menu_item(handle, 0, MF_BYPOSITION);
+    }
+};
+
+typedef fixture_combinator<
+    boost::mpl::vector<
+        old_style_separator<boost::mpl::_>,
+        new_style_separator<boost::mpl::_>,
+        weird_old_style_separator1<boost::mpl::_>,
+        weird_new_style_separator1<boost::mpl::_>,
+        weird_old_style_separator2<boost::mpl::_>,
+        weird_new_style_separator2<boost::mpl::_>
+    >
+>::type separator_fixtures;
+
+/**
+ * Wrap a separator.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( extract_separator_item, F, separator_fixtures )
+{
+    HMENU handle = detail::win32::create_popup_menu();
+    F::do_insert(handle);
+
+    menu m(menu_handle::adopt_handle(handle));
+
+    BOOST_CHECK(m.begin() != m.end());
+    BOOST_CHECK(m[0]);
+
+    typedef const separator_menu_item item_type;
+
+    BOOST_CHECK_NO_THROW(boost::shared_polymorphic_cast<item_type>(m[0]));
 
     F::do_test(m);
 }

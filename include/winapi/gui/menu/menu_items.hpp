@@ -36,9 +36,9 @@
 #include <winapi/gui/menu/detail/menu_win32.hpp> // get_menu_item_info
 #include <winapi/gui/menu/detail/menu.hpp> // menu_handle
 #include <winapi/gui/menu/menu.hpp>
-#include <winapi/gui/menu/menu_bar_item.hpp>
+#include <winapi/gui/menu/selectable_menu_item.hpp>
 #include <winapi/gui/menu/menu_item.hpp>
-#include <winapi/gui/menu/menu_buttons.hpp> // menu_button_nature
+#include <winapi/gui/menu/buttons.hpp> // menu_button_nature
 
 #include <boost/type_traits/is_convertible.hpp>
 #include <boost/utility/enable_if.hpp>
@@ -64,7 +64,7 @@ namespace menu {
  * @tparam  Button nature concrete type.
  */
 template<typename T>
-class command_menu_item : public menu_bar_item
+class command_menu_item : public selectable_menu_item
 {
 public:
 
@@ -138,7 +138,7 @@ inline command_menu_item<T> make_command_menu_item(
  * @tparam  Button nature concrete type.
  */
 template<typename T>
-class sub_menu : public menu_bar_item
+class sub_menu : public selectable_menu_item
 {
 public:
 
@@ -249,25 +249,29 @@ namespace detail {
             const MENUITEMINFOW& info, const menu_handle& /*menu*/,
             UINT /*pos*/)
         {
-            return make_command_menu_item(
-                owner_drawn_menu_button(), info.wID).clone();
+            return std::auto_ptr<ItemType>(
+                make_command_menu_item(
+                    owner_drawn_menu_button(), info.wID).clone());
         }
     };
 
-    // Note: this specialisation is for menu_item rather than menu_bar_item
+    // Note: this specialisation is for menu_item rather than selectable_menu_item
     template<typename ItemType>
-    struct item_type_converter<
-        MFT_SEPARATOR, ItemType,
-        boost::enable_if<
-            typename boost::is_convertible<ItemType, menu_item>::type> >
+    struct item_type_converter<MFT_SEPARATOR, ItemType>
     {
-        static std::auto_ptr<menu_item> convert(
+        static std::auto_ptr<ItemType> convert(
             const MENUITEMINFOW& info, const menu_handle& /*menu*/,
             UINT /*pos*/)
         {
-            (void)info.wID;
-            assert(info.wID == 0);
-            return new separator_menu_item();
+            (void)info;
+        /*    assert(info.wID == 0);
+            assert(!info.hSubMenu);
+            assert(!info.hbmpChecked);
+            assert(!info.hbmpUnchecked);
+            assert(!info.dwTypeData);
+            assert(info.cch == 0);
+            assert(!info.hbmpItem); */
+            return std::auto_ptr<ItemType>(new separator_menu_item());
         }
     };
 
@@ -311,26 +315,33 @@ namespace detail {
     {
         MENUITEMINFOW info = MENUITEMINFOW();
         info.cbSize = sizeof(MENUITEMINFOW);
-        info.fMask = MIIM_FTYPE;
+
+        // MIIM_SUBMENU is part of the mask so isn't set by GetMenuItemInfo.
+        // We have to set it and check hSubMenu to decide if this is a popup
+        // item
+        info.fMask = MIIM_FTYPE | MIIM_SUBMENU;
         detail::win32::get_menu_item_info(menu.get(), pos, TRUE, &info);
 
-        // MSDN doesn't say that MFT_OWNERDRAWN is part of the
-        // mutually exclusive set of flags but I don't see how it couldn't
-        // be.  These flags specify the meaning of dwTypeData and cch which
-        // MFT_OWNERDRAWN gives a user-defined meaning.
-        if (info.fType & MFT_BITMAP)
+        // Four mutually-exclusive menu possibilities.  The first, separator
+        // determines the entire menu item behaviour while the others just
+        // indicate the button type (separators have no button).
+        if (info.fType & MFT_SEPARATOR)
+        {
+            return item_type_converter<MFT_SEPARATOR, ItemType>::convert(
+                info, menu, pos);
+        }
+        else if (info.fType & MFT_BITMAP)
         {
             return item_type_converter<MFT_BITMAP, ItemType>::convert(
                 info, menu, pos);
         }
         else if (info.fType & MFT_OWNERDRAW)
         {
+            // MSDN doesn't say that MFT_OWNERDRAWN is part of the
+            // mutually exclusive set of flags but I don't see how it couldn't
+            // be.  These flags specify the meaning of dwTypeData and cch which
+            // MFT_OWNERDRAWN gives a user-defined meaning.
             return item_type_converter<MFT_OWNERDRAW, ItemType>::convert(
-                info, menu, pos);
-        }
-        else if (info.fType & MFT_SEPARATOR)
-        {
-            return item_type_converter<MFT_SEPARATOR, ItemType>::convert(
                 info, menu, pos);
         }
         else

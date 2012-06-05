@@ -36,7 +36,7 @@
 #include <winapi/gui/menu/detail/menu_common_core.hpp>
 #include <winapi/gui/menu/detail/menu_item_iterator.hpp>
 #include <winapi/gui/menu/detail/menu_win32.hpp> // create_menu
-#include <winapi/gui/menu/menu_bar_item.hpp>
+#include <winapi/gui/menu/selectable_menu_item.hpp>
 #include <winapi/gui/menu/menu_handle.hpp>
 
 #include <Windows.h> // MENUITEMINFO
@@ -52,7 +52,7 @@ namespace menu {
 /**
  * Main application window menu bar.
  */
-class menu_bar : private detail::menu_common_core<menu_bar_item>
+class menu_bar : private detail::menu_common_core<selectable_menu_item>
 {
 #if defined (_MSC_VER) && (_MSC_VER > 1400)
     template<typename>
@@ -65,7 +65,7 @@ class menu_bar : private detail::menu_common_core<menu_bar_item>
     friend class window<wchar_t>;
 #endif
 
-    typedef detail::menu_common_core<menu_bar_item> core;
+    typedef detail::menu_common_core<selectable_menu_item> core;
     typedef int iterator_type;
 
 public:

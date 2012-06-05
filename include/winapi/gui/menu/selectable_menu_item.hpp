@@ -53,9 +53,9 @@ class menu_common_core;
  *
  * Anything that can be added to a menu bar can also be added to a regular menu.
  */
-class menu_bar_item : public menu_item
+class selectable_menu_item : public menu_item
 {
-    friend class detail::menu_common_core<menu_bar_item>;
+    friend class detail::menu_common_core<selectable_menu_item>;
 
 private:
 

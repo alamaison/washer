@@ -75,6 +75,26 @@ inline void destroy_menu(HMENU hmenu)
             boost::errinfo_api_function("DestroyMenu"));
 }
 
+inline void insert_menu(
+    HMENU menu, UINT position, UINT flags, UINT_PTR new_item_id_or_handle,
+    const char* new_item)
+{
+    if (!::InsertMenuA(menu, position, flags, new_item_id_or_handle, new_item))
+        BOOST_THROW_EXCEPTION(
+            boost::enable_error_info(winapi::last_error()) <<
+            boost::errinfo_api_function("InsertMenu"));
+}
+
+inline void insert_menu(
+    HMENU menu, UINT position, UINT flags, UINT_PTR new_item_id_or_handle,
+    const wchar_t* new_item)
+{
+    if (!::InsertMenuW(menu, position, flags, new_item_id_or_handle, new_item))
+        BOOST_THROW_EXCEPTION(
+            boost::enable_error_info(winapi::last_error()) <<
+            boost::errinfo_api_function("InsertMenu"));
+}
+
 inline void insert_menu_item(
     HMENU menu, UINT id, BOOL is_by_position, const MENUITEMINFOA* info)
 {
@@ -124,6 +144,14 @@ inline int get_menu_item_count(HMENU menu)
 inline bool is_menu(HMENU menu)
 {
     return ::IsMenu(menu) != FALSE;
+}
+
+inline void enable_menu_item(HMENU menu, UINT item, UINT flags)
+{
+    if (!::EnableMenuItem(menu, item, flags))
+        BOOST_THROW_EXCEPTION(
+            boost::enable_error_info(winapi::last_error()) <<
+            boost::errinfo_api_function("EnableMenuItem"));
 }
 
 }}}}} // namespace winapi::gui::menu::detail::win32
