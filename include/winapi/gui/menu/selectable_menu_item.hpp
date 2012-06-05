@@ -41,6 +41,8 @@ namespace winapi {
 namespace gui {
 namespace menu {
 
+class menu_button_nature;
+
 namespace detail {
 
 template<typename>
@@ -49,13 +51,31 @@ class menu_common_core;
 }
 
 /**
- * Interface to items that can appear in menu bars as well as menus.
+ * Interface to items that, when clicked, might result in an action.
  *
- * Anything that can be added to a menu bar can also be added to a regular menu.
+ * These items have an clickable appearance which we are calling a ''button''.
+ * It is commonly a text caption but can also be a bitmap or a custom drawn
+ * item.  Separators are the only non-selectable menu item.
+ *
+ * Selectable menu items are the only items that can appear in menu bars.  In
+ * other words, menu bars don't allow separators.
+ *
+ * @note  It is possible to put a separator into a menu item using the windows
+ *        API but it's forbidden by the documentation.  Similarly, you can
+ *        add string captions, add submenus and force-enable the separator.
+ *        However, as these are invalid uses of a separator, we don't support
+ *        them.
  */
 class selectable_menu_item : public menu_item
 {
     friend class detail::menu_common_core<selectable_menu_item>;
+
+public:
+
+    /**
+     * An immutable model of the menu item's clickable appearance.
+     */
+    virtual const menu_button_nature& button() const = 0;
 
 private:
 

@@ -47,9 +47,11 @@ namespace gui {
 namespace menu {
 namespace detail {
 
+class menu_item_proxy;
+
 template<typename ItemType>
-inline std::auto_ptr<ItemType> menu_item_from_position(
-    const menu_handle& menu, UINT pos);
+inline boost::shared_ptr<ItemType> menu_item_from_position(
+    const menu_item_proxy& item);
 
 /**
  * Object implementing the common aspects of wrapping a menu and a menu bar.
@@ -95,8 +97,8 @@ public:
 
     boost::shared_ptr<item_type> operator[](size_t position) const
     {
-        return boost::shared_ptr<item_type>(
-            detail::menu_item_from_position<item_type>(handle(), position));
+        return detail::menu_item_from_position<item_type>(
+            menu_item_proxy(handle(), position));
     }
 
     iterator begin()

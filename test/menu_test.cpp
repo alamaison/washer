@@ -46,6 +46,7 @@
 #include <boost/mpl/fold.hpp>
 #include <boost/mpl/push_back.hpp>
 #include <boost/mpl/vector.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/test/unit_test.hpp>
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
 
@@ -56,7 +57,7 @@ using namespace winapi::gui::menu;
 using winapi::gui::window;
 using winapi::module_handle;
 
-using boost::polymorphic_cast;
+using boost::shared_ptr;
 
 using std::string;
 using std::wstring;
@@ -195,7 +196,7 @@ public:
     static void do_test(menu& m)
     {
         menu_bar b;
-        b.append(make_sub_menu(string_menu_button(L"Menu"), m));
+        b.append(sub_menu(string_menu_button(L"Menu"), m));
         BOOST_CHECK(b.begin() != b.end());
 
         BOOST_CHECK(m.valid());
@@ -215,7 +216,7 @@ public:
     static void do_test(menu& m)
     {
         menu_bar b;
-        b.append(make_sub_menu(string_menu_button(L"Menu"), m));
+        b.append(sub_menu(string_menu_button(L"Menu"), m));
         BOOST_CHECK(b.begin() != b.end());
 
         BOOST_CHECK(m.valid());
@@ -361,12 +362,15 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     BOOST_CHECK(m.begin() != m.end());
     BOOST_CHECK(m[0]);
 
-    typedef const command_menu_item<string_menu_button> item_type;
-    BOOST_CHECK_EQUAL(
-        boost::shared_polymorphic_cast<item_type>(m[0])->command_id(), 42);
-    BOOST_CHECK_EQUAL(
-        boost::shared_polymorphic_cast<item_type>(m[0])->button().caption(),
-        L"Bob");
+    shared_ptr<command_menu_item> item =
+        boost::shared_polymorphic_cast<command_menu_item>(m[0]);
+
+    BOOST_CHECK_EQUAL(item->command_id(), 42);
+
+    const string_menu_button& button =
+        dynamic_cast<const string_menu_button&>(item->button());
+
+    BOOST_CHECK_EQUAL(button.caption(), L"Bob");
 
     F::do_test(m);
 }
@@ -382,7 +386,7 @@ struct old_style_string_popup : public F
     static void do_insert(HMENU handle, wstring caption, HMENU sub_menu)
     {
         detail::win32::insert_menu(
-            handle, 0, MF_BYPOSITION | MF_STRING, (UINT_PTR)sub_menu,
+            handle, 0, MF_BYPOSITION | MF_STRING | MF_POPUP, (UINT_PTR)sub_menu,
             caption.c_str());
     }
 };
@@ -420,7 +424,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     menu_handle submenu_handle = menu_handle::adopt_handle(
         detail::win32::create_popup_menu());
     do_insertion(
-        submenu_handle.get(), L"Pop", 7, NULL, MIIM_STRING, MFT_STRING);
+        submenu_handle.get(), L"Pop", 7, NULL, MIIM_STRING | MIIM_ID,
+        MFT_STRING);
 
     F::do_insert(handle, L"Bob", submenu_handle.get());
 
@@ -429,25 +434,26 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     BOOST_CHECK(m.begin() != m.end());
     BOOST_CHECK(m[0]);
 
-    typedef const sub_menu<string_menu_button> item_type;
+    shared_ptr<sub_menu> item =
+        boost::shared_polymorphic_cast<sub_menu>(m[0]);
 
-    BOOST_CHECK_EQUAL(
-        boost::shared_polymorphic_cast<item_type>(m[0])->button().caption(),
-        L"Bob");
+    const string_menu_button& button =
+        dynamic_cast<const string_menu_button&>(item->button());
 
-    menu& submenu = boost::shared_polymorphic_cast<item_type>(m[0])->menu();
+    BOOST_CHECK_EQUAL(button.caption(), L"Bob");
+
+    menu& submenu = item->menu();
     BOOST_CHECK(submenu.valid());
     BOOST_CHECK_EQUAL(submenu.size(), 1);
     BOOST_CHECK(submenu.begin() != submenu.end());
     BOOST_CHECK(submenu[0]);
 
-    typedef const command_menu_item<string_menu_button> sub_item_type;
+    shared_ptr<command_menu_item> sub_item =
+        boost::shared_polymorphic_cast<command_menu_item>(submenu[0]);
+
+    BOOST_CHECK_EQUAL(sub_item->command_id(), 7);
     BOOST_CHECK_EQUAL(
-        boost::shared_polymorphic_cast<sub_item_type>(
-            submenu[0])->command_id(), 7);
-    BOOST_CHECK_EQUAL(
-        boost::shared_polymorphic_cast<sub_item_type>(
-            submenu[0])->button().caption(),
+        dynamic_cast<const string_menu_button&>(sub_item->button()).caption(),
         L"Pop");
 
     F::do_test(m);
@@ -594,7 +600,7 @@ BOOST_AUTO_TEST_CASE( string_command_in_bar )
 {
     menu_bar b;
 
-    b.append(make_command_menu_item(
+    b.append(command_menu_item(
         string_menu_button(L"string command in bar"), 14));
 
     BOOST_CHECK_EQUAL(b.size(), 1);
@@ -609,8 +615,8 @@ BOOST_AUTO_TEST_CASE( bitmap_command_in_bar )
 {
     menu_bar b;
 
-    command_menu_item<bitmap_menu_button> item =
-        make_command_menu_item(bitmap_menu_button(test_bitmap()), 13);
+    command_menu_item item =
+        command_menu_item(bitmap_menu_button(test_bitmap()), 13);
 
     b.append(item);
 
@@ -627,10 +633,10 @@ BOOST_AUTO_TEST_CASE( string_popup_in_bar )
     menu_bar b;
 
     menu m;
-    m.append(make_command_menu_item(string_menu_button(L"Pop"), 1));
+    m.append(command_menu_item(string_menu_button(L"Pop"), 1));
 
-    sub_menu<string_menu_button> item =
-        make_sub_menu(string_menu_button(L"string popup in bar"), m);
+    sub_menu item =
+        sub_menu(string_menu_button(L"string popup in bar"), m);
 
     b.append(item);
 
@@ -647,9 +653,9 @@ BOOST_AUTO_TEST_CASE( bitmap_popup_in_bar )
     menu_bar b;
 
     menu m;
-    m.append(make_command_menu_item(string_menu_button(L"Pop"), 1));
+    m.append(command_menu_item(string_menu_button(L"Pop"), 1));
 
-    b.append(make_sub_menu(bitmap_menu_button(test_bitmap()), m));
+    b.append(sub_menu(bitmap_menu_button(test_bitmap()), m));
 
     BOOST_CHECK(b.begin() != b.end());
 
@@ -681,7 +687,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( empty_menu, F, fixtures )
 BOOST_AUTO_TEST_CASE_TEMPLATE( string_command, F, fixtures )
 {
     menu m;
-    m.append(make_command_menu_item(string_menu_button(L"Child command"), 1));
+    m.append(command_menu_item(string_menu_button(L"Child command"), 1));
 
     BOOST_CHECK(m.begin() != m.end());
 
@@ -694,7 +700,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( string_command, F, fixtures )
 BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_command, F, fixtures )
 {
     menu m;
-    m.append(make_command_menu_item(bitmap_menu_button(test_bitmap()), 1));
+    m.append(command_menu_item(bitmap_menu_button(test_bitmap()), 1));
 
     BOOST_CHECK(m.begin() != m.end());
 
@@ -722,9 +728,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( string_submenu, F, fixtures )
     menu m;
     menu sub;
 
-    sub.append(make_command_menu_item(string_menu_button(L"Boo"), 1));
+    sub.append(command_menu_item(string_menu_button(L"Boo"), 1));
 
-    m.append(make_sub_menu(string_menu_button(L"Pop"), sub));
+    m.append(sub_menu(string_menu_button(L"Pop"), sub));
 
     BOOST_CHECK(m.begin() != m.end());
 
@@ -742,9 +748,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_submenu, F, fixtures )
     BOOST_CHECK(m.begin() == m.end());
     BOOST_CHECK(sub.begin() == sub.end());
 
-    sub.append(make_command_menu_item(string_menu_button(L"Boo"), 1));
+    sub.append(command_menu_item(string_menu_button(L"Boo"), 1));
 
-    m.append(make_sub_menu(bitmap_menu_button(test_bitmap()), sub));
+    m.append(sub_menu(bitmap_menu_button(test_bitmap()), sub));
 
     BOOST_CHECK(m.begin() != m.end());
 
@@ -758,21 +764,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( mixed_items, F, fixtures )
 {
     menu m;
 
-    m.append(make_command_menu_item(string_menu_button(L"String command"), 1));
+    m.append(command_menu_item(string_menu_button(L"String command"), 1));
 
-    m.append(make_command_menu_item(bitmap_menu_button(test_bitmap()), 2));
+    m.append(command_menu_item(bitmap_menu_button(test_bitmap()), 2));
 
     m.append(separator_menu_item());
 
     menu sub;
 
-    sub.append(make_command_menu_item(string_menu_button(L"String sub"), 3));
+    sub.append(command_menu_item(string_menu_button(L"String sub"), 3));
 
     sub.append(separator_menu_item());
 
-    sub.append(make_command_menu_item(bitmap_menu_button(test_bitmap()), 4));
+    sub.append(command_menu_item(bitmap_menu_button(test_bitmap()), 4));
 
-    m.append(make_sub_menu(string_menu_button(L"Lalala"), sub));
+    m.append(sub_menu(string_menu_button(L"Lalala"), sub));
 
     F::do_test(m);
 }

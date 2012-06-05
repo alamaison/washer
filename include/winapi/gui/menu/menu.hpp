@@ -53,7 +53,7 @@ namespace menu {
  */
 class menu : private detail::menu_common_core<menu_item>
 {
-    template<typename T> friend class sub_menu;
+    friend class sub_menu;
 
     typedef detail::menu_common_core<menu_item> core;
     typedef detail::menu_item_iterator<menu> iterator;

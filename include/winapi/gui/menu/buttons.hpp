@@ -54,9 +54,9 @@ namespace menu {
  */
 class menu_button_nature
 {
-    template<typename T> friend class command_menu_item;
+    friend class command_menu_item;
 
-    template<typename T> friend class sub_menu;
+    friend class sub_menu;
 
 public:
 
