@@ -90,6 +90,11 @@ public:
 
     explicit bitmap_menu_button(HBITMAP bitmap) : m_bitmap(bitmap) {}
 
+    HBITMAP bitmap() const
+    {
+        return m_bitmap;
+    }
+
 private:
 
     virtual MENUITEMINFOW as_menuiteminfo() const

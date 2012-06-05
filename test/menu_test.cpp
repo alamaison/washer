@@ -129,8 +129,8 @@ namespace {
     template<typename AorW>
     void show_window(window<AorW>& w)
     {
-        w.visible(true);
         w.text(boost::unit_test::framework::current_test_case().p_name);
+        //w.visible(true);
         //pump_thread_messages();
     }
 
@@ -376,6 +376,74 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
 }
 
 /**
+ * Does insertion via the old insertion API.
+ * The menu items are always retrieved using the new API so this tests that
+ * the translation goes smoothly.
+ */
+template<typename F>
+struct old_style_bitmap_command : public F
+{
+    static void do_insert(HMENU handle, HBITMAP bitmap, UINT command_id)
+    {
+        detail::win32::insert_menu(
+            handle, 0, MF_BITMAP, command_id, (const wchar_t*)bitmap);
+    }
+};
+
+/**
+ * Inserts string command using the new API.
+ *
+ * This specifies the MIIM_TYPE flag because it is using the (legacy) 
+ * whole-button bitmap.
+ */
+template<typename F>
+struct new_style_bitmap_command : public F
+{
+    static void do_insert(HMENU handle, HBITMAP bitmap, UINT command_id)
+    {
+        do_insertion(
+            handle, (const wchar_t*)bitmap, command_id, NULL,
+            MIIM_TYPE | MIIM_ID, MFT_BITMAP);
+    }
+};
+
+typedef fixture_combinator<
+    boost::mpl::vector<
+        old_style_bitmap_command<boost::mpl::_>,
+        new_style_bitmap_command<boost::mpl::_>
+    >
+>::type bitmap_command_fixtures;
+
+/**
+ * Wrap a simple bitmap command.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    extract_command_item_with_bitmap_button, F, bitmap_command_fixtures )
+{
+    HMENU handle = detail::win32::create_popup_menu();
+    HBITMAP bitmap = test_bitmap();
+
+    F::do_insert(handle, bitmap, 42);
+
+    menu m(menu_handle::adopt_handle(handle));
+
+    BOOST_CHECK(m.begin() != m.end());
+    BOOST_CHECK(m[0]);
+
+    shared_ptr<command_menu_item> item =
+        boost::shared_polymorphic_cast<command_menu_item>(m[0]);
+
+    BOOST_CHECK_EQUAL(item->command_id(), 42);
+
+    const bitmap_menu_button& button =
+        dynamic_cast<const bitmap_menu_button&>(item->button());
+
+    BOOST_CHECK(button.bitmap() == bitmap);
+
+    F::do_test(m);
+}
+
+/**
  * Does string popup insertion via the old insertion API.
  * The menu items are always retrieved using the new API so this tests that
  * the translation goes smoothly.
@@ -458,6 +526,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
 
     F::do_test(m);
 }
+
+/** @todo  Could do tests for bitmap with popup menu here. */
+
+/** @todo  Not tested owner-drawn buttons yet. */
 
 template<typename F>
 struct old_style_separator : public F
