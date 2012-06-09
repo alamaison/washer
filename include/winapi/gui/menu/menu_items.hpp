@@ -36,13 +36,14 @@
 #include <winapi/gui/menu/detail/menu_win32.hpp> // get_menu_item_info
 #include <winapi/gui/menu/detail/menu.hpp> // menu_handle
 #include <winapi/gui/menu/menu.hpp>
+#include <winapi/gui/menu/menu_bar.hpp>
 #include <winapi/gui/menu/selectable_menu_item.hpp>
 #include <winapi/gui/menu/menu_item.hpp>
 #include <winapi/gui/menu/buttons.hpp> // menu_button_nature
 
 #include <boost/make_shared.hpp>
+#include <boost/static_assert.hpp> // BOOST_STATIC_ASSERT
 #include <boost/type_traits/is_convertible.hpp>
-#include <boost/utility/enable_if.hpp>
 
 #include <cassert> // assert
 #include <stdexcept> // logic_error
@@ -310,9 +311,39 @@ namespace detail {
         }
     }
 
+    /**
+     * Do correct thing when encountering a separator item.
+     *
+     * Purpose: to select (at compile time) the appropriate behaviour when
+     *          encountering a separator item in a menu based on the type of
+     *          menu item we are allowed to represent.
+     */
     template<typename ItemType>
-    inline boost::shared_ptr<ItemType> menu_item_from_position(
-        const menu_item_proxy& item)
+    inline boost::shared_ptr<ItemType> separator_behaviour_chooser()
+    {
+        // Triggers if this is instantiated
+        BOOST_STATIC_ASSERT(sizeof(ItemType) == 0);
+    }
+
+    template<>
+    inline boost::shared_ptr<selectable_menu_item>
+    separator_behaviour_chooser<selectable_menu_item>()
+    {
+        // If this throws, a separator was encountered in a menu bar
+        BOOST_THROW_EXCEPTION(
+            std::runtime_error("Separator not a selectable item"));
+    }
+
+    template<>
+    inline boost::shared_ptr<menu_item>
+    separator_behaviour_chooser<menu_item>()
+    {
+        return boost::make_shared<separator_menu_item>();
+    }
+
+    template<typename ItemType>
+    inline boost::shared_ptr<ItemType>
+    menu_item_from_position(const menu_item_proxy& item)
     {
         // MIIM_SUBMENU is part of the mask so isn't set by GetMenuItemInfo.
         // We have to set it and check hSubMenu to decide if this is a popup
@@ -328,7 +359,7 @@ namespace detail {
             // In reality, a separator can be forced to have a submenu but as
             // this is clearly not what is intended, we don't give a way to get
             // access to it.
-            return boost::make_shared<separator_menu_item>();
+            return separator_behaviour_chooser<ItemType>();
         }
         else
         {

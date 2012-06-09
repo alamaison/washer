@@ -165,7 +165,8 @@ namespace {
  * a menu bar in a window.
  *
  * This is the scenario where the menu is being used as a context menu rather
- * than rooted in the window.
+ * than rooted in the window.  Or where, bizarrely, a menu bar is created but
+ * then never used.
  *
  * The other two scenarios take ownership of the menu's lifetime so this tests
  * how the menu copes with managing its own lifetime.
@@ -179,10 +180,17 @@ public:
 
         BOOST_CHECK(m.valid());
     }
+
+    static void do_test(menu_bar& m)
+    {
+        // do nothing
+
+        BOOST_CHECK(m.valid());
+    }
 };
 
 /**
- * Fixture that test the behaviour of a menu that is given to a menu bar but
+ * Fixture that tests the behaviour of a menu that is given to a menu bar but
  * (strangely) the menu bar is not given to a window.
  *
  * The menu bar takes ownership of the menu so it has to cope with this
@@ -200,6 +208,13 @@ public:
         BOOST_CHECK(m.valid());
         BOOST_CHECK(b.valid());
     }
+
+    static void do_test(menu_bar& m)
+    {
+        // do nothing
+
+        BOOST_CHECK(m.valid());
+    }
 };
 
 /**
@@ -211,6 +226,7 @@ public:
 class normal_usage_fixture
 {
 public:
+
     static void do_test(menu& m)
     {
         menu_bar b;
@@ -229,10 +245,77 @@ public:
         BOOST_CHECK(!m.valid());
         BOOST_CHECK(!b.valid());
     }
+
+    static void do_test(menu_bar& m)
+    {
+        BOOST_CHECK(m.valid());
+
+        {
+            window<> w = create_test_window();
+            w.menu(m);
+            show_window(w);
+        }
+
+        BOOST_CHECK(!m.valid());
+    }
 };
 
 typedef boost::mpl::vector<
-    lonely_fixture, no_window_fixture, normal_usage_fixture> fixtures;
+    lonely_fixture, no_window_fixture, normal_usage_fixture>
+    menu_ownership_fixtures;
+
+template<typename T>
+class test_menu_
+{
+public:
+    test_menu_(const T& m, menu_handle handle) : m_menu(m), m_handle(handle) {}
+
+    T& menu() { return m_menu; }
+    menu_handle handle() { return m_handle; }
+
+private:
+    T m_menu;
+    menu_handle m_handle;
+};
+
+template<typename F>
+struct normal_menu_creator : public F
+{
+
+    typedef menu menu_type;
+    typedef test_menu_<menu_type> test_menu;
+
+    static test_menu create_menu_to_test()
+    {
+        menu_handle handle = menu_handle::adopt_handle(
+            detail::win32::create_popup_menu());
+        return test_menu(menu_type(handle), handle);
+    }
+};
+
+template<typename F>
+struct menu_bar_creator : public F
+{
+public:
+
+    typedef menu_bar menu_type;
+    typedef test_menu_<menu_type> test_menu;
+
+    static test_menu create_menu_to_test()
+    {
+        menu_handle handle = menu_handle::adopt_handle(
+            detail::win32::create_menu());
+        return test_menu(menu_type(handle), handle);
+    }
+};
+
+typedef fixture_permutator<
+    boost::mpl::vector<
+        normal_menu_creator<boost::mpl::_>,
+        menu_bar_creator<boost::mpl::_>
+    >,
+    menu_ownership_fixtures
+>::type menu_fixtures;
 
 /**
  * Tests where the menu was created externally and passed to the wrapper as a
@@ -246,11 +329,10 @@ BOOST_AUTO_TEST_SUITE(raw_menu_tests)
 /**
  * Wrap an empty menu.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( empty_menu, F, fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE( empty_menu, F, menu_fixtures )
 {
-    menu_handle handle = menu_handle::adopt_handle(
-        detail::win32::create_popup_menu());
-    menu m(handle);
+    F::test_menu t = F::create_menu_to_test();
+    F::menu_type m = t.menu();
 
     BOOST_CHECK(m.begin() == m.end());
 
@@ -265,10 +347,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( empty_menu, F, fixtures )
 template<typename F>
 struct old_style_string_command : public F
 {
-    static void do_insert(HMENU handle, wstring caption, UINT command_id)
+    static void do_insert(menu_handle handle, wstring caption, UINT command_id)
     {
         detail::win32::insert_menu(
-            handle, 0, MF_BYPOSITION | MF_STRING, command_id, caption.c_str());
+            handle.get(), 0, MF_BYPOSITION | MF_STRING, command_id,
+            caption.c_str());
     }
 };
 
@@ -282,10 +365,10 @@ struct old_style_string_command : public F
 template<typename F>
 struct new_style_string_command : public F
 {
-    static void do_insert(HMENU handle, wstring caption, UINT command_id)
+    static void do_insert(menu_handle handle, wstring caption, UINT command_id)
     {
         do_insertion(
-            handle, caption.c_str(), command_id, NULL,
+            handle.get(), caption.c_str(), command_id, NULL,
             MIIM_FTYPE | MIIM_ID | MIIM_STRING,
             MFT_STRING);
     }
@@ -301,10 +384,10 @@ struct new_style_string_command : public F
 template<typename F>
 struct new_style_string_command_no_ftype_set : public F
 {
-    static void do_insert(HMENU handle, wstring caption, UINT command_id)
+    static void do_insert(menu_handle handle, wstring caption, UINT command_id)
     {
         do_insertion(
-            handle, caption.c_str(), command_id, NULL,
+            handle.get(), caption.c_str(), command_id, NULL,
             MIIM_ID | MIIM_STRING, // No FTYPE flag
             MFT_STRING); // Zero so makes no difference
     }
@@ -316,7 +399,7 @@ typedef fixture_permutator<
         new_style_string_command<boost::mpl::_>,
         new_style_string_command_no_ftype_set<boost::mpl::_>
     >,
-    fixtures
+    menu_fixtures
 >::type string_command_fixtures;
 
 /**
@@ -325,11 +408,10 @@ typedef fixture_permutator<
 BOOST_AUTO_TEST_CASE_TEMPLATE(
     extract_command_item_with_string_button, F, string_command_fixtures )
 {
-    HMENU handle = detail::win32::create_popup_menu();
+    F::test_menu t = F::create_menu_to_test();
+    F::menu_type m = t.menu();
 
-    F::do_insert(handle, L"Bob", 42);
-
-    menu m(menu_handle::adopt_handle(handle));
+    F::do_insert(t.handle(), L"Bob", 42);
 
     BOOST_CHECK(m.begin() != m.end());
     BOOST_CHECK(m[0]);
@@ -355,10 +437,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
 template<typename F>
 struct old_style_bitmap_command : public F
 {
-    static void do_insert(HMENU handle, HBITMAP bitmap, UINT command_id)
+    static void do_insert(menu_handle handle, HBITMAP bitmap, UINT command_id)
     {
         detail::win32::insert_menu(
-            handle, 0, MF_BITMAP, command_id, (const wchar_t*)bitmap);
+            handle.get(), 0, MF_BITMAP, command_id, (const wchar_t*)bitmap);
     }
 };
 
@@ -371,10 +453,10 @@ struct old_style_bitmap_command : public F
 template<typename F>
 struct new_style_bitmap_command : public F
 {
-    static void do_insert(HMENU handle, HBITMAP bitmap, UINT command_id)
+    static void do_insert(menu_handle handle, HBITMAP bitmap, UINT command_id)
     {
         do_insertion(
-            handle, (const wchar_t*)bitmap, command_id, NULL,
+            handle.get(), (const wchar_t*)bitmap, command_id, NULL,
             MIIM_TYPE | MIIM_ID, MFT_BITMAP);
     }
 };
@@ -384,7 +466,7 @@ typedef fixture_permutator<
         old_style_bitmap_command<boost::mpl::_>,
         new_style_bitmap_command<boost::mpl::_>
     >,
-    fixtures
+    menu_fixtures
 >::type bitmap_command_fixtures;
 
 /**
@@ -393,12 +475,12 @@ typedef fixture_permutator<
 BOOST_AUTO_TEST_CASE_TEMPLATE(
     extract_command_item_with_bitmap_button, F, bitmap_command_fixtures )
 {
-    HMENU handle = detail::win32::create_popup_menu();
+    F::test_menu t = F::create_menu_to_test();
+    F::menu_type m = t.menu();
+
     HBITMAP bitmap = test_bitmap();
 
-    F::do_insert(handle, bitmap, 42);
-
-    menu m(menu_handle::adopt_handle(handle));
+    F::do_insert(t.handle(), bitmap, 42);
 
     BOOST_CHECK(m.begin() != m.end());
     BOOST_CHECK(m[0]);
@@ -453,7 +535,7 @@ typedef fixture_permutator<
         old_style_string_popup<boost::mpl::_>,
         new_style_string_popup<boost::mpl::_>
     >,
-    fixtures
+    menu_fixtures
 >::type string_popup_fixtures;
 
 /**
@@ -462,16 +544,16 @@ typedef fixture_permutator<
 BOOST_AUTO_TEST_CASE_TEMPLATE(
     extract_popup_item_with_string_button, F, string_popup_fixtures )
 {
-    HMENU handle = detail::win32::create_popup_menu();
+    F::test_menu t = F::create_menu_to_test();
+    F::menu_type m = t.menu();
+
     menu_handle submenu_handle = menu_handle::adopt_handle(
         detail::win32::create_popup_menu());
     do_insertion(
         submenu_handle.get(), L"Pop", 7, NULL, MIIM_STRING | MIIM_ID,
         MFT_STRING);
 
-    F::do_insert(handle, L"Bob", submenu_handle.get());
-
-    menu m(menu_handle::adopt_handle(handle));
+    F::do_insert(t.handle().get(), L"Bob", submenu_handle.get());
 
     BOOST_CHECK(m.begin() != m.end());
     BOOST_CHECK(m[0]);
@@ -590,7 +672,7 @@ typedef fixture_permutator<
         weird_old_style_separator2<boost::mpl::_>,
         weird_new_style_separator2<boost::mpl::_>
     >,
-    fixtures
+    menu_ownership_fixtures
 >::type separator_fixtures;
 
 /**
@@ -719,7 +801,7 @@ BOOST_AUTO_TEST_SUITE(menu_tests)
 /**
  * An empty menu.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( empty_menu, F, fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE( empty_menu, F, menu_ownership_fixtures )
 {
     menu m;
 
@@ -731,7 +813,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( empty_menu, F, fixtures )
 /**
  * A simple string command.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( string_command, F, fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE( string_command, F, menu_ownership_fixtures )
 {
     menu m;
     m.append(command_menu_item(string_menu_button(L"Child command"), 1));
@@ -744,7 +826,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( string_command, F, fixtures )
 /**
  * A bitmap command.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_command, F, fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_command, F, menu_ownership_fixtures )
 {
     menu m;
     m.append(command_menu_item(bitmap_menu_button(test_bitmap()), 1));
@@ -757,7 +839,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_command, F, fixtures )
 /**
  * A separator.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( separator, F, fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE( separator, F, menu_ownership_fixtures )
 {
     menu m;
     m.append(separator_menu_item());
@@ -770,7 +852,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( separator, F, fixtures )
 /**
  * A string popping out a submenu.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( string_submenu, F, fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE( string_submenu, F, menu_ownership_fixtures )
 {
     menu m;
     menu sub;
@@ -787,7 +869,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( string_submenu, F, fixtures )
 /**
  * A bitmap popping out a submenu.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_submenu, F, fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_submenu, F, menu_ownership_fixtures )
 {
     menu m;
     menu sub;
@@ -807,7 +889,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_submenu, F, fixtures )
 /**
  * A menu with multiple items.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( mixed_items, F, fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE( mixed_items, F, menu_ownership_fixtures )
 {
     menu m;
 
