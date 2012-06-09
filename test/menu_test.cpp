@@ -29,6 +29,7 @@
     @endif
 */
 
+#include "fixture_permutator.hpp"
 #include "wchar_output.hpp" // wchar_t test output
 
 #include <winapi/gui/menu/menu.hpp> // test subject
@@ -41,10 +42,6 @@
 #include <boost/cast.hpp> // polymorphic_cast
 #include <boost/exception/errinfo_api_function.hpp> // errinfo_api_function
 #include <boost/exception/info.hpp> // errinfo
-#include <boost/mpl/apply.hpp>
-#include <boost/mpl/copy.hpp>
-#include <boost/mpl/fold.hpp>
-#include <boost/mpl/push_back.hpp>
 #include <boost/mpl/vector.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/test/unit_test.hpp>
@@ -52,10 +49,11 @@
 
 #include <string>
 
-using winapi::gui::hwnd_t;
 using namespace winapi::gui::menu;
+using winapi::gui::hwnd_t;
 using winapi::gui::window;
 using winapi::module_handle;
+using winapi::test::fixture_permutator;
 
 using boost::shared_ptr;
 
@@ -236,38 +234,11 @@ public:
 typedef boost::mpl::vector<
     lonely_fixture, no_window_fixture, normal_usage_fixture> fixtures;
 
-template<typename Outer>
-struct fixtures_loop
-{
-    template<typename T>
-    struct use : boost::mpl::apply<Outer, T> {};
-
-    typedef typename boost::mpl::fold<
-        fixtures, boost::mpl::vector<>,
-        boost::mpl::push_back< boost::mpl::_1, use<boost::mpl::_2> >
-    >::type type;
-};
-
-/**
- * Allows fixtures to be combined with the windows ownership fixtures
- */
-template<typename T>
-struct fixture_combinator
-{
-    typedef typename boost::mpl::fold<
-        T, boost::mpl::vector<>,
-        boost::mpl::copy<
-            fixtures_loop<boost::mpl::_2>,
-            boost::mpl::back_inserter<boost::mpl::_1>
-        >
-    >::type type;
-};
-
 /**
  * Tests where the menu was created externally and passed to the wrapper as a
  * raw menu.
  *
- * Thest test make sure that, given a menu, we can extra items from it
+ * These test make sure that, given a menu, we can extra items from it
  * correctly.
  */
 BOOST_AUTO_TEST_SUITE(raw_menu_tests)
@@ -339,12 +310,13 @@ struct new_style_string_command_no_ftype_set : public F
     }
 };
 
-typedef fixture_combinator<
+typedef fixture_permutator<
     boost::mpl::vector<
         old_style_string_command<boost::mpl::_>,
         new_style_string_command<boost::mpl::_>,
         new_style_string_command_no_ftype_set<boost::mpl::_>
-    >
+    >,
+    fixtures
 >::type string_command_fixtures;
 
 /**
@@ -407,11 +379,12 @@ struct new_style_bitmap_command : public F
     }
 };
 
-typedef fixture_combinator<
+typedef fixture_permutator<
     boost::mpl::vector<
         old_style_bitmap_command<boost::mpl::_>,
         new_style_bitmap_command<boost::mpl::_>
-    >
+    >,
+    fixtures
 >::type bitmap_command_fixtures;
 
 /**
@@ -475,11 +448,12 @@ struct new_style_string_popup : public F
 };
 
 
-typedef fixture_combinator<
+typedef fixture_permutator<
     boost::mpl::vector<
         old_style_string_popup<boost::mpl::_>,
         new_style_string_popup<boost::mpl::_>
-    >
+    >,
+    fixtures
 >::type string_popup_fixtures;
 
 /**
@@ -607,7 +581,7 @@ struct weird_new_style_separator2 : public F
     }
 };
 
-typedef fixture_combinator<
+typedef fixture_permutator<
     boost::mpl::vector<
         old_style_separator<boost::mpl::_>,
         new_style_separator<boost::mpl::_>,
@@ -615,7 +589,8 @@ typedef fixture_combinator<
         weird_new_style_separator1<boost::mpl::_>,
         weird_old_style_separator2<boost::mpl::_>,
         weird_new_style_separator2<boost::mpl::_>
-    >
+    >,
+    fixtures
 >::type separator_fixtures;
 
 /**

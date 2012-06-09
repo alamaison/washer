@@ -18,8 +18,9 @@ add_definitions(
   -DWIN32_LEAN_AND_MEAN -DBOOST_FILESYSTEM_VERSION=2 -DSTRICT_TYPED_ITEMIDS)
 
 set(TEST_SOURCES
-  wchar_output.hpp
+  fixture_permutator.hpp
   sandbox_fixture.hpp
+  wchar_output.hpp
   dynamic_link_test.cpp
   filesystem_test.cpp
   folder_error_adapter_test.cpp
