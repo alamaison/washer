@@ -33,13 +33,13 @@
 #define WINAPI_GUI_MENU_MENU_ITEMS_HPP
 #pragma once
 
+#include <winapi/gui/menu/buttons.hpp> // menu_button_nature
 #include <winapi/gui/menu/detail/menu_win32.hpp> // get_menu_item_info
-#include <winapi/gui/menu/detail/menu.hpp> // menu_handle
 #include <winapi/gui/menu/menu.hpp>
 #include <winapi/gui/menu/menu_bar.hpp>
-#include <winapi/gui/menu/selectable_menu_item.hpp>
+#include <winapi/gui/menu/menu_handle.hpp>
 #include <winapi/gui/menu/menu_item.hpp>
-#include <winapi/gui/menu/buttons.hpp> // menu_button_nature
+#include <winapi/gui/menu/selectable_menu_item.hpp>
 
 #include <boost/make_shared.hpp>
 #include <boost/static_assert.hpp> // BOOST_STATIC_ASSERT
