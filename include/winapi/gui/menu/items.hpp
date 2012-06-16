@@ -1,7 +1,7 @@
 /**
     @file
 
-    Range of items that can appear in menus and menu bars.
+    Menu items extracted from underlying HMENU.
 
     @if license
 
@@ -29,24 +29,22 @@
     @endif
 */
 
-#ifndef WINAPI_GUI_MENU_MENU_ITEMS_HPP
-#define WINAPI_GUI_MENU_MENU_ITEMS_HPP
+#ifndef WINAPI_GUI_MENU_ITEMS_HPP
+#define WINAPI_GUI_MENU_ITEMS_HPP
 #pragma once
 
 #include <winapi/gui/menu/buttons.hpp> // menu_button_nature
 #include <winapi/gui/menu/detail/menu_win32.hpp> // get_menu_item_info
 #include <winapi/gui/menu/menu.hpp>
-#include <winapi/gui/menu/menu_bar.hpp>
 #include <winapi/gui/menu/menu_handle.hpp>
 #include <winapi/gui/menu/menu_item.hpp>
 #include <winapi/gui/menu/selectable_menu_item.hpp>
 
 #include <boost/make_shared.hpp>
 #include <boost/static_assert.hpp> // BOOST_STATIC_ASSERT
-#include <boost/type_traits/is_convertible.hpp>
 
 #include <cassert> // assert
-#include <stdexcept> // logic_error
+#include <stdexcept> // runtime_error
 #include <string>
 #include <vector>
 
@@ -88,16 +86,6 @@ public:
 
 private:
 
-    virtual MENUITEMINFOW as_menuiteminfo() const
-    {
-        MENUITEMINFOW info = m_button->as_menuiteminfo();
-
-        info.fMask |= MIIM_ID;
-        info.wID = m_command_id;
-
-        return info;
-    }
-
     virtual command_menu_item* do_clone() const
     {
         return new command_menu_item(*this);
@@ -110,12 +98,7 @@ private:
 /**
  * Menu nested in or below main menu bar.
  *
- * Purpose: to associate a caption text and command ID with a menu to ready it
- * for insertion into a menu bar or into another menu.
- *
- * Menus can be used independently so they do not intrinsically have
- * a caption or command ID; these only make sense for menus that are going to
- * be inserted into another menu or menu bar.
+ * Purpose: to extract an item with a submenu from an HMENU.
  */
 class sub_menu : public selectable_menu_item
 {
@@ -136,16 +119,6 @@ public:
 
 private:
 
-    MENUITEMINFOW as_menuiteminfo() const
-    {
-        MENUITEMINFOW info = m_button->as_menuiteminfo();
-
-        info.fMask |= MIIM_SUBMENU;
-        info.hSubMenu = m_menu.handle().get();
-
-        return info;
-    }
-
     virtual menu_item* do_clone() const
     {
         return new sub_menu(*this);
@@ -161,17 +134,6 @@ private:
 class separator_menu_item : public menu_item
 {
 private:
-
-    virtual MENUITEMINFOW as_menuiteminfo() const
-    {
-        MENUITEMINFOW info = MENUITEMINFOW();
-        info.cbSize = sizeof(MENUITEMINFOW);
-
-        info.fMask = MIIM_FTYPE;
-        info.fType = MFT_SEPARATOR;
-
-        return info;
-    }
 
     virtual separator_menu_item* do_clone() const
     {

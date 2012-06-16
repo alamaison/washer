@@ -37,6 +37,7 @@
 #include <winapi/gui/menu/detail/menu_item_iterator.hpp>
 #include <winapi/gui/menu/detail/menu_win32.hpp> // create_menu
 #include <winapi/gui/menu/selectable_menu_item.hpp>
+#include <winapi/gui/menu/selectable_menu_item_description.hpp>
 #include <winapi/gui/menu/menu_handle.hpp>
 
 #include <Windows.h> // MENUITEMINFO
@@ -52,7 +53,8 @@ namespace menu {
 /**
  * Main application window menu bar.
  */
-class menu_bar : private detail::menu_common_core<selectable_menu_item>
+class menu_bar : private detail::menu_common_core<
+    selectable_menu_item, selectable_menu_item_description>
 {
 #if defined (_MSC_VER) && (_MSC_VER > 1400)
     template<typename>
@@ -65,8 +67,8 @@ class menu_bar : private detail::menu_common_core<selectable_menu_item>
     friend class window<wchar_t>;
 #endif
 
-    typedef detail::menu_common_core<selectable_menu_item> core;
-    typedef int iterator_type;
+    typedef detail::menu_common_core<
+        selectable_menu_item, selectable_menu_item_description> core;
 
 public:
 
@@ -92,12 +94,8 @@ public:
     using core::size;
 
     /**
-     * Appends an item onto the end of the menu.
-     */
-    using core::append;
-
-    /**
-     * Insert an item into the menu at the given iterator position.
+     * Create an item based on the given description and insert it into the
+     * menu at the given iterator position.
      *
      * Shuffles existing items along.
      */
@@ -105,7 +103,10 @@ public:
 
     using core::operator[];
 
+    using core::iterator;
+
     using core::begin;
+
     using core::end;
 
     /**

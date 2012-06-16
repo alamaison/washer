@@ -1,7 +1,7 @@
 /**
     @file
 
-    Interface to items that can appear in menu bars as well as menus.
+    Interface to objects describing selectable menu items.
 
     @if license
 
@@ -29,11 +29,11 @@
     @endif
 */
 
-#ifndef WINAPI_GUI_MENU_SELECTABLE_MENU_ITEM_HPP
-#define WINAPI_GUI_MENU_SELECTABLE_MENU_ITEM_HPP
+#ifndef WINAPI_GUI_MENU_SELECTABLE_MENU_ITEM_DESCRIPTION_HPP
+#define WINAPI_GUI_MENU_SELECTABLE_MENU_ITEM_DESCRIPTION_HPP
 #pragma once
 
-#include <winapi/gui/menu/menu_item.hpp>
+#include <winapi/gui/menu/menu_item_description.hpp>
 
 #include <Windows.h> // MENUITEMINFO
 
@@ -41,12 +41,18 @@ namespace winapi {
 namespace gui {
 namespace menu {
 
-class menu_button_nature;
+namespace detail {
+
+template<typename, typename>
+class menu_common_core;
+
+}
 
 /**
- * Interface to items that, when clicked, might result in an action.
+ * Interface to objects that describe (but aren't) menu items that, when 
+ * clicked, might result in an action.
  *
- * These items have an clickable appearance which we are calling a ''button''.
+ * Such items have an clickable appearance which we are calling a ''button''.
  * It is commonly a text caption but can also be a bitmap or a custom drawn
  * item.  Separators are the only non-selectable menu item.
  *
@@ -59,14 +65,20 @@ class menu_button_nature;
  *        However, as these are invalid uses of a separator, we don't support
  *        them.
  */
-class selectable_menu_item : public menu_item
+class selectable_menu_item_description : public menu_item_description
 {
-public:
+    template<typename, typename>
+    friend class detail::menu_common_core;
+
+private:
 
     /**
-     * An immutable model of the menu item's clickable appearance.
+     * Win32 representation of the menu-bar item as a completed MENUITEMINFO.
+     *
+     * Classes that implement menu items expose themselves to the menu and
+     * menu-bar classes through this method.
      */
-    virtual const menu_button_nature& button() const = 0;
+    virtual MENUITEMINFOW as_menuiteminfo() const = 0;
 };
 
 }}} // namespace winapi::gui::menu

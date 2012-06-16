@@ -29,8 +29,8 @@
     @endif
 */
 
-#ifndef WINAPI_GUI_MENU_MENU_BUTTONS_HPP
-#define WINAPI_GUI_MENU_MENU_BUTTONS_HPP
+#ifndef WINAPI_GUI_MENU_BUTTONS_HPP
+#define WINAPI_GUI_MENU_BUTTONS_HPP
 #pragma once
 
 #include <cassert> // assert
@@ -54,9 +54,8 @@ namespace menu {
  */
 class menu_button_nature
 {
-    friend class command_menu_item;
-
-    friend class sub_menu;
+    friend class command_item_description;
+    friend class sub_menu_description;
 
 public:
 

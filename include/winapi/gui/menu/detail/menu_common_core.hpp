@@ -58,14 +58,15 @@ inline boost::shared_ptr<ItemType> menu_item_from_position(
  *
  * @todo  Add a method that can insert at an iterator position.
  */
-template<typename ItemType>
+template<typename ItemType, typename DescriptionType>
 class menu_common_core
 {
-
     typedef ItemType item_type;
-    typedef detail::menu_item_iterator<menu_common_core> iterator;
+    typedef DescriptionType description_type;
 
 public:
+
+    typedef detail::menu_item_iterator<menu_common_core> iterator;
 
     menu_common_core(menu_handle menu) : m_menu(menu) {}
 
@@ -78,21 +79,22 @@ public:
     }
 
     /**
-     * Appends an item onto the end of the menu.
-     */
-    void append(const item_type& menu)
-    {
-        insert_at_position(menu, -1);
-    }
-
-    /**
-     * Insert an item into the menu at the given iterator position.
+     * Create an item based on the given description and insert it into the
+     * menu at the given iterator position.
      *
      * Shuffles existing items along.
      */
-    void insert(const item_type& item, const iterator& position)
+    void insert(const description_type& item, const iterator& position)
     {
         insert_at_position(item, position);
+    }
+
+    /**
+     * Insert an item at the end of the menu.
+     */
+    void insert(const description_type& item)
+    {
+        insert_at_position(item, -1);
     }
 
     boost::shared_ptr<item_type> operator[](size_t position) const
@@ -140,9 +142,9 @@ protected:
 
 private:
 
-    void insert_at_position(const item_type& menu, UINT position)
+    void insert_at_position(const description_type& item, UINT position)
     {
-        MENUITEMINFOW info = menu.as_menuiteminfo();
+        MENUITEMINFOW info = item.as_menuiteminfo();
         // BUG: this function takes ownership of the submenu HMENU but the
         // passed-in menu will still try to destroy it
         detail::win32::insert_menu_item(m_menu.get(), position, TRUE, &info);

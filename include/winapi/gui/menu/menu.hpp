@@ -38,6 +38,7 @@
 #include <winapi/gui/menu/detail/menu_win32.hpp> // create_popup_menu
 #include <winapi/gui/menu/menu_handle.hpp> // menu_handle
 #include <winapi/gui/menu/menu_item.hpp>
+#include <winapi/gui/menu/menu_item_description.hpp>
 
 #include <Windows.h> // MENUITEMINFO
 
@@ -51,12 +52,11 @@ namespace menu {
  *
  * @todo  Add a method that can insert at an iterator position.
  */
-class menu : private detail::menu_common_core<menu_item>
+class menu : private detail::menu_common_core<menu_item, menu_item_description>
 {
-    friend class sub_menu;
+    friend class sub_menu_description;
 
-    typedef detail::menu_common_core<menu_item> core;
-    typedef detail::menu_item_iterator<menu> iterator;
+    typedef detail::menu_common_core<menu_item, menu_item_description> core;
 
 public:
 
@@ -82,18 +82,16 @@ public:
     using core::size;
 
     /**
-     * Appends an item onto the end of the menu.
-     */
-    using core::append;
-
-    /**
-     * Insert an item into the menu at the given iterator position.
+     * Create an item based on the given description and insert it into the
+     * menu at the given iterator position.
      *
      * Shuffles existing items along.
      */
     using core::insert;
 
     using core::operator[];
+
+    using core::iterator;
 
     using core::begin;
     
@@ -120,7 +118,7 @@ public:
 
 private:
 
-    /** To allow sub_menu::as_menuiteminfo to access raw HWND. */
+    /** To allow sub_menu_description::as_menuiteminfo to access raw HWND. */
     using core::handle;
 };
 

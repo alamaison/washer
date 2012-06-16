@@ -32,8 +32,9 @@
 #include "fixture_permutator.hpp"
 #include "wchar_output.hpp" // wchar_t test output
 
+#include <winapi/gui/menu/item_descriptions.hpp> // test subject
+#include <winapi/gui/menu/items.hpp> // test subject
 #include <winapi/gui/menu/menu.hpp> // test subject
-#include <winapi/gui/menu/menu_items.hpp> // test subject
 
 #include <winapi/dynamic_link.hpp> // module_handle
 #include <winapi/gui/windows/window.hpp>
@@ -202,7 +203,7 @@ public:
     static void do_test(menu& m)
     {
         menu_bar b;
-        b.append(sub_menu(string_menu_button(L"Menu"), m));
+        b.insert(sub_menu_description(string_menu_button(L"Menu"), m));
         BOOST_CHECK(b.begin() != b.end());
 
         BOOST_CHECK(m.valid());
@@ -230,7 +231,7 @@ public:
     static void do_test(menu& m)
     {
         menu_bar b;
-        b.append(sub_menu(string_menu_button(L"Menu"), m));
+        b.insert(sub_menu_description(string_menu_button(L"Menu"), m));
         BOOST_CHECK(b.begin() != b.end());
 
         BOOST_CHECK(m.valid());
@@ -729,7 +730,7 @@ BOOST_AUTO_TEST_CASE( string_command_in_bar )
 {
     menu_bar b;
 
-    b.append(command_menu_item(
+    b.insert(command_item_description(
         string_menu_button(L"string command in bar"), 14));
 
     BOOST_CHECK_EQUAL(b.size(), 1);
@@ -744,10 +745,10 @@ BOOST_AUTO_TEST_CASE( bitmap_command_in_bar )
 {
     menu_bar b;
 
-    command_menu_item item =
-        command_menu_item(bitmap_menu_button(test_bitmap()), 13);
+    command_item_description item =
+        command_item_description(bitmap_menu_button(test_bitmap()), 13);
 
-    b.append(item);
+    b.insert(item);
 
     BOOST_CHECK_EQUAL(b.size(), 1);
     BOOST_CHECK(b.begin() != b.end());
@@ -762,12 +763,12 @@ BOOST_AUTO_TEST_CASE( string_popup_in_bar )
     menu_bar b;
 
     menu m;
-    m.append(command_menu_item(string_menu_button(L"Pop"), 1));
+    m.insert(command_item_description(string_menu_button(L"Pop"), 1));
 
-    sub_menu item =
-        sub_menu(string_menu_button(L"string popup in bar"), m);
+    sub_menu_description item =
+        sub_menu_description(string_menu_button(L"string popup in bar"), m);
 
-    b.append(item);
+    b.insert(item);
 
     BOOST_CHECK_EQUAL(b.size(), 1);
     BOOST_CHECK(b.begin() != b.end());
@@ -782,9 +783,9 @@ BOOST_AUTO_TEST_CASE( bitmap_popup_in_bar )
     menu_bar b;
 
     menu m;
-    m.append(command_menu_item(string_menu_button(L"Pop"), 1));
+    m.insert(command_item_description(string_menu_button(L"Pop"), 1));
 
-    b.append(sub_menu(bitmap_menu_button(test_bitmap()), m));
+    b.insert(sub_menu_description(bitmap_menu_button(test_bitmap()), m));
 
     BOOST_CHECK(b.begin() != b.end());
 
@@ -816,7 +817,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( empty_menu, F, menu_ownership_fixtures )
 BOOST_AUTO_TEST_CASE_TEMPLATE( string_command, F, menu_ownership_fixtures )
 {
     menu m;
-    m.append(command_menu_item(string_menu_button(L"Child command"), 1));
+    m.insert(command_item_description(string_menu_button(L"Child command"), 1));
 
     BOOST_CHECK(m.begin() != m.end());
 
@@ -829,7 +830,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( string_command, F, menu_ownership_fixtures )
 BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_command, F, menu_ownership_fixtures )
 {
     menu m;
-    m.append(command_menu_item(bitmap_menu_button(test_bitmap()), 1));
+    m.insert(command_item_description(bitmap_menu_button(test_bitmap()), 1));
 
     BOOST_CHECK(m.begin() != m.end());
 
@@ -842,7 +843,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_command, F, menu_ownership_fixtures )
 BOOST_AUTO_TEST_CASE_TEMPLATE( separator, F, menu_ownership_fixtures )
 {
     menu m;
-    m.append(separator_menu_item());
+    m.insert(separator_description());
 
     BOOST_CHECK(m.begin() != m.end());
 
@@ -857,9 +858,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( string_submenu, F, menu_ownership_fixtures )
     menu m;
     menu sub;
 
-    sub.append(command_menu_item(string_menu_button(L"Boo"), 1));
+    sub.insert(command_item_description(string_menu_button(L"Boo"), 1));
 
-    m.append(sub_menu(string_menu_button(L"Pop"), sub));
+    m.insert(sub_menu_description(string_menu_button(L"Pop"), sub));
 
     BOOST_CHECK(m.begin() != m.end());
 
@@ -877,9 +878,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_submenu, F, menu_ownership_fixtures )
     BOOST_CHECK(m.begin() == m.end());
     BOOST_CHECK(sub.begin() == sub.end());
 
-    sub.append(command_menu_item(string_menu_button(L"Boo"), 1));
+    sub.insert(command_item_description(string_menu_button(L"Boo"), 1));
 
-    m.append(sub_menu(bitmap_menu_button(test_bitmap()), sub));
+    m.insert(sub_menu_description(bitmap_menu_button(test_bitmap()), sub));
 
     BOOST_CHECK(m.begin() != m.end());
 
@@ -893,21 +894,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( mixed_items, F, menu_ownership_fixtures )
 {
     menu m;
 
-    m.append(command_menu_item(string_menu_button(L"String command"), 1));
+    m.insert(command_item_description(string_menu_button(L"String command"), 1));
 
-    m.append(command_menu_item(bitmap_menu_button(test_bitmap()), 2));
+    m.insert(command_item_description(bitmap_menu_button(test_bitmap()), 2));
 
-    m.append(separator_menu_item());
+    m.insert(separator_description());
 
     menu sub;
 
-    sub.append(command_menu_item(string_menu_button(L"String sub"), 3));
+    sub.insert(command_item_description(string_menu_button(L"String sub"), 3));
 
-    sub.append(separator_menu_item());
+    sub.insert(separator_description());
 
-    sub.append(command_menu_item(bitmap_menu_button(test_bitmap()), 4));
+    sub.insert(command_item_description(bitmap_menu_button(test_bitmap()), 4));
 
-    m.append(sub_menu(string_menu_button(L"Lalala"), sub));
+    m.insert(sub_menu_description(string_menu_button(L"Lalala"), sub));
 
     F::do_test(m);
 }
