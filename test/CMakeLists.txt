@@ -28,6 +28,8 @@ set(TEST_SOURCES
   global_lock_test.cpp
   hook_test.cpp
   icon_test.cpp
+  menu_item_description_test.cpp
+  menu_item_test.cpp
   menu_test.cpp
   module.cpp
   pidl_iterator_test.cpp
