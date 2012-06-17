@@ -66,9 +66,12 @@ class menu_common_core
 
 public:
 
-    typedef detail::menu_item_iterator<menu_common_core> iterator;
+    typedef detail::menu_item_iterator<menu_common_core, item_type>
+        iterator;
+    typedef detail::menu_item_iterator<menu_common_core, const item_type>
+        const_iterator;
 
-    menu_common_core(menu_handle menu) : m_menu(menu) {}
+    explicit menu_common_core(menu_handle menu) : m_menu(menu) {}
 
     /**
      * Returns the number of items in the menu.
@@ -150,7 +153,7 @@ private:
         detail::win32::insert_menu_item(m_menu.get(), position, TRUE, &info);
     }
 
-    const menu_handle m_menu;
+    menu_handle m_menu;
 };
 
 }}}} // namespace winapi::gui::menu::detail

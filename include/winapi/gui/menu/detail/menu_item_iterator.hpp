@@ -34,10 +34,10 @@
 #pragma once
 
 #include <boost/iterator/iterator_facade.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
 
 #include <cassert> // assert
-#include <memory> // auto_ptr
 
 namespace winapi {
 namespace gui {
@@ -47,18 +47,29 @@ class menu_item;
 
 namespace detail {
 
-template<typename T>
+template<typename Menu, typename Item>
 class menu_item_iterator :
     public boost::iterator_facade<
-        menu_item_iterator<T>, menu_item, std::random_access_iterator_tag>
+        menu_item_iterator<Menu, Item>, Item, std::random_access_iterator_tag>
 {
     friend boost::iterator_core_access;
+    // Enables conversion constructor to work:
+    template<typename,typename> friend class menu_item_iterator;
 
 public:
 
-    explicit menu_item_iterator(const T& menu) : m_menu(menu), m_pos(0) {}
+    explicit menu_item_iterator(const Menu& menu) : m_menu(menu), m_pos(0) {}
 
-    static menu_item_iterator end(const T& menu)
+    /**
+     * Copy conversion constructor.
+     *
+     * Purpose: to allow mutable iterators to be converted to const iterators.
+     */
+    template<typename OtherValue>
+    menu_item_iterator(const menu_item_iterator<Menu, OtherValue>& other)
+        : m_menu(other.m_menu), m_pos(other.m_pos) {}
+
+    static menu_item_iterator end(const Menu& menu)
     {
         return menu_item_iterator(menu, end_tag());
     }
@@ -67,7 +78,7 @@ private:
 
     class end_tag {};
 
-    menu_item_iterator(const T& menu, const end_tag&)
+    menu_item_iterator(const Menu& menu, const end_tag&)
         : m_menu(menu), m_pos(m_menu.size()) {}
 
     bool equal(menu_item_iterator const& other) const
@@ -106,9 +117,9 @@ private:
         m_current_item.reset();
     }
 
-    const T m_menu;
+    Menu m_menu;
     size_t m_pos;
-    mutable std::auto_ptr<menu_item> m_current_item;
+    mutable boost::shared_ptr<Item> m_current_item;
 };
 
 }}}} // namespace winapi::gui::menu::detail

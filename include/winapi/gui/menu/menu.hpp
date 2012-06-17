@@ -92,6 +92,7 @@ public:
     using core::operator[];
 
     using core::iterator;
+    using core::const_iterator;
 
     using core::begin;
     
@@ -105,6 +106,14 @@ public:
         const core& other_core = other;
         const core& this_core = *this;
         return this_core == other_core;
+    }
+
+    /**
+     * Test if objects wrap different Win32 menus.
+     */
+    bool operator!=(const menu& other) const
+    {
+        return !(*this == other);
     }
 
     /**

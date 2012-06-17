@@ -104,19 +104,28 @@ public:
     using core::operator[];
 
     using core::iterator;
+    using core::const_iterator;
 
     using core::begin;
 
     using core::end;
 
     /**
-     * Test if objects wrap the same Win32 menu.
+     * Test if objects wrap the same Win32 menu bar.
      */
     bool operator==(const menu_bar& other) const
     {
         const core& other_core = other;
         const core& this_core = *this;
         return this_core == other_core;
+    }
+
+    /**
+     * Test if objects wrap different Win32 menu bars.
+     */
+    bool operator!=(const menu_bar& other) const
+    {
+        return !(*this == other);
     }
 
     /**

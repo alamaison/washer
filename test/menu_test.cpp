@@ -36,6 +36,7 @@
 #include <winapi/gui/menu/items.hpp> // test subject
 #include <winapi/gui/menu/menu.hpp> // test subject
 
+#include <boost/foreach.hpp> // BOOST_FOREACH
 #include <boost/test/unit_test.hpp>
 
 using namespace winapi::gui::menu;
@@ -60,8 +61,31 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( create_empty_menu, F, menu_ownership_fixtures )
     BOOST_CHECK(m.begin() == m.end());
     BOOST_CHECK_EQUAL(m.size(), 0);
     BOOST_CHECK_THROW(m[0], std::runtime_error);
+    BOOST_FOREACH(menu_item& item, m)
+    {
+        BOOST_FAIL("Empty menu should not iterate");
+    }
 
     F::do_test(m);
+}
+
+
+/**
+ * Test menu copying.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( menu_copy, F, menu_ownership_fixtures )
+{
+    menu m;
+
+    // Copy constructor
+    menu n = m;
+    BOOST_CHECK(m == n);
+
+    // Copy assignment
+    menu p;
+    n = p;
+    BOOST_CHECK(n == p);
+    BOOST_CHECK(n != m);
 }
 
 /**
@@ -74,6 +98,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( empty_menu_bar, F, menu_ownership_fixtures )
     BOOST_CHECK(m.begin() == m.end());
     BOOST_CHECK_EQUAL(m.size(), 0);
     BOOST_CHECK_THROW(m[0], std::runtime_error);
+    BOOST_FOREACH(menu_item& item, m)
+    {
+        BOOST_FAIL("Empty menu should not iterate");
+    }
 
     F::do_test(m);
 }
@@ -89,6 +117,10 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( existing_empty_menu, F, menu_fixtures )
     BOOST_CHECK(m.begin() == m.end());
     BOOST_CHECK_EQUAL(m.size(), 0);
     BOOST_CHECK_THROW(m[0], std::runtime_error);
+    BOOST_FOREACH(menu_item& item, m)
+    {
+        BOOST_FAIL("Empty menu should not iterate");
+    }
 
     F::do_test(m);
 }
@@ -154,6 +186,31 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( create_submenu, F, menu_fixtures )
     BOOST_CHECK_THROW(m[1], std::runtime_error);
 
     F::do_test(m);
+}
+
+/**
+ * Test iterator copying.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_copy, F, menu_fixtures )
+{
+    F::test_menu t = F::create_menu_to_test();
+    F::menu_type m = t.menu();
+
+    // Copy constructor
+    F::menu_type::iterator start = m.begin();
+
+    // Copy conversion constructor
+    F::menu_type::const_iterator const_start = m.begin();
+
+    BOOST_CHECK(start == const_start);
+
+    // Copy assignment
+    start = m.begin();
+
+    // Copy conversion assignment
+    const_start = m.begin();
+
+    BOOST_CHECK(start == const_start);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
