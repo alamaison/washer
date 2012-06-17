@@ -35,7 +35,7 @@
 
 #include <winapi/gui/menu/menu_item.hpp>
 
-#include <Windows.h> // MENUITEMINFO
+#include <boost/shared_ptr.hpp>
 
 namespace winapi {
 namespace gui {
@@ -64,9 +64,14 @@ class selectable_menu_item : public menu_item
 public:
 
     /**
-     * An immutable model of the menu item's clickable appearance.
+     * The menu item's clickable appearance.
      */
-    virtual const menu_button_nature& button() const = 0;
+    virtual boost::shared_ptr<menu_button_nature> button() const = 0;
+
+    virtual bool is_default() const = 0;
+    virtual bool is_enabled() const = 0;
+    virtual bool is_checked() const = 0;
+    virtual bool is_highlighted() const = 0;
 };
 
 }}} // namespace winapi::gui::menu

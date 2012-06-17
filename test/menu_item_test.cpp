@@ -54,7 +54,9 @@ using winapi::test::fixture_permutator;
 using winapi::test::menu_fixtures;
 using winapi::test::menu_ownership_fixtures;
 
+using boost::dynamic_pointer_cast;
 using boost::shared_ptr;
+using boost::shared_polymorphic_cast;
 
 using std::string;
 using std::wstring;
@@ -159,14 +161,19 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     BOOST_CHECK(m[0]);
 
     shared_ptr<command_menu_item> item =
-        boost::shared_polymorphic_cast<command_menu_item>(m[0]);
+        shared_polymorphic_cast<command_menu_item>(m[0]);
 
     BOOST_CHECK_EQUAL(item->command_id(), 42);
 
-    const string_menu_button& button =
-        dynamic_cast<const string_menu_button&>(item->button());
+    BOOST_CHECK(item->is_enabled());
+    BOOST_CHECK(!item->is_default());
+    BOOST_CHECK(!item->is_highlighted());
+    BOOST_CHECK(!item->is_checked());
 
-    BOOST_CHECK_EQUAL(button.caption(), L"Bob");
+    boost::shared_ptr<string_menu_button> button =
+        dynamic_pointer_cast<string_menu_button>(item->button());
+
+    BOOST_CHECK_EQUAL(button->caption(), L"Bob");
 
     F::do_test(m);
 }
@@ -228,14 +235,19 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     BOOST_CHECK(m[0]);
 
     shared_ptr<command_menu_item> item =
-        boost::shared_polymorphic_cast<command_menu_item>(m[0]);
+        shared_polymorphic_cast<command_menu_item>(m[0]);
+
+    BOOST_CHECK(item->is_enabled());
+    BOOST_CHECK(!item->is_default());
+    BOOST_CHECK(!item->is_highlighted());
+    BOOST_CHECK(!item->is_checked());
 
     BOOST_CHECK_EQUAL(item->command_id(), 42);
 
-    const bitmap_menu_button& button =
-        dynamic_cast<const bitmap_menu_button&>(item->button());
+    shared_ptr<bitmap_menu_button> button =
+        dynamic_pointer_cast<bitmap_menu_button>(item->button());
 
-    BOOST_CHECK(button.bitmap() == bitmap);
+    BOOST_CHECK(button->bitmap() == bitmap);
 
     F::do_test(m);
 }
@@ -300,13 +312,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     BOOST_CHECK(m.begin() != m.end());
     BOOST_CHECK(m[0]);
 
-    shared_ptr<sub_menu> item =
-        boost::shared_polymorphic_cast<sub_menu>(m[0]);
+    shared_ptr<sub_menu> item = shared_polymorphic_cast<sub_menu>(m[0]);
 
-    const string_menu_button& button =
-        dynamic_cast<const string_menu_button&>(item->button());
+    BOOST_CHECK(item->is_enabled());
+    BOOST_CHECK(!item->is_default());
+    BOOST_CHECK(!item->is_highlighted());
+    BOOST_CHECK(!item->is_checked());
 
-    BOOST_CHECK_EQUAL(button.caption(), L"Bob");
+    shared_ptr<string_menu_button> button =
+        dynamic_pointer_cast<string_menu_button>(item->button());
+
+    BOOST_CHECK_EQUAL(button->caption(), L"Bob");
 
     menu& submenu = item->menu();
     BOOST_CHECK(submenu.valid());
@@ -315,11 +331,16 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     BOOST_CHECK(submenu[0]);
 
     shared_ptr<command_menu_item> sub_item =
-        boost::shared_polymorphic_cast<command_menu_item>(submenu[0]);
+        shared_polymorphic_cast<command_menu_item>(submenu[0]);
+
+    BOOST_CHECK(sub_item->is_enabled());
+    BOOST_CHECK(!sub_item->is_default());
+    BOOST_CHECK(!sub_item->is_highlighted());
+    BOOST_CHECK(!sub_item->is_checked());
 
     BOOST_CHECK_EQUAL(sub_item->command_id(), 7);
     BOOST_CHECK_EQUAL(
-        dynamic_cast<const string_menu_button&>(sub_item->button()).caption(),
+        dynamic_pointer_cast<string_menu_button>(sub_item->button())->caption(),
         L"Pop");
 
     F::do_test(m);
@@ -432,7 +453,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( extract_separator_item, F, separator_fixtures )
 
     typedef const separator_menu_item item_type;
 
-    BOOST_CHECK_NO_THROW(boost::shared_polymorphic_cast<item_type>(m[0]));
+    BOOST_CHECK_NO_THROW(shared_polymorphic_cast<item_type>(m[0]));
 
     F::do_test(m);
 }

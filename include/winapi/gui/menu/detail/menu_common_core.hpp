@@ -33,6 +33,7 @@
 #define WINAPI_GUI_MENU_DETAIL_MENU_COMMON_CORE_HPP
 #pragma once
 
+#include <winapi/gui/menu/detail/item_proxy.hpp>
 #include <winapi/gui/menu/detail/menu_item_iterator.hpp>
 #include <winapi/gui/menu/menu_handle.hpp> // menu_handle
 
@@ -47,11 +48,9 @@ namespace gui {
 namespace menu {
 namespace detail {
 
-class menu_item_proxy;
-
 template<typename ItemType>
 inline boost::shared_ptr<ItemType> menu_item_from_position(
-    const menu_item_proxy& item);
+    const item_proxy& item);
 
 /**
  * Object implementing the common aspects of wrapping a menu and a menu bar.
@@ -103,7 +102,7 @@ public:
     boost::shared_ptr<item_type> operator[](size_t position) const
     {
         return detail::menu_item_from_position<item_type>(
-            menu_item_proxy(handle(), position));
+            item_proxy(handle(), position));
     }
 
     iterator begin()

@@ -34,19 +34,18 @@
 #pragma once
 
 #include <winapi/gui/menu/buttons.hpp> // menu_button_nature
-#include <winapi/gui/menu/detail/menu_win32.hpp> // get_menu_item_info
+#include <winapi/gui/menu/detail/item_common.hpp> // selectable_item_core
+#include <winapi/gui/menu/detail/item_proxy.hpp>
 #include <winapi/gui/menu/menu.hpp>
 #include <winapi/gui/menu/menu_handle.hpp>
 #include <winapi/gui/menu/menu_item.hpp>
 #include <winapi/gui/menu/selectable_menu_item.hpp>
 
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/static_assert.hpp> // BOOST_STATIC_ASSERT
 
-#include <cassert> // assert
 #include <stdexcept> // runtime_error
-#include <string>
-#include <vector>
 
 #include <Windows.h> // MENUITEMINFO
 
@@ -64,15 +63,35 @@ class command_menu_item : public selectable_menu_item
 {
 public:
 
-    command_menu_item(const menu_button_nature& button_nature, UINT command_id)
-        : m_button(button_nature.clone()), m_command_id(command_id) {}
+    command_menu_item(const detail::item_proxy& item, UINT command_id)
+        : m_core(item), m_command_id(command_id) {}
 
     /**
      * The button description for this command item.
      */
-    virtual const menu_button_nature& button() const
+    virtual boost::shared_ptr<menu_button_nature> button() const
     {
-        return *m_button;
+        return m_core.button();
+    }
+
+    virtual bool is_default() const
+    {
+        return m_core.is_default();
+    }
+
+    virtual bool is_enabled() const
+    {
+        return m_core.is_enabled();
+    }
+
+    virtual bool is_checked() const
+    {
+        return m_core.is_checked();
+    }
+
+    virtual bool is_highlighted() const
+    {
+        return m_core.is_highlighted();
     }
 
     /**
@@ -91,8 +110,8 @@ private:
         return new command_menu_item(*this);
     }
 
-    const boost::shared_ptr<menu_button_nature> m_button;
-    const UINT m_command_id;
+    detail::selectable_item_core m_core;
+    UINT m_command_id;
 };
 
 /**
@@ -104,12 +123,32 @@ class sub_menu : public selectable_menu_item
 {
 public:
 
-    sub_menu(const menu_button_nature& button_nature, const menu& menu)
-        : m_button(button_nature.clone()), m_menu(menu) {}
+    sub_menu(const detail::item_proxy& item, const menu& menu)
+        : m_core(item), m_menu(menu) {}
 
-    virtual const menu_button_nature& button() const
+    virtual boost::shared_ptr<menu_button_nature> button() const
     {
-        return *m_button;
+        return m_core.button();
+    }
+
+    virtual bool is_default() const
+    {
+        return m_core.is_default();
+    }
+
+    virtual bool is_enabled() const
+    {
+        return m_core.is_enabled();
+    }
+
+    virtual bool is_checked() const
+    {
+        return m_core.is_checked();
+    }
+
+    virtual bool is_highlighted() const
+    {
+        return m_core.is_highlighted();
     }
 
     menu menu() const
@@ -124,8 +163,9 @@ private:
         return new sub_menu(*this);
     }
 
-    const boost::shared_ptr<menu_button_nature> m_button;
-    const ::winapi::gui::menu::menu m_menu;
+
+    detail::selectable_item_core m_core;
+    ::winapi::gui::menu::menu m_menu;
 };
 
 /**
@@ -142,136 +182,6 @@ private:
 };
 
 namespace detail {
-
-    /**
-     * Combines a menu and a menu position.
-     *
-     * Purpose: to abstract the notion of an item (whose type we do not know
-     *          yet) at a particular point in a menu.
-     *
-     * Encapsulates the operations that only make sense when a menu and
-     * a menu item position exist in unison.
-     */
-    class menu_item_proxy
-    {
-    public:
-
-        menu_item_proxy(const menu_handle& menu, UINT position)
-            : m_handle(menu), m_position(position) {}
-
-        MENUITEMINFOW get_menuiteminfo(UINT fMask) const
-        {
-            MENUITEMINFOW info = MENUITEMINFOW();
-            info.cbSize = sizeof(MENUITEMINFOW);
-
-            info.fMask = fMask;
-            detail::win32::get_menu_item_info(
-                m_handle.get(), m_position, TRUE, &info);
-
-            return info;
-        }
-
-        /**
-         * Getting the string from a MENUITEMINFO gets its own special method
-         * because of the double-call semantics and buffer ownership.
-         */
-        std::wstring get_caption() const
-        {
-            MENUITEMINFOW info = get_menuiteminfo(MIIM_FTYPE | MIIM_STRING);
-
-            assert(
-                (info.fType & (MFT_BITMAP | MFT_OWNERDRAW | MFT_SEPARATOR))
-                == 0);
-
-            std::vector<wchar_t> buffer(info.cch + 1);
-            info.cch = buffer.size();
-            info.dwTypeData = (!buffer.empty()) ? &buffer[0] : NULL;
-            detail::win32::get_menu_item_info(
-                m_handle.get(), m_position, TRUE, &info);
-
-            if (info.cch > 0)
-            {
-                assert(info.dwTypeData);
-                return std::wstring(info.dwTypeData, info.cch);
-            }
-            else
-            {
-                return std::wstring();
-            }
-        }
-
-    private:
-
-        const menu_handle m_handle;
-        const UINT m_position;
-    };
-
-    template<UINT Mft>
-    struct item_type_converter
-    {
-        static boost::shared_ptr<menu_button_nature> convert(
-            const menu_item_proxy& /*item*/);
-    };
-
-    template<>
-    struct item_type_converter<MFT_BITMAP> 
-    {
-        static boost::shared_ptr<menu_button_nature> convert(
-            const menu_item_proxy& item)
-        {
-            // Old-style whole-button bitmap specified through dwTypeData and
-            // MFT_BITMAP (MF_BITMAP) requires MIIM_TYPE rather than MIIM_FTYPE
-            MENUITEMINFOW info = item.get_menuiteminfo(MIIM_TYPE);
-
-            HBITMAP bitmap = reinterpret_cast<HBITMAP>(info.dwTypeData);
-            return boost::make_shared<bitmap_menu_button>(bitmap);
-        }
-    };
-
-    template<>
-    struct item_type_converter<MFT_OWNERDRAW>
-    {
-        /**
-         * @todo  Include custom data in dwTypeData and dwItemData.
-         */
-        static boost::shared_ptr<menu_button_nature> convert(
-            const menu_item_proxy& item)
-        {
-            return boost::make_shared<owner_drawn_menu_button>();
-        }
-    };
-
-    template<>
-    struct item_type_converter<MFT_STRING>
-    {
-        static boost::shared_ptr<menu_button_nature> convert(
-            const menu_item_proxy& item)
-        {
-            return boost::make_shared<string_menu_button>(item.get_caption());
-        }
-    };
-
-    inline boost::shared_ptr<menu_button_nature> convert_menu_button(
-        const MENUITEMINFOW& info, const menu_item_proxy& item)
-    {
-        if (info.fType & MFT_BITMAP)
-        {
-            return item_type_converter<MFT_BITMAP>::convert(item);
-        }
-        else if (info.fType & MFT_OWNERDRAW)
-        {
-            // MSDN doesn't say that MFT_OWNERDRAWN is part of the
-            // mutually exclusive set of flags but I don't see how it couldn't
-            // be.  These flags specify the meaning of dwTypeData and cch which
-            // MFT_OWNERDRAWN gives a user-defined meaning.
-            return item_type_converter<MFT_OWNERDRAW>::convert(item);
-        }
-        else
-        {
-            // MFT_STRING which is zero so can only be detected by elimination
-            return item_type_converter<MFT_STRING>::convert(item);
-        }
-    }
 
     /**
      * Do correct thing when encountering a separator item.
@@ -305,7 +215,7 @@ namespace detail {
 
     template<typename ItemType>
     inline boost::shared_ptr<ItemType>
-    menu_item_from_position(const menu_item_proxy& item)
+    menu_item_from_position(const item_proxy& item)
     {
         // MIIM_SUBMENU is part of the mask so isn't set by GetMenuItemInfo.
         // We have to set it and check hSubMenu to decide if this is a popup
@@ -325,18 +235,15 @@ namespace detail {
         }
         else
         {
-            const boost::shared_ptr<menu_button_nature> button =
-                convert_menu_button(info, item);
-
             if (info.hSubMenu)
             {
                 return boost::make_shared<sub_menu>(
-                    *button, menu_handle::foster_handle(info.hSubMenu));
+                    item, menu_handle::foster_handle(info.hSubMenu));
             }
             else
             {
                 return boost::make_shared<command_menu_item>(
-                    *button, item.get_menuiteminfo(MIIM_ID).wID);
+                    item, item.get_menuiteminfo(MIIM_ID).wID);
             }
         }
     }
