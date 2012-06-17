@@ -213,5 +213,133 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_copy, F, menu_fixtures )
     BOOST_CHECK(start == const_start);
 }
 
+/**
+ * Test iterator forward-traversal.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_increment, F, menu_fixtures )
+{
+    F::test_menu t = F::create_menu_to_test();
+    F::menu_type m = t.menu();
+
+    winapi::test::detail::do_insertion(
+        t.handle().get(), L"C", 42, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+    winapi::test::detail::do_insertion(
+        t.handle().get(), L"D", 43, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+
+    F::menu_type::iterator it = m.begin();
+
+    BOOST_CHECK(it != m.end());
+
+    it++;
+
+    BOOST_CHECK(it != m.begin());
+    BOOST_CHECK(it != m.end());
+
+    it++;
+
+    BOOST_CHECK(it == m.end());
+
+    BOOST_CHECK_THROW(++it, std::runtime_error);
+}
+
+/**
+ * Test iterator backward-traversal.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_decrement, F, menu_fixtures )
+{
+    F::test_menu t = F::create_menu_to_test();
+    F::menu_type m = t.menu();
+
+    winapi::test::detail::do_insertion(
+        t.handle().get(), L"C", 42, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+    winapi::test::detail::do_insertion(
+        t.handle().get(), L"D", 43, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+
+    F::menu_type::iterator it = m.end();
+
+    BOOST_CHECK(it != m.begin());
+
+    it--;
+
+    BOOST_CHECK(it != m.begin());
+    BOOST_CHECK(it != m.end());
+
+    it--;
+
+    BOOST_CHECK(it == m.begin());
+
+    BOOST_CHECK_THROW(--it, std::runtime_error);
+}
+
+/**
+ * Test iterator forward skip.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_advance, F, menu_fixtures )
+{
+    F::test_menu t = F::create_menu_to_test();
+    F::menu_type m = t.menu();
+
+    winapi::test::detail::do_insertion(
+        t.handle().get(), L"C", 42, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+    winapi::test::detail::do_insertion(
+        t.handle().get(), L"D", 43, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+
+    F::menu_type::iterator it = m.begin();
+
+    BOOST_CHECK(it != m.end());
+
+    it = it + 2;
+
+    BOOST_CHECK(it == m.end());
+
+    BOOST_CHECK_THROW(it + 1, std::runtime_error);
+    BOOST_CHECK_THROW(it - 3, std::runtime_error);
+}
+
+/**
+ * Test iterator reverse skip.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_reverse, F, menu_fixtures )
+{
+    F::test_menu t = F::create_menu_to_test();
+    F::menu_type m = t.menu();
+
+    winapi::test::detail::do_insertion(
+        t.handle().get(), L"C", 42, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+    winapi::test::detail::do_insertion(
+        t.handle().get(), L"D", 43, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+
+    F::menu_type::iterator it = m.end();
+
+    BOOST_CHECK(it != m.begin());
+
+    it = it - 2;
+
+    BOOST_CHECK(it == m.begin());
+
+    BOOST_CHECK_THROW(it - 1, std::runtime_error);
+    BOOST_CHECK_THROW(it + 3, std::runtime_error);
+}
+
+/**
+ * Test iterator forward skip.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_distance, F, menu_fixtures )
+{
+    F::test_menu t = F::create_menu_to_test();
+    F::menu_type m = t.menu();
+
+    winapi::test::detail::do_insertion(
+        t.handle().get(), L"C", 42, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+    winapi::test::detail::do_insertion(
+        t.handle().get(), L"D", 43, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+
+    F::menu_type::iterator it = m.begin();
+
+    BOOST_CHECK_EQUAL(m.begin() - m.begin(), 0);
+    BOOST_CHECK_EQUAL(m.begin() - m.end(), -2);
+    BOOST_CHECK_EQUAL(m.end() - m.begin(), 2);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 

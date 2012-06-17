@@ -105,16 +105,36 @@ private:
 
     void increment()
     {
-        size_t size = m_menu.size();
+        advance(1);
+    }
 
-        if (m_pos >= size) // leaves iterator unchanged
+    void decrement()
+    {
+        advance(-1);
+    }
+
+    void advance(typename iterator_facade_::difference_type step)
+    {
+        if (step + m_pos < 0) // leaves iterator unchanged
+        {
+            BOOST_THROW_EXCEPTION(
+                std::range_error("Cannot decrement past beginning of the menu"));
+        }
+
+        if (step + m_pos > m_menu.size()) // leaves iterator unchanged
         {
             BOOST_THROW_EXCEPTION(
                 std::range_error("Cannot increment past end of the menu"));
         }
 
-        ++m_pos; // iterator changed from here
+        m_pos += step; // iterator changed from here
         m_current_item.reset();
+    }
+
+    typename iterator_facade_::difference_type distance_to(
+        const menu_item_iterator& other) const
+    {
+        return other.m_pos - m_pos;
     }
 
     Menu m_menu;
