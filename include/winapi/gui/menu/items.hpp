@@ -63,8 +63,7 @@ class command_menu_item : public selectable_menu_item
 {
 public:
 
-    command_menu_item(const detail::item_proxy& item, UINT command_id)
-        : m_core(item), m_command_id(command_id) {}
+    command_menu_item(const detail::item_proxy& item) : m_core(item) {}
 
     /**
      * The button description for this command item.
@@ -100,7 +99,7 @@ public:
      */
     UINT command_id() const
     {
-        return m_command_id;
+        return m_core.get_menuiteminfo(MIIM_ID).wID;
     }
 
 private:
@@ -111,7 +110,6 @@ private:
     }
 
     detail::selectable_item_core m_core;
-    UINT m_command_id;
 };
 
 /**
@@ -123,8 +121,7 @@ class sub_menu : public selectable_menu_item
 {
 public:
 
-    sub_menu(const detail::item_proxy& item, const menu& menu)
-        : m_core(item), m_menu(menu) {}
+    sub_menu(const detail::item_proxy& item) : m_core(item) {}
 
     virtual boost::shared_ptr<menu_button_nature> button() const
     {
@@ -153,7 +150,9 @@ public:
 
     menu menu() const
     {
-        return m_menu;
+        HMENU submenu = m_core.get_menuiteminfo(MIIM_SUBMENU).hSubMenu;
+        assert(submenu);
+        return ::winapi::gui::menu::menu(menu_handle::foster_handle(submenu));
     }
 
 private:
@@ -163,9 +162,7 @@ private:
         return new sub_menu(*this);
     }
 
-
     detail::selectable_item_core m_core;
-    ::winapi::gui::menu::menu m_menu;
 };
 
 /**
@@ -237,13 +234,11 @@ namespace detail {
         {
             if (info.hSubMenu)
             {
-                return boost::make_shared<sub_menu>(
-                    item, menu_handle::foster_handle(info.hSubMenu));
+                return boost::make_shared<sub_menu>(item);
             }
             else
             {
-                return boost::make_shared<command_menu_item>(
-                    item, item.get_menuiteminfo(MIIM_ID).wID);
+                return boost::make_shared<command_menu_item>(item);
             }
         }
     }

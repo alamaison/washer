@@ -76,6 +76,11 @@ public:
         return (m_item.get_menuiteminfo(MIIM_STATE).fState & MFS_HILITE) != 0;
     }
 
+    MENUITEMINFOW get_menuiteminfo(UINT mask) const
+    {
+        return m_item.get_menuiteminfo(mask);
+    }
+
 private:
 
     item_proxy m_item;
