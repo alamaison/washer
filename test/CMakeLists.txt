@@ -30,6 +30,7 @@ set(TEST_SOURCES
   icon_test.cpp
   menu_item_description_test.cpp
   menu_item_test.cpp
+  menu_item_visitor_test.cpp
   menu_test.cpp
   module.cpp
   pidl_iterator_test.cpp

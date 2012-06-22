@@ -312,12 +312,36 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     BOOST_CHECK(m.begin() != m.end());
     BOOST_CHECK(m[0]);
 
+    class submenu_state_test : public menu_item_visitor<boost::any>
+    {
+    public:
+
+        boost::any visit(separator_menu_item&)
+        {
+            BOOST_FAIL("Separator unexpected");
+            return boost::any();
+        }
+
+        boost::any visit(command_menu_item&)
+        {
+            BOOST_FAIL("Command item unexpected");
+            return boost::any();
+        }
+
+        boost::any visit(sub_menu& item)
+        {
+            BOOST_CHECK(item.is_enabled());
+            BOOST_CHECK(!item.is_default());
+            BOOST_CHECK(!item.is_highlighted());
+            BOOST_CHECK(!item.is_checked());
+            return boost::any();
+        }
+    };
+
+    m[0]->accept(submenu_state_test());
+
     shared_ptr<sub_menu> item = shared_polymorphic_cast<sub_menu>(m[0]);
 
-    BOOST_CHECK(item->is_enabled());
-    BOOST_CHECK(!item->is_default());
-    BOOST_CHECK(!item->is_highlighted());
-    BOOST_CHECK(!item->is_checked());
 
     shared_ptr<string_menu_button> button =
         dynamic_pointer_cast<string_menu_button>(item->button());

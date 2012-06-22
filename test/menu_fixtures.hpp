@@ -311,6 +311,10 @@ struct menu_bar_creator : public F
     }
 };
 
+typedef boost::mpl::vector<
+    normal_menu_creator<boost::mpl::_>, menu_bar_creator<boost::mpl::_> >
+menu_creator_fixtures;
+
 typedef fixture_permutator<
     boost::mpl::vector<
         normal_menu_creator<boost::mpl::_>,

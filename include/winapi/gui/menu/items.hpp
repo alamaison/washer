@@ -65,6 +65,11 @@ public:
 
     command_menu_item(const detail::item_proxy& item) : m_core(item) {}
 
+    virtual boost::any accept(menu_item_visitor<boost::any>& visitor)
+    {
+        return visitor.visit(*this);
+    }
+
     /**
      * The button description for this command item.
      */
@@ -123,6 +128,11 @@ public:
 
     sub_menu(const detail::item_proxy& item) : m_core(item) {}
 
+    virtual boost::any accept(menu_item_visitor<boost::any>& visitor)
+    {
+        return visitor.visit(*this);
+    }
+
     virtual boost::shared_ptr<menu_button_nature> button() const
     {
         return m_core.button();
@@ -170,6 +180,13 @@ private:
  */
 class separator_menu_item : public menu_item
 {
+public:
+
+    virtual boost::any accept(menu_item_visitor<boost::any>& visitor)
+    {
+        return visitor.visit(*this);
+    }
+
 private:
 
     virtual separator_menu_item* do_clone() const

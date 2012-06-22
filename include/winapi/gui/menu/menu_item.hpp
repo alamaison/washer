@@ -33,6 +33,8 @@
 #define WINAPI_GUI_MENU_MENU_ITEM_HPP
 #pragma once
 
+#include <boost/any.hpp>
+
 #include <cassert> // assert
 
 #include <Windows.h> // MENUITEMINFO
@@ -40,6 +42,23 @@
 namespace winapi {
 namespace gui {
 namespace menu {
+
+class separator_menu_item;
+class command_menu_item;
+class sub_menu;
+
+template<typename ReturnType=void>
+class menu_item_visitor
+{
+public:
+
+    ~menu_item_visitor() {}
+
+    virtual ReturnType visit(separator_menu_item&) = 0;
+    virtual ReturnType visit(command_menu_item&) = 0;
+    virtual ReturnType visit(sub_menu&) = 0;
+};
+
 
 /**
  * Interface to items which can only be added to regular menus, not menu bars.
@@ -49,6 +68,8 @@ class menu_item
 public:
 
     virtual ~menu_item() {}
+
+    virtual boost::any accept(menu_item_visitor<boost::any>& visitor) = 0;
 
     menu_item* clone() const
     {
