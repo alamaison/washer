@@ -33,8 +33,8 @@
 #define WINAPI_GUI_DETAIL_MENU_ITEM_ITERATOR_HPP
 #pragma once
 
+#include <boost/iterator/iterator_categories.hpp> // random_access_traversal_tag
 #include <boost/iterator/iterator_facade.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
 
 #include <cassert> // assert
@@ -43,14 +43,14 @@ namespace winapi {
 namespace gui {
 namespace menu {
 
-class menu_item;
-
 namespace detail {
 
 template<typename Menu, typename Item>
 class menu_item_iterator :
     public boost::iterator_facade<
-        menu_item_iterator<Menu, Item>, Item, std::random_access_iterator_tag>
+        menu_item_iterator<Menu, Item>, Item,
+        boost::random_access_traversal_tag, Item> // reference = value_type
+        // using boost tag to allow non-& reference
 {
     friend boost::iterator_core_access;
     // Enables conversion constructor to work:
@@ -92,15 +92,7 @@ private:
             BOOST_THROW_EXCEPTION(
                 std::logic_error("Dereferencing past the end of the menu"));
 
-        // Fetch item on demand: keeps logic simple (safe) and incrementing fast
-        if (!m_current_item)
-        {
-            m_current_item = m_menu[m_pos];
-        }
-
-        assert(m_current_item);
-
-        return *m_current_item;
+        return m_menu[m_pos];
     }
 
     void increment()
@@ -128,7 +120,6 @@ private:
         }
 
         m_pos += step; // iterator changed from here
-        m_current_item.reset();
     }
 
     typename iterator_facade_::difference_type distance_to(
@@ -139,7 +130,6 @@ private:
 
     Menu m_menu;
     size_t m_pos;
-    mutable boost::shared_ptr<Item> m_current_item;
 };
 
 }}}} // namespace winapi::gui::menu::detail

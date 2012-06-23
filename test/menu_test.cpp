@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( create_command, F, menu_fixtures )
 
     BOOST_CHECK(m.begin() != m.end());
     BOOST_CHECK_EQUAL(m.size(), 1);
-    BOOST_CHECK(m[0]);
+    BOOST_CHECK_NO_THROW(m[0]);
     BOOST_CHECK_THROW(m[1], std::runtime_error);
 
     F::do_test(m);
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( existing_command, F, menu_fixtures )
 
     BOOST_CHECK(m.begin() != m.end());
     BOOST_CHECK_EQUAL(m.size(), 1);
-    BOOST_CHECK(m[0]);
+    BOOST_CHECK_NO_THROW(m[0]);
     BOOST_CHECK_THROW(m[1], std::runtime_error);
 
     F::do_test(m);
@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( create_submenu, F, menu_fixtures )
 
     BOOST_CHECK(m.begin() != m.end());
     BOOST_CHECK_EQUAL(m.size(), 1);
-    BOOST_CHECK(m[0]);
+    BOOST_CHECK_NO_THROW(m[0]);
     BOOST_CHECK_THROW(m[1], std::runtime_error);
 
     F::do_test(m);

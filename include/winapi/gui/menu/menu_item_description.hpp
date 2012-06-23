@@ -43,7 +43,7 @@ namespace menu {
 
 namespace detail {
 
-template<typename, typename>
+template<typename>
 class menu_common_core;
 
 }
@@ -69,7 +69,7 @@ class menu_common_core;
  */
 class menu_item_description
 {
-    template<typename, typename>
+    template<typename>
     friend class detail::menu_common_core;
 
 public:

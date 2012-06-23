@@ -61,6 +61,170 @@ using boost::shared_polymorphic_cast;
 using std::string;
 using std::wstring;
 
+namespace {
+
+    class selectable_state_test : public menu_item_visitor<>
+    {
+    public:
+
+        void operator()(separator_menu_item&)
+        {
+            BOOST_FAIL("Separator unexpected");
+        }
+
+        void operator()(selectable_menu_item& item)
+        {
+            BOOST_CHECK(item.is_enabled());
+            BOOST_CHECK(!item.is_default());
+            BOOST_CHECK(!item.is_highlighted());
+            BOOST_CHECK(!item.is_checked());
+        }
+    };
+
+    class is_separator_test : public menu_item_visitor<>
+    {
+    public:
+
+        void operator()(separator_menu_item&)
+        {
+        }
+
+        void operator()(command_menu_item&)
+        {
+            BOOST_FAIL("Command item unexpected");
+        }
+
+        void operator()(sub_menu&)
+        {
+            BOOST_FAIL("Sub-menu unexpected");
+        }
+    };
+
+    class is_command_test : public menu_item_visitor<>
+    {
+    public:
+
+        void operator()(separator_menu_item&)
+        {
+            BOOST_FAIL("Separator unexpected");
+        }
+
+        void operator()(command_menu_item&)
+        {
+        }
+
+        void operator()(sub_menu&)
+        {
+            BOOST_FAIL("Sub-menu unexpected");
+        }
+    };
+
+    class is_sub_menu_test : public menu_item_visitor<>
+    {
+    public:
+
+        void operator()(separator_menu_item&)
+        {
+            BOOST_FAIL("Separator unexpected");
+        }
+
+        void operator()(command_menu_item&)
+        {
+            BOOST_FAIL("Command item unexpected");
+        }
+
+        void operator()(sub_menu&)
+        {
+        }
+    };
+
+    class command_id_test : public menu_item_visitor<>
+    {
+    public:
+        command_id_test(UINT command_id) : m_command_id(command_id) {}
+
+        void operator()(command_menu_item& item)
+        {
+            BOOST_CHECK_EQUAL(item.command_id(), m_command_id);
+        }
+
+        template<typename T>
+        void operator()(T&)
+        {
+            BOOST_FAIL("Unexpected");
+        }
+
+    private:
+        UINT m_command_id;
+    };
+
+    class sub_menu_test : public menu_item_visitor<>
+    {
+    public:
+
+        template<typename T>
+        void operator()(T&)
+        {
+            BOOST_FAIL("Unexpected");
+        }
+
+        void operator()(sub_menu& item)
+        {
+            menu& submenu = item.menu();
+            BOOST_CHECK(submenu.valid());
+
+            /*
+             * TODO: Add something here that tests the menu is the same one
+             * as one taken in the constructor.
+             */
+        }
+    };
+
+    class string_button_test : public menu_item_visitor<>
+    {
+    public:
+        string_button_test(const wstring& caption) : m_caption(caption) {}
+
+        void operator()(selectable_menu_item& item)
+        {
+            boost::shared_ptr<string_menu_button> button =
+                dynamic_pointer_cast<string_menu_button>(item.button());
+
+            BOOST_CHECK_EQUAL(button->caption(), m_caption);
+        }
+
+        void operator()(separator_menu_item&)
+        {
+            BOOST_FAIL("Unexpected separator");
+        }
+
+    private:
+        wstring m_caption;
+    };
+
+    class bitmap_button_test : public menu_item_visitor<>
+    {
+    public:
+        bitmap_button_test(HBITMAP bitmap) : m_bitmap(bitmap) {}
+
+        void operator()(selectable_menu_item& item)
+        {
+            boost::shared_ptr<bitmap_menu_button> button =
+                dynamic_pointer_cast<bitmap_menu_button>(item.button());
+
+            BOOST_CHECK_EQUAL(button->bitmap(), m_bitmap);
+        }
+
+        void operator()(separator_menu_item&)
+        {
+            BOOST_FAIL("Unexpected separator");
+        }
+
+    private:
+        HBITMAP m_bitmap;
+    };
+}
+
 /**
  * Tests where the menu was created externally and passed to the wrapper as a
  * raw menu.
@@ -158,22 +322,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     F::do_insert(t.handle(), L"Bob", 42);
 
     BOOST_CHECK(m.begin() != m.end());
-    BOOST_CHECK(m[0]);
+    BOOST_CHECK_NO_THROW(m[0]);
 
-    shared_ptr<command_menu_item> item =
-        shared_polymorphic_cast<command_menu_item>(m[0]);
-
-    BOOST_CHECK_EQUAL(item->command_id(), 42);
-
-    BOOST_CHECK(item->is_enabled());
-    BOOST_CHECK(!item->is_default());
-    BOOST_CHECK(!item->is_highlighted());
-    BOOST_CHECK(!item->is_checked());
-
-    boost::shared_ptr<string_menu_button> button =
-        dynamic_pointer_cast<string_menu_button>(item->button());
-
-    BOOST_CHECK_EQUAL(button->caption(), L"Bob");
+    m[0].accept(is_command_test());
+    m[0].accept(selectable_state_test());
+    m[0].accept(command_id_test(42));
+    m[0].accept(string_button_test(L"Bob"));
 
     F::do_test(m);
 }
@@ -232,22 +386,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     F::do_insert(t.handle(), bitmap, 42);
 
     BOOST_CHECK(m.begin() != m.end());
-    BOOST_CHECK(m[0]);
+    BOOST_CHECK_NO_THROW(m[0]);
 
-    shared_ptr<command_menu_item> item =
-        shared_polymorphic_cast<command_menu_item>(m[0]);
-
-    BOOST_CHECK(item->is_enabled());
-    BOOST_CHECK(!item->is_default());
-    BOOST_CHECK(!item->is_highlighted());
-    BOOST_CHECK(!item->is_checked());
-
-    BOOST_CHECK_EQUAL(item->command_id(), 42);
-
-    shared_ptr<bitmap_menu_button> button =
-        dynamic_pointer_cast<bitmap_menu_button>(item->button());
-
-    BOOST_CHECK(button->bitmap() == bitmap);
+    m[0].accept(is_command_test());
+    m[0].accept(selectable_state_test());
+    m[0].accept(command_id_test(42));
+    m[0].accept(bitmap_button_test(bitmap));
 
     F::do_test(m);
 }
@@ -310,62 +454,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     F::do_insert(t.handle().get(), L"Bob", submenu_handle.get());
 
     BOOST_CHECK(m.begin() != m.end());
-    BOOST_CHECK(m[0]);
+    BOOST_CHECK_NO_THROW(m[0]);
 
-    class submenu_state_test : public menu_item_visitor<boost::any>
-    {
-    public:
-
-        boost::any visit(separator_menu_item&)
-        {
-            BOOST_FAIL("Separator unexpected");
-            return boost::any();
-        }
-
-        boost::any visit(command_menu_item&)
-        {
-            BOOST_FAIL("Command item unexpected");
-            return boost::any();
-        }
-
-        boost::any visit(sub_menu& item)
-        {
-            BOOST_CHECK(item.is_enabled());
-            BOOST_CHECK(!item.is_default());
-            BOOST_CHECK(!item.is_highlighted());
-            BOOST_CHECK(!item.is_checked());
-            return boost::any();
-        }
-    };
-
-    m[0]->accept(submenu_state_test());
-
-    shared_ptr<sub_menu> item = shared_polymorphic_cast<sub_menu>(m[0]);
-
-
-    shared_ptr<string_menu_button> button =
-        dynamic_pointer_cast<string_menu_button>(item->button());
-
-    BOOST_CHECK_EQUAL(button->caption(), L"Bob");
-
-    menu& submenu = item->menu();
-    BOOST_CHECK(submenu.valid());
-    BOOST_CHECK_EQUAL(submenu.size(), 1);
-    BOOST_CHECK(submenu.begin() != submenu.end());
-    BOOST_CHECK(submenu[0]);
-
-    shared_ptr<command_menu_item> sub_item =
-        shared_polymorphic_cast<command_menu_item>(submenu[0]);
-
-    BOOST_CHECK(sub_item->is_enabled());
-    BOOST_CHECK(!sub_item->is_default());
-    BOOST_CHECK(!sub_item->is_highlighted());
-    BOOST_CHECK(!sub_item->is_checked());
-
-    BOOST_CHECK_EQUAL(sub_item->command_id(), 7);
-    BOOST_CHECK_EQUAL(
-        dynamic_pointer_cast<string_menu_button>(sub_item->button())->caption(),
-        L"Pop");
+    m[0].accept(is_sub_menu_test());
+    m[0].accept(selectable_state_test());
+    m[0].accept(string_button_test(L"Bob"));
+    m[0].accept(sub_menu_test());
 
     F::do_test(m);
 }
@@ -473,11 +567,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( extract_separator_item, F, separator_fixtures )
     menu m(menu_handle::adopt_handle(handle));
 
     BOOST_CHECK(m.begin() != m.end());
-    BOOST_CHECK(m[0]);
+    BOOST_CHECK_NO_THROW(m[0]);
 
-    typedef const separator_menu_item item_type;
-
-    BOOST_CHECK_NO_THROW(shared_polymorphic_cast<item_type>(m[0]));
+    m[0].accept(is_separator_test());
 
     F::do_test(m);
 }

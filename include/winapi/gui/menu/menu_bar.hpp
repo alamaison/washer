@@ -53,8 +53,8 @@ namespace menu {
 /**
  * Main application window menu bar.
  */
-class menu_bar : private detail::menu_common_core<
-    selectable_menu_item, selectable_menu_item_description>
+class menu_bar :
+    private detail::menu_common_core<selectable_menu_item_description>
 {
 #if defined (_MSC_VER) && (_MSC_VER > 1400)
     template<typename>
@@ -67,8 +67,7 @@ class menu_bar : private detail::menu_common_core<
     friend class window<wchar_t>;
 #endif
 
-    typedef detail::menu_common_core<
-        selectable_menu_item, selectable_menu_item_description> core;
+    typedef detail::menu_common_core<selectable_menu_item_description> core;
 
 public:
 

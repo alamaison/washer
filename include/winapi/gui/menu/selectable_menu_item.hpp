@@ -33,8 +33,6 @@
 #define WINAPI_GUI_MENU_SELECTABLE_MENU_ITEM_HPP
 #pragma once
 
-#include <winapi/gui/menu/menu_item.hpp>
-
 #include <boost/shared_ptr.hpp>
 
 namespace winapi {
@@ -59,9 +57,11 @@ class menu_button_nature;
  *        However, as these are invalid uses of a separator, we don't support
  *        them.
  */
-class selectable_menu_item : public menu_item
+class selectable_menu_item
 {
 public:
+
+    virtual ~selectable_menu_item() {}
 
     /**
      * The menu item's clickable appearance.

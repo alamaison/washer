@@ -34,10 +34,8 @@
 #pragma once
 
 #include <winapi/gui/menu/detail/menu_common_core.hpp>
-#include <winapi/gui/menu/detail/menu_item_iterator.hpp>
 #include <winapi/gui/menu/detail/menu_win32.hpp> // create_popup_menu
 #include <winapi/gui/menu/menu_handle.hpp> // menu_handle
-#include <winapi/gui/menu/menu_item.hpp>
 #include <winapi/gui/menu/menu_item_description.hpp>
 
 #include <Windows.h> // MENUITEMINFO
@@ -52,11 +50,11 @@ namespace menu {
  *
  * @todo  Add a method that can insert at an iterator position.
  */
-class menu : private detail::menu_common_core<menu_item, menu_item_description>
+class menu : private detail::menu_common_core<menu_item_description>
 {
     friend class sub_menu_description;
 
-    typedef detail::menu_common_core<menu_item, menu_item_description> core;
+    typedef detail::menu_common_core<menu_item_description> core;
 
 public:
 

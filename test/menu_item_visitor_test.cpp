@@ -51,36 +51,102 @@ using std::string;
  */
 BOOST_AUTO_TEST_SUITE( menu_item_visitor_tests )
 
-class test_visitor : public menu_item_visitor<boost::any>
+BOOST_SCOPED_ENUM_START(expected_case)
+{
+    separator,
+    command,
+    sub
+};
+BOOST_SCOPED_ENUM_END;
+
+class test_visitor : public menu_item_visitor<string>
 {
 public:
 
-    BOOST_SCOPED_ENUM_START(expected_case)
-    {
-        separator,
-        command,
-        sub
-    };
-    BOOST_SCOPED_ENUM_END;
-
     test_visitor(BOOST_SCOPED_ENUM(expected_case) c) : m_case(c) {}
 
-    boost::any visit(separator_menu_item&)
+    string operator()(separator_menu_item&)
     {
         BOOST_REQUIRE(m_case == expected_case::separator);
-        return string("separator");
+        return "separator";
     }
 
-    boost::any visit(command_menu_item&)
+    string operator()(command_menu_item&)
     {
         BOOST_REQUIRE(m_case == expected_case::command);
-        return string("command");
+        return "command";
     }
 
-    boost::any visit(sub_menu& item)
+    string operator()(sub_menu& item)
     {
         BOOST_REQUIRE(m_case == expected_case::sub);
-        return string("sub_menu");
+        return "sub_menu";
+    }
+
+private:
+
+    BOOST_SCOPED_ENUM(expected_case) m_case;
+};
+
+class void_test_visitor : public menu_item_visitor<>
+{
+public:
+
+    void_test_visitor(BOOST_SCOPED_ENUM(expected_case) c) : m_case(c) {}
+
+    void operator()(separator_menu_item&)
+    {
+        BOOST_REQUIRE(m_case == expected_case::separator);
+    }
+
+    void operator()(command_menu_item&)
+    {
+        BOOST_REQUIRE(m_case == expected_case::command);
+    }
+
+    void operator()(sub_menu& item)
+    {
+        BOOST_REQUIRE(m_case == expected_case::sub);
+    }
+
+private:
+
+    BOOST_SCOPED_ENUM(expected_case) m_case;
+};
+
+class templated_test_visitor : public menu_item_visitor<string>
+{
+public:
+
+    template<typename T>
+    string operator()(T&)
+    {
+        return "catch-all";
+    }
+};
+
+/**
+ * Tests that the inheritance hierachy we've set up to separate selectable
+ * from non-selectable menu items, actually works.
+ */
+class semi_inheritance_test_visitor : public menu_item_visitor<string>
+{
+public:
+
+    semi_inheritance_test_visitor(BOOST_SCOPED_ENUM(expected_case) c)
+        : m_case(c) {}
+
+    string operator()(separator_menu_item&)
+    {
+        BOOST_REQUIRE(m_case == expected_case::separator);
+        return "separator";
+    }
+
+    string operator()(selectable_menu_item&)
+    {
+        BOOST_REQUIRE(
+            m_case == expected_case::command || m_case == expected_case::sub);
+        return "command-or-sub_menu";
     }
 
 private:
@@ -93,9 +159,17 @@ BOOST_AUTO_TEST_CASE( visit_separator )
     menu m;
     m.insert(separator_description());
 
-    string out = boost::any_cast<string>(
-        m[0]->accept(test_visitor(test_visitor::expected_case::separator)));
-    BOOST_CHECK_EQUAL(out, "separator");
+    BOOST_CHECK_EQUAL(
+        m[0].accept(test_visitor(expected_case::separator)),
+        "separator");
+
+    m[0].accept(void_test_visitor(expected_case::separator));
+
+    BOOST_CHECK_EQUAL(m[0].accept(templated_test_visitor()), "catch-all");
+
+    BOOST_CHECK_EQUAL(
+        m[0].accept(semi_inheritance_test_visitor(expected_case::separator)),
+        "separator");
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE( visit_command, F, menu_creator_fixtures )
@@ -103,9 +177,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( visit_command, F, menu_creator_fixtures )
     F::menu_type m = F::create_menu_to_test().menu();
     m.insert(command_item_description(string_menu_button(L"Bob"), 42));
 
-    string out = boost::any_cast<string>(
-        m[0]->accept(test_visitor(test_visitor::expected_case::command)));
-    BOOST_CHECK_EQUAL(out, "command");
+    BOOST_CHECK_EQUAL(
+        m[0].accept(test_visitor(expected_case::command)),
+        "command");
+
+    m[0].accept(void_test_visitor(expected_case::command));
+
+    BOOST_CHECK_EQUAL(m[0].accept(templated_test_visitor()), "catch-all");
+
+    BOOST_CHECK_EQUAL(
+        m[0].accept(semi_inheritance_test_visitor(expected_case::command)),
+        "command-or-sub_menu");
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE( visit_sub_menu, F, menu_creator_fixtures )
@@ -115,9 +197,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( visit_sub_menu, F, menu_creator_fixtures )
     s.insert(command_item_description(string_menu_button(L"Pop"), 7));
     m.insert(sub_menu_description(string_menu_button(L"Bob"), s));
 
-    string out = boost::any_cast<string>(
-        m[0]->accept(test_visitor(test_visitor::expected_case::sub)));
-    BOOST_CHECK_EQUAL(out, "sub_menu");
+    BOOST_CHECK_EQUAL(
+        m[0].accept(test_visitor(expected_case::sub)),
+        "sub_menu");
+
+    m[0].accept(void_test_visitor(expected_case::sub));
+
+    BOOST_CHECK_EQUAL(m[0].accept(templated_test_visitor()), "catch-all");
+
+    BOOST_CHECK_EQUAL(
+        m[0].accept(semi_inheritance_test_visitor(expected_case::sub)),
+        "command-or-sub_menu");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

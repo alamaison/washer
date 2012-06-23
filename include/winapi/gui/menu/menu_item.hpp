@@ -33,60 +33,112 @@
 #define WINAPI_GUI_MENU_MENU_ITEM_HPP
 #pragma once
 
-#include <boost/any.hpp>
-
-#include <cassert> // assert
+#include <winapi/gui/menu/detail/item_proxy.hpp>
 
 #include <Windows.h> // MENUITEMINFO
 
 namespace winapi {
 namespace gui {
 namespace menu {
-
+    
 class separator_menu_item;
 class command_menu_item;
 class sub_menu;
 
-template<typename ReturnType=void>
+namespace detail {
+
+    template<typename>
+    class menu_common_core;
+
+}
+
+/**
+ * Convenience interface giving subclasses the static visitor concept necessary
+ * to visit menu items.
+ *
+ * Purpose: This class only exists to make it easier to create visitors suitable
+ * to pass to `menu_item::accept` by defining their result type.  In particular,
+ * classes are not required to inherit from this interface in order to be used
+ * as menu item visitors.
+ *
+ * Classes implementing this interface must also provide at least one
+ * implementation of `operator()` that can accept arguments of types
+ * `separator_menu_item&`, `command_menu_item&` and `sub_menu&`.
+ */
+template<typename ResultType=void>
 class menu_item_visitor
 {
 public:
 
-    ~menu_item_visitor() {}
+    typedef ResultType result_type;
 
-    virtual ReturnType visit(separator_menu_item&) = 0;
-    virtual ReturnType visit(command_menu_item&) = 0;
-    virtual ReturnType visit(sub_menu&) = 0;
+    ~menu_item_visitor() {}
 };
 
 
 /**
- * Interface to items which can only be added to regular menus, not menu bars.
+ * Type-agnostic representation of an item in a menu.
+ *
+ * Purpose: to allow code to reason in terms of an item in a menu at a
+ *          particular position and to allow callers to convert that position
+ *          to the specific typed representation safely.
+ *
+ * Menus entries can change their type either by an insertion/removal
+ * shuffling items around or by explicitly setting an item.  Therefore, the
+ * typed representations (`command_menu_item`, `sub_menu` and `separator_item`)
+ * must not be stored and used later as, by that time, their underlying type in
+ * the Win32 menu may have become incompatible.  Therefore, this class
+ * represents items blind to their type and only allows access to the typed
+ * view of them via references to non-copyable objects created when accepting
+ * a visitor.  These object cease to exist after the visitor has returned
+ * which means the types cannot diverge from the underlying menu: if the
+ * underlying menu type changes then a different typed class is generated the
+ * next time a visitor is accepted.
  */
 class menu_item
 {
+    template<typename> friend class detail::menu_common_core;
+
 public:
 
-    virtual ~menu_item() {}
-
-    virtual boost::any accept(menu_item_visitor<boost::any>& visitor) = 0;
-
-    menu_item* clone() const
+    template<typename Visitor>
+    typename Visitor::result_type accept(Visitor& visitor) const
     {
-        menu_item* item = do_clone();
-        assert(typeid(*this) == typeid(*item) && "do_clone() sliced object!");
-        return item;
+        // MIIM_SUBMENU is part of the mask so isn't set by GetMenuItemInfo.
+        // We have to set it and check hSubMenu to decide if this is a popup
+        // item
+        const MENUITEMINFOW info =
+            m_item.get_menuiteminfo(MIIM_FTYPE | MIIM_SUBMENU);
+
+        // Four mutually-exclusive menu possibilities.  The first, separator
+        // determines the entire menu item behaviour while the others just
+        // indicate the button type (separators have no button).
+        if (info.fType & MFT_SEPARATOR)
+        {
+            // In reality, a separator can be forced to have a submenu but as
+            // this is clearly not what is intended, we don't give a way to get
+            // access to it.
+            return separator_menu_item().accept(visitor);
+        }
+        else
+        {
+            if (info.hSubMenu)
+            {
+                return sub_menu(m_item).accept(visitor);
+            }
+            else
+            {
+                return command_menu_item(m_item).accept(visitor);
+            }
+        }
     }
 
 private:
 
-    virtual menu_item* do_clone() const = 0;
-};
+    menu_item(const detail::item_proxy& item) : m_item(item) {}
 
-inline menu_item* new_clone(const menu_item& item)
-{
-    return item.clone();
-}
+    detail::item_proxy m_item;
+};
 
 }}} // namespace winapi::gui::menu
 

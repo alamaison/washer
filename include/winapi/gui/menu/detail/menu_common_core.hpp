@@ -36,10 +36,7 @@
 #include <winapi/gui/menu/detail/item_proxy.hpp>
 #include <winapi/gui/menu/detail/menu_item_iterator.hpp>
 #include <winapi/gui/menu/menu_handle.hpp> // menu_handle
-
-#include <boost/shared_ptr.hpp>
-
-#include <memory> // auto_ptr
+#include <winapi/gui/menu/menu_item.hpp>
 
 #include <Windows.h> // MENUITEMINFO
 
@@ -48,26 +45,19 @@ namespace gui {
 namespace menu {
 namespace detail {
 
-template<typename ItemType>
-inline boost::shared_ptr<ItemType> menu_item_from_position(
-    const item_proxy& item);
-
 /**
  * Object implementing the common aspects of wrapping a menu and a menu bar.
- *
- * @todo  Add a method that can insert at an iterator position.
  */
-template<typename ItemType, typename DescriptionType>
+template<typename DescriptionType>
 class menu_common_core
 {
-    typedef ItemType item_type;
     typedef DescriptionType description_type;
 
 public:
 
-    typedef detail::menu_item_iterator<menu_common_core, item_type>
+    typedef detail::menu_item_iterator<menu_common_core, menu_item>
         iterator;
-    typedef detail::menu_item_iterator<menu_common_core, const item_type>
+    typedef detail::menu_item_iterator<menu_common_core, const menu_item>
         const_iterator;
 
     explicit menu_common_core(menu_handle menu) : m_menu(menu) {}
@@ -99,10 +89,13 @@ public:
         insert_at_position(item, -1);
     }
 
-    boost::shared_ptr<item_type> operator[](size_t position) const
+    menu_item operator[](size_t position) const
     {
-        return detail::menu_item_from_position<item_type>(
-            item_proxy(handle(), position));
+        if (position >= size())
+            BOOST_THROW_EXCEPTION(
+                std::range_error("Menu item index out of range"));
+
+        return menu_item(item_proxy(handle(), position));
     }
 
     iterator begin()
