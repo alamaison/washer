@@ -1,7 +1,7 @@
 /**
     @file
 
-    Internal representation of menu item in a menu.
+    Internal representation of a position in a menu.
 
     @if license
 
@@ -29,8 +29,8 @@
     @endif
 */
 
-#ifndef WINAPI_GUI_MENU_DETAIL_ITEM_PROXY_HPP
-#define WINAPI_GUI_MENU_DETAIL_ITEM_PROXY_HPP
+#ifndef WINAPI_GUI_MENU_DETAIL_ITEM_POSITION_HPP
+#define WINAPI_GUI_MENU_DETAIL_ITEM_POSITION_HPP
 #pragma once
 
 #include <winapi/gui/menu/detail/menu_win32.hpp> // get_menu_item_info
@@ -56,11 +56,11 @@ namespace detail {
  * Encapsulates the operations that only make sense when a menu and
  * a menu item position exist in unison.
  */
-class item_proxy
+class item_position
 {
 public:
 
-    item_proxy(const menu_handle& menu, UINT position)
+    item_position(const menu_handle& menu, UINT position)
         : m_handle(menu), m_position(position) {}
 
     MENUITEMINFOW get_menuiteminfo(UINT fMask) const

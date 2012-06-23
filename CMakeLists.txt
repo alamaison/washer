@@ -71,7 +71,7 @@ source_group(winapi\\gui\\menu FILES ${LIBRARY_SOURCES_gui_menu})
 set(LIBRARY_SOURCES_gui_menu_detail
   ${LIBRARY_DIRECTORY}/gui/menu/detail/convert_button.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/item_common.hpp
-  ${LIBRARY_DIRECTORY}/gui/menu/detail/item_proxy.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/detail/item_position.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/menu.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/menu_common_core.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/menu_item_iterator.hpp

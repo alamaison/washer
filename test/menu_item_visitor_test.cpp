@@ -77,7 +77,7 @@ public:
         return "command";
     }
 
-    string operator()(sub_menu& item)
+    string operator()(sub_menu_item& item)
     {
         BOOST_REQUIRE(m_case == expected_case::sub);
         return "sub_menu";
@@ -104,7 +104,7 @@ public:
         BOOST_REQUIRE(m_case == expected_case::command);
     }
 
-    void operator()(sub_menu& item)
+    void operator()(sub_menu_item& item)
     {
         BOOST_REQUIRE(m_case == expected_case::sub);
     }

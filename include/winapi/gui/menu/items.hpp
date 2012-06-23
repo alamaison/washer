@@ -34,7 +34,7 @@
 #pragma once
 
 #include <winapi/gui/menu/detail/item_common.hpp> // selectable_item_core
-#include <winapi/gui/menu/detail/item_proxy.hpp>
+#include <winapi/gui/menu/detail/item_position.hpp>
 #include <winapi/gui/menu/menu.hpp>
 #include <winapi/gui/menu/menu_handle.hpp>
 #include <winapi/gui/menu/selectable_menu_item.hpp>
@@ -104,7 +104,7 @@ public:
 
 private:
 
-    command_menu_item(const detail::item_proxy& item) : m_core(item) {}
+    command_menu_item(const detail::item_position& item) : m_core(item) {}
 
     detail::selectable_item_core m_core;
 };
@@ -114,7 +114,7 @@ private:
  *
  * Purpose: to extract an item with a submenu from an HMENU.
  */
-class sub_menu : 
+class sub_menu_item : 
     public selectable_menu_item, private boost::noncopyable
 {
     friend class menu_item;
@@ -161,7 +161,7 @@ public:
 
 private:
 
-    sub_menu(const detail::item_proxy& item) : m_core(item) {}
+    sub_menu_item(const detail::item_position& item) : m_core(item) {}
 
     detail::selectable_item_core m_core;
 };

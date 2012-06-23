@@ -33,7 +33,7 @@
 #define WINAPI_GUI_MENU_MENU_ITEM_HPP
 #pragma once
 
-#include <winapi/gui/menu/detail/item_proxy.hpp>
+#include <winapi/gui/menu/detail/item_position.hpp>
 
 #include <Windows.h> // MENUITEMINFO
 
@@ -43,7 +43,7 @@ namespace menu {
     
 class separator_menu_item;
 class command_menu_item;
-class sub_menu;
+class sub_menu_item;
 
 namespace detail {
 
@@ -63,7 +63,7 @@ namespace detail {
  *
  * Classes implementing this interface must also provide at least one
  * implementation of `operator()` that can accept arguments of types
- * `separator_menu_item&`, `command_menu_item&` and `sub_menu&`.
+ * `separator_menu_item&`, `command_menu_item&` and `sub_menu_item&`.
  */
 template<typename ResultType=void>
 class menu_item_visitor
@@ -85,15 +85,16 @@ public:
  *
  * Menus entries can change their type either by an insertion/removal
  * shuffling items around or by explicitly setting an item.  Therefore, the
- * typed representations (`command_menu_item`, `sub_menu` and `separator_item`)
- * must not be stored and used later as, by that time, their underlying type in
- * the Win32 menu may have become incompatible.  Therefore, this class
- * represents items blind to their type and only allows access to the typed
- * view of them via references to non-copyable objects created when accepting
- * a visitor.  These object cease to exist after the visitor has returned
- * which means the types cannot diverge from the underlying menu: if the
- * underlying menu type changes then a different typed class is generated the
- * next time a visitor is accepted.
+ * typed representations (`command_menu_item`, `sub_menu_item` and 
+ * `separator_item`) must not be stored and used later as, by that time, their
+ * underlying type in the Win32 menu may have become incompatible.
+ *
+ * Therefore, this class represents items blind to their type and only allows
+ * access to the typed view of them via references to non-copyable objects
+ * created when accepting a visitor.  These object cease to exist after the
+ * visitor has returned which means the types cannot diverge from the
+ * underlying menu: if the underlying menu type changes then a different typed
+ * class is generated the next time a visitor is accepted.
  */
 class menu_item
 {
@@ -124,7 +125,7 @@ public:
         {
             if (info.hSubMenu)
             {
-                return sub_menu(m_item).accept(visitor);
+                return sub_menu_item(m_item).accept(visitor);
             }
             else
             {
@@ -135,9 +136,9 @@ public:
 
 private:
 
-    menu_item(const detail::item_proxy& item) : m_item(item) {}
+    menu_item(const detail::item_position& item) : m_item(item) {}
 
-    detail::item_proxy m_item;
+    detail::item_position m_item;
 };
 
 }}} // namespace winapi::gui::menu

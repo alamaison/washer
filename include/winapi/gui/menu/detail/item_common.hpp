@@ -34,7 +34,7 @@
 #pragma once
 
 #include <winapi/gui/menu/detail/convert_button.hpp> // convert_menu_button
-#include <winapi/gui/menu/detail/item_proxy.hpp>
+#include <winapi/gui/menu/detail/item_position.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -49,7 +49,7 @@ class selectable_item_core
 {
 public:
 
-    explicit selectable_item_core(const item_proxy& item) : m_item(item) {}
+    explicit selectable_item_core(const item_position& item) : m_item(item) {}
 
     boost::shared_ptr<menu_button_nature> button() const
     {
@@ -83,7 +83,7 @@ public:
 
 private:
 
-    item_proxy m_item;
+    item_position m_item;
 };
 
 

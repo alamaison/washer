@@ -33,7 +33,7 @@
 #define WINAPI_GUI_MENU_DETAIL_MENU_COMMON_CORE_HPP
 #pragma once
 
-#include <winapi/gui/menu/detail/item_proxy.hpp>
+#include <winapi/gui/menu/detail/item_position.hpp>
 #include <winapi/gui/menu/detail/menu_item_iterator.hpp>
 #include <winapi/gui/menu/menu_handle.hpp> // menu_handle
 #include <winapi/gui/menu/menu_item.hpp>
@@ -95,7 +95,7 @@ public:
             BOOST_THROW_EXCEPTION(
                 std::range_error("Menu item index out of range"));
 
-        return menu_item(item_proxy(handle(), position));
+        return menu_item(item_position(handle(), position));
     }
 
     iterator begin()

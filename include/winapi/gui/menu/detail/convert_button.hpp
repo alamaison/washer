@@ -33,7 +33,7 @@
 #define WINAPI_GUI_MENU_DETAIL_CONVERT_BUTTON_HPP
 #pragma once
 
-#include <winapi/gui/menu/detail/item_proxy.hpp>
+#include <winapi/gui/menu/detail/item_position.hpp>
 
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
@@ -49,13 +49,13 @@ template<UINT Mft>
 struct item_type_converter
 {
     static boost::shared_ptr<menu_button_nature> convert(
-        const item_proxy& /*item*/);
+        const item_position& /*item*/);
 };
 
 template<>
 struct item_type_converter<MFT_BITMAP> 
 {
-    static boost::shared_ptr<menu_button_nature> convert(const item_proxy& item)
+    static boost::shared_ptr<menu_button_nature> convert(const item_position& item)
     {
         // Old-style whole-button bitmap specified through dwTypeData and
         // MFT_BITMAP (MF_BITMAP) requires MIIM_TYPE rather than MIIM_FTYPE
@@ -72,7 +72,7 @@ struct item_type_converter<MFT_OWNERDRAW>
     /**
      * @todo  Include custom data in dwTypeData and dwItemData.
      */
-    static boost::shared_ptr<menu_button_nature> convert(const item_proxy& item)
+    static boost::shared_ptr<menu_button_nature> convert(const item_position& item)
     {
         return boost::make_shared<owner_drawn_menu_button>();
     }
@@ -81,14 +81,14 @@ struct item_type_converter<MFT_OWNERDRAW>
 template<>
 struct item_type_converter<MFT_STRING>
 {
-    static boost::shared_ptr<menu_button_nature> convert(const item_proxy& item)
+    static boost::shared_ptr<menu_button_nature> convert(const item_position& item)
     {
         return boost::make_shared<string_menu_button>(item.get_caption());
     }
 };
 
 inline boost::shared_ptr<menu_button_nature> convert_menu_button(
-    const item_proxy& item)
+    const item_position& item)
 {
     UINT button_type_flag = item.get_menuiteminfo(MIIM_FTYPE).fType;
 

@@ -94,7 +94,7 @@ namespace {
             BOOST_FAIL("Command item unexpected");
         }
 
-        void operator()(sub_menu&)
+        void operator()(sub_menu_item&)
         {
             BOOST_FAIL("Sub-menu unexpected");
         }
@@ -113,7 +113,7 @@ namespace {
         {
         }
 
-        void operator()(sub_menu&)
+        void operator()(sub_menu_item&)
         {
             BOOST_FAIL("Sub-menu unexpected");
         }
@@ -133,7 +133,7 @@ namespace {
             BOOST_FAIL("Command item unexpected");
         }
 
-        void operator()(sub_menu&)
+        void operator()(sub_menu_item&)
         {
         }
     };
@@ -168,7 +168,7 @@ namespace {
             BOOST_FAIL("Unexpected");
         }
 
-        void operator()(sub_menu& item)
+        void operator()(sub_menu_item& item)
         {
             menu& submenu = item.menu();
             BOOST_CHECK(submenu.valid());
