@@ -19,6 +19,7 @@ add_definitions(
 
 set(TEST_SOURCES
   fixture_permutator.hpp
+  item_test_visitors.hpp
   menu_fixtures.hpp
   sandbox_fixture.hpp
   wchar_output.hpp

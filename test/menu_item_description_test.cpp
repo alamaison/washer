@@ -39,8 +39,7 @@
 #include <boost/test/unit_test.hpp>
 
 using namespace winapi::gui::menu;
-using winapi::test::detail::test_bitmap;
-using winapi::test::menu_creator_fixtures;
+using namespace winapi::test;
 
 
 BOOST_AUTO_TEST_SUITE(menu_item_description_tests)

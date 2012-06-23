@@ -30,200 +30,25 @@
 */
 
 #include "fixture_permutator.hpp"
+#include "item_test_visitors.hpp"
 #include "menu_fixtures.hpp"
 #include "wchar_output.hpp" // wchar_t test output
 
 #include <winapi/gui/menu/items.hpp> // test subject
 #include <winapi/gui/menu/menu.hpp> // test subject
 
-#include <winapi/gui/windows/window.hpp>
-
-#include <boost/cast.hpp> // polymorphic_cast
 #include <boost/mpl/vector.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <string>
 
 using namespace winapi::gui::menu;
-using winapi::gui::hwnd_t;
-using winapi::gui::window;
-using winapi::test::detail::do_insertion;
-using winapi::test::detail::test_bitmap;
-using winapi::test::fixture_permutator;
-using winapi::test::menu_fixtures;
-using winapi::test::menu_ownership_fixtures;
-
-using boost::dynamic_pointer_cast;
-using boost::shared_ptr;
-using boost::shared_polymorphic_cast;
+using namespace winapi::test;
+namespace win32 = winapi::gui::menu::detail::win32;
 
 using std::string;
 using std::wstring;
 
-namespace {
-
-    class selectable_state_test : public menu_item_visitor<>
-    {
-    public:
-
-        void operator()(separator_menu_item&)
-        {
-            BOOST_FAIL("Separator unexpected");
-        }
-
-        void operator()(selectable_menu_item& item)
-        {
-            BOOST_CHECK(item.is_enabled());
-            BOOST_CHECK(!item.is_default());
-            BOOST_CHECK(!item.is_highlighted());
-            BOOST_CHECK(!item.is_checked());
-        }
-    };
-
-    class is_separator_test : public menu_item_visitor<>
-    {
-    public:
-
-        void operator()(separator_menu_item&)
-        {
-        }
-
-        void operator()(command_menu_item&)
-        {
-            BOOST_FAIL("Command item unexpected");
-        }
-
-        void operator()(sub_menu_item&)
-        {
-            BOOST_FAIL("Sub-menu unexpected");
-        }
-    };
-
-    class is_command_test : public menu_item_visitor<>
-    {
-    public:
-
-        void operator()(separator_menu_item&)
-        {
-            BOOST_FAIL("Separator unexpected");
-        }
-
-        void operator()(command_menu_item&)
-        {
-        }
-
-        void operator()(sub_menu_item&)
-        {
-            BOOST_FAIL("Sub-menu unexpected");
-        }
-    };
-
-    class is_sub_menu_test : public menu_item_visitor<>
-    {
-    public:
-
-        void operator()(separator_menu_item&)
-        {
-            BOOST_FAIL("Separator unexpected");
-        }
-
-        void operator()(command_menu_item&)
-        {
-            BOOST_FAIL("Command item unexpected");
-        }
-
-        void operator()(sub_menu_item&)
-        {
-        }
-    };
-
-    class command_id_test : public menu_item_visitor<>
-    {
-    public:
-        command_id_test(UINT command_id) : m_command_id(command_id) {}
-
-        void operator()(command_menu_item& item)
-        {
-            BOOST_CHECK_EQUAL(item.command_id(), m_command_id);
-        }
-
-        template<typename T>
-        void operator()(T&)
-        {
-            BOOST_FAIL("Unexpected");
-        }
-
-    private:
-        UINT m_command_id;
-    };
-
-    class sub_menu_test : public menu_item_visitor<>
-    {
-    public:
-
-        template<typename T>
-        void operator()(T&)
-        {
-            BOOST_FAIL("Unexpected");
-        }
-
-        void operator()(sub_menu_item& item)
-        {
-            menu& submenu = item.menu();
-            BOOST_CHECK(submenu.valid());
-
-            /*
-             * TODO: Add something here that tests the menu is the same one
-             * as one taken in the constructor.
-             */
-        }
-    };
-
-    class string_button_test : public menu_item_visitor<>
-    {
-    public:
-        string_button_test(const wstring& caption) : m_caption(caption) {}
-
-        void operator()(selectable_menu_item& item)
-        {
-            boost::shared_ptr<string_menu_button> button =
-                dynamic_pointer_cast<string_menu_button>(item.button());
-
-            BOOST_CHECK_EQUAL(button->caption(), m_caption);
-        }
-
-        void operator()(separator_menu_item&)
-        {
-            BOOST_FAIL("Unexpected separator");
-        }
-
-    private:
-        wstring m_caption;
-    };
-
-    class bitmap_button_test : public menu_item_visitor<>
-    {
-    public:
-        bitmap_button_test(HBITMAP bitmap) : m_bitmap(bitmap) {}
-
-        void operator()(selectable_menu_item& item)
-        {
-            boost::shared_ptr<bitmap_menu_button> button =
-                dynamic_pointer_cast<bitmap_menu_button>(item.button());
-
-            BOOST_CHECK_EQUAL(button->bitmap(), m_bitmap);
-        }
-
-        void operator()(separator_menu_item&)
-        {
-            BOOST_FAIL("Unexpected separator");
-        }
-
-    private:
-        HBITMAP m_bitmap;
-    };
-}
 
 /**
  * Tests where the menu was created externally and passed to the wrapper as a
@@ -257,7 +82,7 @@ struct old_style_string_command : public F
 {
     static void do_insert(menu_handle handle, wstring caption, UINT command_id)
     {
-        detail::win32::insert_menu(
+        win32::insert_menu(
             handle.get(), 0, MF_BYPOSITION | MF_STRING, command_id,
             caption.c_str());
     }
@@ -342,7 +167,7 @@ struct old_style_bitmap_command : public F
 {
     static void do_insert(menu_handle handle, HBITMAP bitmap, UINT command_id)
     {
-        detail::win32::insert_menu(
+        win32::insert_menu(
             handle.get(), 0, MF_BITMAP, command_id, (const wchar_t*)bitmap);
     }
 };
@@ -406,7 +231,7 @@ struct old_style_string_popup : public F
 {
     static void do_insert(HMENU handle, wstring caption, HMENU sub_menu)
     {
-        detail::win32::insert_menu(
+        win32::insert_menu(
             handle, 0, MF_BYPOSITION | MF_STRING | MF_POPUP, (UINT_PTR)sub_menu,
             caption.c_str());
     }
@@ -446,7 +271,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     F::menu_type m = t.menu();
 
     menu_handle submenu_handle = menu_handle::adopt_handle(
-        detail::win32::create_popup_menu());
+        win32::create_popup_menu());
     do_insertion(
         submenu_handle.get(), L"Pop", 7, NULL, MIIM_STRING | MIIM_ID,
         MFT_STRING);
@@ -473,7 +298,7 @@ struct old_style_separator : public F
 {
     static void do_insert(HMENU handle)
     {
-        detail::win32::insert_menu(
+        win32::insert_menu(
             handle, 0, MF_BYPOSITION | MF_SEPARATOR, 0, (wchar_t*)(NULL));
     }
 };
@@ -492,7 +317,7 @@ struct weird_old_style_separator1 : public F
 {
     static void do_insert(HMENU handle)
     {
-        detail::win32::insert_menu(
+        win32::insert_menu(
             handle, 42, MF_BYPOSITION | MF_STRING | MF_SEPARATOR, 42,
             L"I'm an odd separator with a caption");
     }
@@ -515,15 +340,15 @@ struct weird_old_style_separator2 : public F
 {
     static void do_insert(HMENU handle)
     {
-        HMENU submenu = detail::win32::create_popup_menu();
+        HMENU submenu = win32::create_popup_menu();
         do_insertion(
             submenu, L"Supposedly, I'm a submenu of a separator", 7, NULL,
             MIIM_FTYPE | MIIM_ID | MIIM_STRING, MFT_STRING);
 
-        detail::win32::insert_menu(
+        win32::insert_menu(
             handle, 42, MF_BYPOSITION | MF_SEPARATOR, (UINT_PTR)submenu,
             (const wchar_t*)NULL);
-        detail::win32::enable_menu_item(handle, 0, MF_BYPOSITION);
+        win32::enable_menu_item(handle, 0, MF_BYPOSITION);
     }
 };
 
@@ -532,7 +357,7 @@ struct weird_new_style_separator2 : public F
 {
     static void do_insert(HMENU handle)
     {
-        HMENU submenu = detail::win32::create_popup_menu();
+        HMENU submenu = win32::create_popup_menu();
         do_insertion(
             submenu, L"Supposedly, I'm a submenu of a separator", 7, NULL,
             MIIM_FTYPE | MIIM_ID | MIIM_STRING, MFT_STRING);
@@ -540,7 +365,7 @@ struct weird_new_style_separator2 : public F
         do_insertion(
             handle, NULL, 101, submenu, MIIM_FTYPE | MIIM_SUBMENU,
             MFT_SEPARATOR);
-        detail::win32::enable_menu_item(handle, 0, MF_BYPOSITION);
+        win32::enable_menu_item(handle, 0, MF_BYPOSITION);
     }
 };
 
@@ -561,7 +386,7 @@ typedef fixture_permutator<
  */
 BOOST_AUTO_TEST_CASE_TEMPLATE( extract_separator_item, F, separator_fixtures )
 {
-    HMENU handle = detail::win32::create_popup_menu();
+    HMENU handle = win32::create_popup_menu();
     F::do_insert(handle);
 
     menu m(menu_handle::adopt_handle(handle));

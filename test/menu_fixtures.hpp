@@ -129,34 +129,34 @@ namespace detail {
         //w.visible(true);
         //pump_thread_messages();
     }
+}
 
-    inline HBITMAP test_bitmap()
-    {
-        HBITMAP bitmap = (HBITMAP)::LoadImageW(
-            module_handle("shell32.dll"), L"#145", IMAGE_BITMAP,
-            LR_DEFAULTSIZE, LR_DEFAULTSIZE, LR_SHARED);
-        if (bitmap == NULL)
-            BOOST_THROW_EXCEPTION(
-                boost::enable_error_info(winapi::last_error()) <<
-                boost::errinfo_api_function("LoadImage"));
+inline void do_insertion(
+    HMENU handle, const wchar_t* caption, UINT command_id,
+    HMENU sub_menu, UINT fMask, UINT fType)
+{
+    MENUITEMINFOW info = MENUITEMINFOW();
+    info.cbSize = sizeof(MENUITEMINFOW);
+    info.fMask = fMask;
+    info.fType = fType;
+    info.wID = command_id;
+    info.hSubMenu = sub_menu;
+    info.dwTypeData = const_cast<wchar_t*>(caption);
+    gui::menu::detail::win32::insert_menu_item(
+        handle, 0, MF_BYPOSITION, &info);
+}
 
-        return bitmap;
-    }
+inline HBITMAP test_bitmap()
+{
+    HBITMAP bitmap = (HBITMAP)::LoadImageW(
+        module_handle("shell32.dll"), L"#145", IMAGE_BITMAP,
+        LR_DEFAULTSIZE, LR_DEFAULTSIZE, LR_SHARED);
+    if (bitmap == NULL)
+        BOOST_THROW_EXCEPTION(
+            boost::enable_error_info(winapi::last_error()) <<
+            boost::errinfo_api_function("LoadImage"));
 
-    inline void do_insertion(
-        HMENU handle, const wchar_t* caption, UINT command_id,
-        HMENU sub_menu, UINT fMask, UINT fType)
-    {
-        MENUITEMINFOW info = MENUITEMINFOW();
-        info.cbSize = sizeof(MENUITEMINFOW);
-        info.fMask = fMask;
-        info.fType = fType;
-        info.wID = command_id;
-        info.hSubMenu = sub_menu;
-        info.dwTypeData = const_cast<wchar_t*>(caption);
-        gui::menu::detail::win32::insert_menu_item(
-            handle, 0, MF_BYPOSITION, &info);
-    }
+    return bitmap;
 }
 
 /**
