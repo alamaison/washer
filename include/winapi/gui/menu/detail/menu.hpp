@@ -33,7 +33,8 @@
 #define WINAPI_GUI_MENU_DETAIL_MENU_HPP
 #pragma once
 
-#include <winapi/gui/menu/detail/menu_win32.hpp> // destroy_menu
+#include <winapi/gui/menu/detail/menu_win32.hpp>
+                                 // create_popup_menu, create_menu, destroy_menu
 #include <winapi/trace.hpp>
 
 namespace winapi {
@@ -56,6 +57,22 @@ inline void safe_destroy_menu(HMENU hmenu)
 inline void no_destroy_menu(HMENU hmenu)
 {
 }
+
+struct menu_handle_creator
+{
+    HMENU operator()()
+    {
+        return win32::create_popup_menu();
+    }
+};
+
+struct menu_bar_handle_creator
+{
+    HMENU operator()()
+    {
+        return win32::create_menu();
+    }
+};
 
 }}}} // namespace winapi::gui::menu::detail
 

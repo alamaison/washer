@@ -69,6 +69,7 @@ set(LIBRARY_SOURCES_gui_menu
 source_group(winapi\\gui\\menu FILES ${LIBRARY_SOURCES_gui_menu})
 
 set(LIBRARY_SOURCES_gui_menu_detail
+  ${LIBRARY_DIRECTORY}/gui/menu/detail/befrienders.ipp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/convert_button.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/item_common.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/item_position.hpp
