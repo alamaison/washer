@@ -83,7 +83,7 @@ private:
 
     bool equal(menu_item_iterator const& other) const
     {
-        return this->m_menu == other.m_menu && this->m_pos == other.m_pos;
+        return m_menu == other.m_menu && this->m_pos == other.m_pos;
     }
 
     reference dereference() const

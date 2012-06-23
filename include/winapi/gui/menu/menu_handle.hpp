@@ -73,6 +73,11 @@ public:
         return m_handle.get();
     }
 
+    friend void swap(menu_handle& a, menu_handle& b)
+    {
+        swap(a.m_handle, b.m_handle);
+    }
+
 private:
 
     menu_handle(shared_menu_handle handle) : m_handle(handle) {}

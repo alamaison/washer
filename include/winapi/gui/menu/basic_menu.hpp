@@ -38,6 +38,10 @@
 #include <winapi/gui/menu/menu_handle.hpp> // menu_handle
 #include <winapi/gui/menu/menu_item.hpp>
 
+#include <boost/integer_traits.hpp>
+#include <boost/iterator/reverse_iterator.hpp>
+#include <boost/utility/swap.hpp>
+
 #include <Windows.h> // MENUITEMINFO
 
 namespace winapi {
@@ -58,10 +62,19 @@ class basic_menu
 
 public:
 
-    typedef detail::menu_item_iterator<basic_menu, menu_item>
+    typedef menu_item value_type;
+    typedef value_type& reference;
+    typedef const value_type& const_reference;
+    typedef value_type* pointer;
+    typedef const value_type* const_pointer;
+    typedef detail::menu_item_iterator<basic_menu, value_type>
         iterator;
-    typedef detail::menu_item_iterator<basic_menu, const menu_item>
+    typedef detail::menu_item_iterator<basic_menu, const value_type>
         const_iterator;
+    typedef boost::reverse_iterator<iterator> reverse_iterator;
+    typedef boost::reverse_iterator<const_iterator> const_reverse_iterator;
+    typedef std::ptrdiff_t difference_type;
+    typedef std::size_t size_type;
 
     /**
     * Create a new menu.
@@ -86,9 +99,22 @@ public:
     /**
      * Returns the number of items in the menu.
      */
-    size_t size() const
+    size_type size() const
     {
         return detail::win32::get_menu_item_count(m_menu.get());
+    }
+
+    size_type max_size() const
+    {
+        return boost::integer_traits<UINT>::const_max;
+    }
+
+    /**
+     * Returns whether the menu is empty.
+     */
+    bool empty() const
+    {
+        return size() == 0;
     }
 
     /**
@@ -110,23 +136,33 @@ public:
         insert_at_position(item, -1);
     }
 
-    menu_item operator[](size_t position) const
+    value_type operator[](size_type position) const
     {
         if (position >= size())
             BOOST_THROW_EXCEPTION(
                 std::range_error("Menu item index out of range"));
 
-        return menu_item(detail::item_position(handle(), position));
+        return value_type(detail::item_position(handle(), position));
     }
 
-    iterator begin()
+    iterator begin() const
     {
         return iterator(*this);
     }
 
-    iterator end()
+    iterator end() const
     {
         return iterator::end(*this);
+    }
+
+    reverse_iterator rbegin() const
+    {
+        return reverse_iterator(end());
+    }
+
+    reverse_iterator rend() const
+    {
+        return reverse_iterator(begin());
     }
 
     /**
@@ -155,6 +191,11 @@ public:
     bool valid() const
     {
         return detail::win32::is_menu(m_menu.get());
+    }
+
+    bool swap(basic_menu& other)
+    {
+        boost::swap(m_menu, other.m_menu);
     }
 
 private:

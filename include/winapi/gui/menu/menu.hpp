@@ -39,6 +39,10 @@
 #include <winapi/gui/menu/menu_item_description.hpp>
 #include <winapi/gui/menu/selectable_menu_item_description.hpp>
 
+#include <boost/concept/assert.hpp> // BOOST_CONCEPT_ASSERT
+#include <boost/concept_check.hpp> // Collection
+#include <boost/iterator/iterator_concepts.hpp> // ReadableIterator
+
 namespace winapi {
 namespace gui {
 namespace menu {
@@ -68,5 +72,12 @@ typedef basic_menu<
 }}} // namespace winapi::gui::menu
 
 #include <winapi/gui/menu/detail/befrienders.ipp>
+
+BOOST_CONCEPT_ASSERT((boost::Collection<winapi::gui::menu::menu>));
+BOOST_CONCEPT_ASSERT((boost::Collection<winapi::gui::menu::menu_bar>));
+BOOST_CONCEPT_ASSERT((
+    boost_concepts::ReadableIterator<winapi::gui::menu::menu::iterator>));
+BOOST_CONCEPT_ASSERT((
+    boost_concepts::ReadableIterator<winapi::gui::menu::menu_bar::iterator>));
 
 #endif
