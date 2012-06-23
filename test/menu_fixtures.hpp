@@ -173,14 +173,14 @@ namespace detail {
 class lonely_fixture
 {
 public:
-    static void do_test(gui::menu::menu& m)
+    static void do_ownership_test(gui::menu::menu& m)
     {
         // do nothing
 
         BOOST_CHECK(m.valid());
     }
 
-    static void do_test(gui::menu::menu_bar& m)
+    static void do_ownership_test(gui::menu::menu_bar& m)
     {
         // do nothing
 
@@ -198,7 +198,7 @@ public:
 class no_window_fixture
 {
 public:
-    static void do_test(gui::menu::menu& m)
+    static void do_ownership_test(gui::menu::menu& m)
     {
         gui::menu::menu_bar b;
         b.insert(
@@ -210,7 +210,7 @@ public:
         BOOST_CHECK(b.valid());
     }
 
-    static void do_test(gui::menu::menu_bar& m)
+    static void do_ownership_test(gui::menu::menu_bar& m)
     {
         // do nothing
 
@@ -228,7 +228,7 @@ class normal_usage_fixture
 {
 public:
 
-    static void do_test(gui::menu::menu& m)
+    static void do_ownership_test(gui::menu::menu& m)
     {
         gui::menu::menu_bar b;
         b.insert(
@@ -249,7 +249,7 @@ public:
         BOOST_CHECK(!b.valid());
     }
 
-    static void do_test(gui::menu::menu_bar& m)
+    static void do_ownership_test(gui::menu::menu_bar& m)
     {
         BOOST_CHECK(m.valid());
 

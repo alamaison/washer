@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     BOOST_CHECK_EQUAL(b.size(), 1);
     BOOST_CHECK(b.begin() != b.end());
 
-    F::do_test(b);
+    F::do_ownership_test(b);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     BOOST_CHECK_EQUAL(b.size(), 1);
     BOOST_CHECK(b.begin() != b.end());
 
-    F::do_test(b);
+    F::do_ownership_test(b);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE( string_popup_in_bar, F, menu_ownership_fixtures )
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( string_popup_in_bar, F, menu_ownership_fixtures )
     BOOST_CHECK_EQUAL(b.size(), 1);
     BOOST_CHECK(b.begin() != b.end());
 
-    F::do_test(b);
+    F::do_ownership_test(b);
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_popup_in_bar, F, menu_ownership_fixtures )
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_popup_in_bar, F, menu_ownership_fixtures )
 
     BOOST_CHECK(b.begin() != b.end());
 
-    F::do_test(b);
+    F::do_ownership_test(b);
 }
 
 BOOST_AUTO_TEST_SUITE_END();
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( string_command, F, menu_ownership_fixtures )
 
     BOOST_CHECK(m.begin() != m.end());
 
-    F::do_test(m);
+    F::do_ownership_test(m);
 }
 
 /**
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_command, F, menu_ownership_fixtures )
 
     BOOST_CHECK(m.begin() != m.end());
 
-    F::do_test(m);
+    F::do_ownership_test(m);
 }
 
 /**
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( separator, F, menu_ownership_fixtures )
 
     BOOST_CHECK(m.begin() != m.end());
 
-    F::do_test(m);
+    F::do_ownership_test(m);
 }
 
 /**
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( string_submenu, F, menu_ownership_fixtures )
 
     BOOST_CHECK(m.begin() != m.end());
 
-    F::do_test(m);
+    F::do_ownership_test(m);
 }
 
 /**
@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_submenu, F, menu_ownership_fixtures )
 
     BOOST_CHECK(m.begin() != m.end());
 
-    F::do_test(m);
+    F::do_ownership_test(m);
 }
 
 /**
@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( mixed_items, F, menu_ownership_fixtures )
 
     m.insert(sub_menu_description(string_menu_button(L"Lalala"), sub));
 
-    F::do_test(m);
+    F::do_ownership_test(m);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

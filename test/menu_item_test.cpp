@@ -244,7 +244,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( empty_menu, F, menu_fixtures )
 
     BOOST_CHECK(m.begin() == m.end());
 
-    F::do_test(m);
+    F::do_ownership_test(m);
 }
 
 /**
@@ -329,7 +329,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     m[0].accept(command_id_test(42));
     m[0].accept(string_button_test(L"Bob"));
 
-    F::do_test(m);
+    F::do_ownership_test(m);
 }
 
 /**
@@ -393,7 +393,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     m[0].accept(command_id_test(42));
     m[0].accept(bitmap_button_test(bitmap));
 
-    F::do_test(m);
+    F::do_ownership_test(m);
 }
 
 /**
@@ -461,7 +461,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     m[0].accept(string_button_test(L"Bob"));
     m[0].accept(sub_menu_test());
 
-    F::do_test(m);
+    F::do_ownership_test(m);
 }
 
 /** @todo  Could do tests for bitmap with popup menu here. */
@@ -571,7 +571,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( extract_separator_item, F, separator_fixtures )
 
     m[0].accept(is_separator_test());
 
-    F::do_test(m);
+    F::do_ownership_test(m);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

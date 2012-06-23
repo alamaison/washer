@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( create_empty_menu, F, menu_ownership_fixtures )
         BOOST_FAIL("Empty menu should not iterate");
     }
 
-    F::do_test(m);
+    F::do_ownership_test(m);
 }
 
 
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( empty_menu_bar, F, menu_ownership_fixtures )
         BOOST_FAIL("Empty menu should not iterate");
     }
 
-    F::do_test(m);
+    F::do_ownership_test(m);
 }
 
 /**
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( existing_empty_menu, F, menu_fixtures )
         BOOST_FAIL("Empty menu should not iterate");
     }
 
-    F::do_test(m);
+    F::do_ownership_test(m);
 }
 
 /**
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( create_command, F, menu_fixtures )
     BOOST_CHECK_NO_THROW(m[0]);
     BOOST_CHECK_THROW(m[1], std::runtime_error);
 
-    F::do_test(m);
+    F::do_ownership_test(m);
 }
 
 /**
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( existing_command, F, menu_fixtures )
     BOOST_CHECK_NO_THROW(m[0]);
     BOOST_CHECK_THROW(m[1], std::runtime_error);
 
-    F::do_test(m);
+    F::do_ownership_test(m);
 }
 
 /**
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( create_submenu, F, menu_fixtures )
     BOOST_CHECK_NO_THROW(m[0]);
     BOOST_CHECK_THROW(m[1], std::runtime_error);
 
-    F::do_test(m);
+    F::do_ownership_test(m);
 }
 
 /**
