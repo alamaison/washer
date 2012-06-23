@@ -286,6 +286,32 @@ template<typename F>
 struct normal_menu_creator : public F
 {
     typedef gui::menu::menu menu_type;
+
+    static menu_type create_menu_to_test()
+    {
+        return menu_type();
+    }
+};
+
+template<typename F>
+struct menu_bar_creator : public F
+{
+    typedef gui::menu::menu_bar menu_type;
+
+    static menu_type create_menu_to_test()
+    {
+        return menu_type();
+    }
+};
+
+typedef boost::mpl::vector<
+    normal_menu_creator<boost::mpl::_>, menu_bar_creator<boost::mpl::_> >
+menu_creator_fixtures;
+
+template<typename F>
+struct normal_menu_handle_creator : public F
+{
+    typedef gui::menu::menu menu_type;
     typedef test_menu_<menu_type> test_menu;
 
     static test_menu create_menu_to_test()
@@ -297,7 +323,7 @@ struct normal_menu_creator : public F
 };
 
 template<typename F>
-struct menu_bar_creator : public F
+struct menu_bar_handle_creator : public F
 {
     typedef gui::menu::menu_bar menu_type;
     typedef test_menu_<menu_type> test_menu;
@@ -311,13 +337,14 @@ struct menu_bar_creator : public F
 };
 
 typedef boost::mpl::vector<
-    normal_menu_creator<boost::mpl::_>, menu_bar_creator<boost::mpl::_> >
-menu_creator_fixtures;
+    normal_menu_handle_creator<boost::mpl::_>,
+    menu_bar_handle_creator<boost::mpl::_> >
+menu_with_handle_creator_fixtures;
 
 typedef fixture_permutator<
     boost::mpl::vector<
-        normal_menu_creator<boost::mpl::_>,
-        menu_bar_creator<boost::mpl::_>
+        normal_menu_handle_creator<boost::mpl::_>,
+        menu_bar_handle_creator<boost::mpl::_>
     >,
     menu_ownership_fixtures
 >::type menu_fixtures;

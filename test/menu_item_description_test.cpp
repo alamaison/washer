@@ -36,167 +36,88 @@
 #include <winapi/gui/menu/items.hpp> // test subject
 #include <winapi/gui/menu/menu.hpp> // test subject
 
-#include <winapi/gui/windows/window.hpp>
-
 #include <boost/test/unit_test.hpp>
 
 using namespace winapi::gui::menu;
-using winapi::gui::window;
-using winapi::test::detail::create_test_window;
 using winapi::test::detail::test_bitmap;
-using winapi::test::menu_fixtures;
-using winapi::test::menu_ownership_fixtures;
+using winapi::test::menu_creator_fixtures;
 
 
-BOOST_AUTO_TEST_SUITE(menu_item_description_in_menu_bar_tests)
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(
-    string_command_in_bar, F, menu_ownership_fixtures )
-{
-    menu_bar b;
-
-    b.insert(command_item_description(
-        string_menu_button(L"string command in bar"), 14));
-
-    BOOST_CHECK_EQUAL(b.size(), 1);
-    BOOST_CHECK(b.begin() != b.end());
-
-    F::do_ownership_test(b);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE(
-    bitmap_command_in_bar, F, menu_ownership_fixtures )
-{
-    menu_bar b;
-
-    command_item_description item =
-        command_item_description(bitmap_menu_button(test_bitmap()), 13);
-
-    b.insert(item);
-
-    BOOST_CHECK_EQUAL(b.size(), 1);
-    BOOST_CHECK(b.begin() != b.end());
-
-    F::do_ownership_test(b);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE( string_popup_in_bar, F, menu_ownership_fixtures )
-{
-    menu_bar b;
-
-    menu m;
-    m.insert(command_item_description(string_menu_button(L"Pop"), 1));
-
-    sub_menu_description item =
-        sub_menu_description(string_menu_button(L"string popup in bar"), m);
-
-    b.insert(item);
-
-    BOOST_CHECK_EQUAL(b.size(), 1);
-    BOOST_CHECK(b.begin() != b.end());
-
-    F::do_ownership_test(b);
-}
-
-BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_popup_in_bar, F, menu_ownership_fixtures )
-{
-    menu_bar b;
-
-    menu m;
-    m.insert(command_item_description(string_menu_button(L"Pop"), 1));
-
-    b.insert(sub_menu_description(bitmap_menu_button(test_bitmap()), m));
-
-    BOOST_CHECK(b.begin() != b.end());
-
-    F::do_ownership_test(b);
-}
-
-BOOST_AUTO_TEST_SUITE_END();
-
-
-BOOST_AUTO_TEST_SUITE(menu_item_description_in_menu_tests)
+BOOST_AUTO_TEST_SUITE(menu_item_description_tests)
 
 /**
  * A simple string command.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( string_command, F, menu_ownership_fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE( string_command, F, menu_creator_fixtures )
 {
-    menu m;
+    F::menu_type m = F::create_menu_to_test();
+
     m.insert(command_item_description(string_menu_button(L"Child command"), 1));
 
+    BOOST_CHECK_EQUAL(m.size(), 1);
     BOOST_CHECK(m.begin() != m.end());
-
-    F::do_ownership_test(m);
 }
 
 /**
  * A bitmap command.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_command, F, menu_ownership_fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_command, F, menu_creator_fixtures )
 {
-    menu m;
+    F::menu_type m = F::create_menu_to_test();
+
     m.insert(command_item_description(bitmap_menu_button(test_bitmap()), 1));
 
+    BOOST_CHECK_EQUAL(m.size(), 1);
     BOOST_CHECK(m.begin() != m.end());
-
-    F::do_ownership_test(m);
-}
-
-/**
- * A separator.
- */
-BOOST_AUTO_TEST_CASE_TEMPLATE( separator, F, menu_ownership_fixtures )
-{
-    menu m;
-    m.insert(separator_description());
-
-    BOOST_CHECK(m.begin() != m.end());
-
-    F::do_ownership_test(m);
 }
 
 /**
  * A string popping out a submenu.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( string_submenu, F, menu_ownership_fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE( string_submenu, F, menu_creator_fixtures )
 {
-    menu m;
-    menu sub;
+    F::menu_type m = F::create_menu_to_test();
 
+    menu sub;
     sub.insert(command_item_description(string_menu_button(L"Boo"), 1));
 
     m.insert(sub_menu_description(string_menu_button(L"Pop"), sub));
 
+    BOOST_CHECK_EQUAL(m.size(), 1);
     BOOST_CHECK(m.begin() != m.end());
-
-    F::do_ownership_test(m);
 }
 
 /**
  * A bitmap popping out a submenu.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_submenu, F, menu_ownership_fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE( bitmap_submenu, F, menu_creator_fixtures )
 {
-    menu m;
+    F::menu_type m = F::create_menu_to_test();
+
     menu sub;
-
-    BOOST_CHECK(m.begin() == m.end());
-    BOOST_CHECK(sub.begin() == sub.end());
-
     sub.insert(command_item_description(string_menu_button(L"Boo"), 1));
 
     m.insert(sub_menu_description(bitmap_menu_button(test_bitmap()), sub));
 
+    BOOST_CHECK_EQUAL(m.size(), 1);
     BOOST_CHECK(m.begin() != m.end());
+}
 
-    F::do_ownership_test(m);
+/**
+ * A separator.
+ */
+BOOST_AUTO_TEST_CASE( separator )
+{
+    menu m;
+    m.insert(separator_description());
+
+    BOOST_CHECK(m.begin() != m.end());
 }
 
 /**
  * A menu with multiple items.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( mixed_items, F, menu_ownership_fixtures )
+BOOST_AUTO_TEST_CASE( mixed_items )
 {
     menu m;
 
@@ -215,8 +136,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( mixed_items, F, menu_ownership_fixtures )
     sub.insert(command_item_description(bitmap_menu_button(test_bitmap()), 4));
 
     m.insert(sub_menu_description(string_menu_button(L"Lalala"), sub));
-
-    F::do_ownership_test(m);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

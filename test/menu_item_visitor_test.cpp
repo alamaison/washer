@@ -41,8 +41,8 @@
 #include <string>
 
 using namespace winapi::gui::menu;
-using winapi::test::menu_creator_fixtures;
 using winapi::test::menu_ownership_fixtures;
+using winapi::test::menu_with_handle_creator_fixtures;
 
 using std::string;
 
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE( visit_separator )
         "separator");
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( visit_command, F, menu_creator_fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE( visit_command, F, menu_with_handle_creator_fixtures )
 {
     F::menu_type m = F::create_menu_to_test().menu();
     m.insert(command_item_description(string_menu_button(L"Bob"), 42));
@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( visit_command, F, menu_creator_fixtures )
         "command-or-sub_menu");
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( visit_sub_menu, F, menu_creator_fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE( visit_sub_menu, F, menu_with_handle_creator_fixtures )
 {
     F::menu_type m = F::create_menu_to_test().menu();
     menu s;
