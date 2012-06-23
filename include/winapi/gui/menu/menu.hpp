@@ -1,7 +1,7 @@
 /**
     @file
 
-    Standard Windows HMENU menu wrapper.
+    Windows HMENU menu wrapper for menus and menu bars.
 
     @if license
 
@@ -33,100 +33,109 @@
 #define WINAPI_GUI_MENU_MENU_HPP
 #pragma once
 
-#include <winapi/gui/menu/detail/menu_common_core.hpp>
-#include <winapi/gui/menu/detail/menu_win32.hpp> // create_popup_menu
+#include <winapi/gui/menu/basic_menu.hpp>
+#include <winapi/gui/menu/detail/menu_win32.hpp>
+                                               // create_popup_menu, create_menu
 #include <winapi/gui/menu/menu_handle.hpp> // menu_handle
 #include <winapi/gui/menu/menu_item_description.hpp>
+#include <winapi/gui/menu/selectable_menu_item_description.hpp>
 
 #include <Windows.h> // MENUITEMINFO
 
 namespace winapi {
 namespace gui {
+
+template<typename>
+class window;
+
 namespace menu {
+
+namespace detail {
+
+    struct menu_handle_creator
+    {
+        HMENU operator()()
+        {
+            return detail::win32::create_popup_menu();
+        }
+    };
+
+    struct menu_bar_handle_creator
+    {
+        HMENU operator()()
+        {
+            return detail::win32::create_menu();
+        }
+    };
+
+}
+
+class sub_menu_description_befriender;
 
 /**
  * Menu that can be used as a context menu, as a sub-menu of a menu bar or as
  * a sub-menu of another menu.
- *
- * @todo  Add a method that can insert at an iterator position.
  */
-class menu : private detail::menu_common_core<menu_item_description>
+typedef basic_menu<
+    menu_item_description, detail::menu_handle_creator,
+    sub_menu_description_befriender> menu;
+
+/**
+ * Purpose: to indirect friendship with the basic_menu so we can pass
+ *          different friends in the typedef.
+ */
+class sub_menu_description_befriender
 {
     friend class sub_menu_description;
 
-    typedef detail::menu_common_core<menu_item_description> core;
+private:
 
-public:
+    sub_menu_description_befriender(const menu& menu) : m_menu(menu) {}
 
-    /**
-     * Create empty menu.
-     */
-    menu() : core(menu_handle::adopt_handle(detail::win32::create_popup_menu()))
-    {}
-
-    /**
-     * Accept an existing menu.
-     *
-     * @warning  Do not pass a menu *bar* handle to this constructor.
-     *           Ideally this would check that the handle passed in is to a
-     *           menu, not a menu bar, but there is no way to tell them apart
-     *           once they have been created.  
-     */
-    menu(const menu_handle& handle) : core(handle) {}
-
-    /**
-     * Returns the number of items in the menu.
-     */
-    using core::size;
-
-    /**
-     * Create an item based on the given description and insert it into the
-     * menu at the given iterator position.
-     *
-     * Shuffles existing items along.
-     */
-    using core::insert;
-
-    using core::operator[];
-
-    using core::iterator;
-    using core::const_iterator;
-
-    using core::begin;
-    
-    using core::end;
-
-    /**
-     * Test if objects wrap the same Win32 menu.
-     */
-    bool operator==(const menu& other) const
+    const menu_handle handle() const
     {
-        const core& other_core = other;
-        const core& this_core = *this;
-        return this_core == other_core;
+        return m_menu.handle();
     }
 
-    /**
-     * Test if objects wrap different Win32 menus.
-     */
-    bool operator!=(const menu& other) const
-    {
-        return !(*this == other);
-    }
+    const menu& m_menu;
+};
 
-    /**
-     * Tests if the underlying Win32 menu still exists.
-     *
-     * Windows take over the lifetime of a menu and destroy the menu when they
-     * themselves are destroyed.  Therefore it is possible for this menu to
-     * become invalid outside the control of this wrapper.
-     */
-    using core::valid;
+class window_class_befriender;
+
+/**
+ * Main application window menu bar.
+ */
+typedef basic_menu<
+    selectable_menu_item_description, detail::menu_bar_handle_creator,
+    window_class_befriender> menu_bar;
+
+/**
+ * Purpose: to indirect friendship between a menu_bar and a window so we can
+ *          parameterise the basic_menu template with the friendship.
+ */
+class window_class_befriender
+{
+#if defined (_MSC_VER) && (_MSC_VER > 1400)
+    template<typename>
+    friend class window;
+#else
+    // HACK to workaround VC8 (2005) and presumably earlier that can't
+    // befriend a template class in a parent namespace.
+    // See: http://stackoverflow.com/q/10694416/67013
+    friend class window<char>;
+    friend class window<wchar_t>;
+#endif
 
 private:
 
-    /** To allow sub_menu_description::as_menuiteminfo to access raw HWND. */
-    using core::handle;
+    window_class_befriender(const menu_bar& menu) : m_menu(menu) {}
+
+    const menu_handle handle() const
+    {
+        return m_menu.handle();
+    }
+
+    const menu_bar& m_menu;
 };
 
 }}} // namespace winapi::gui::menu

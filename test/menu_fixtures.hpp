@@ -40,7 +40,6 @@
 #include <winapi/gui/menu/buttons.hpp>
 #include <winapi/gui/menu/item_descriptions.hpp>
 #include <winapi/gui/menu/menu.hpp>
-#include <winapi/gui/menu/menu_bar.hpp>
 #include <winapi/gui/menu/menu_handle.hpp>
 
 #include <winapi/dynamic_link.hpp> // module_handle

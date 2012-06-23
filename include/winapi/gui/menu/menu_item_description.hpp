@@ -41,13 +41,6 @@ namespace winapi {
 namespace gui {
 namespace menu {
 
-namespace detail {
-
-template<typename>
-class menu_common_core;
-
-}
-
 /**
  * Interface to objects that describe (but aren't) menu items.
  *
@@ -69,8 +62,9 @@ class menu_common_core;
  */
 class menu_item_description
 {
-    template<typename>
-    friend class detail::menu_common_core;
+    // To allow basic_menu to be the only class that can see our
+    // underlying Win32 representation
+    template<typename,typename,typename> friend class basic_menu;
 
 public:
 

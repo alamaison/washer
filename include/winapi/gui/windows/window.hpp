@@ -35,7 +35,7 @@
 
 #include <winapi/gui/detail/window_win32.hpp> // set_menu, get_window_rect
 #include <winapi/gui/hwnd.hpp> // HWND-manipulating functions
-#include <winapi/gui/menu/menu_bar.hpp> // menu_bar
+#include <winapi/gui/menu/menu.hpp> // menu_bar
 
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
 #include <boost/type_traits/remove_pointer.hpp> // remove_pointer
@@ -203,7 +203,9 @@ public:
      */
     void menu(const menu::menu_bar& menu)
     {
-        detail::win32::set_menu(hwnd(), menu.handle().get());
+        menu::window_class_befriender befriender(menu);
+        
+        detail::win32::set_menu(hwnd(), befriender.handle().get());
     }
 
     /**

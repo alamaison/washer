@@ -104,7 +104,7 @@ private:
         MENUITEMINFOW info = m_button->as_menuiteminfo();
 
         info.fMask |= MIIM_SUBMENU;
-        info.hSubMenu = m_menu.handle().get();
+        info.hSubMenu = sub_menu_description_befriender(m_menu).handle().get();
 
         return info;
     }

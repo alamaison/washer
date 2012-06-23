@@ -29,8 +29,8 @@
     @endif
 */
 
-#ifndef WINAPI_GUI_MENU_DETAIL_MENU_COMMON_CORE_HPP
-#define WINAPI_GUI_MENU_DETAIL_MENU_COMMON_CORE_HPP
+#ifndef WINAPI_GUI_MENU_BASIC_MENU_HPP
+#define WINAPI_GUI_MENU_BASIC_MENU_HPP
 #pragma once
 
 #include <winapi/gui/menu/detail/item_position.hpp>
@@ -43,24 +43,45 @@
 namespace winapi {
 namespace gui {
 namespace menu {
-namespace detail {
 
 /**
- * Object implementing the common aspects of wrapping a menu and a menu bar.
+ * A C++ view of a Windows menu or menu bar.
+ *
+ * Purpose: to implement the common aspects of wrapping a menu and a menu bar.
  */
-template<typename DescriptionType>
-class menu_common_core
+template<typename DescriptionType, typename HandleCreator, typename Friend>
+class basic_menu
 {
     typedef DescriptionType description_type;
 
+    friend Friend;
+
 public:
 
-    typedef detail::menu_item_iterator<menu_common_core, menu_item>
+    typedef detail::menu_item_iterator<basic_menu, menu_item>
         iterator;
-    typedef detail::menu_item_iterator<menu_common_core, const menu_item>
+    typedef detail::menu_item_iterator<basic_menu, const menu_item>
         const_iterator;
 
-    explicit menu_common_core(menu_handle menu) : m_menu(menu) {}
+    /**
+    * Create a new menu.
+    */
+    explicit basic_menu()
+        : m_menu(menu_handle::adopt_handle(HandleCreator()())) {}
+
+    /**
+     * Accept an existing menu or menu bar.
+     *
+     * Purpose: to allow this menu wrapper to be used with menus created by
+     *          Windows or by other code that gives us a raw HMENU.
+     *
+     * @warning  Only pass the a menu handle to this constructor of the same
+     *           type as would be created by the handle creator type.
+     *           Ideally this would check that the handle passed in is of the
+     *           correct type, but there is no way to tell them apart once they
+     *           have been created.  
+     */
+    basic_menu(const menu_handle& handle) : m_menu(handle) {}
 
     /**
      * Returns the number of items in the menu.
@@ -95,7 +116,7 @@ public:
             BOOST_THROW_EXCEPTION(
                 std::range_error("Menu item index out of range"));
 
-        return menu_item(item_position(handle(), position));
+        return menu_item(detail::item_position(handle(), position));
     }
 
     iterator begin()
@@ -111,9 +132,17 @@ public:
     /**
      * Test if objects wrap the same Win32 menu.
      */
-    bool operator==(const menu_common_core& other) const
+    bool operator==(const basic_menu& other) const
     {
         return m_menu.get() == other.m_menu.get();
+    }
+
+    /**
+     * Test if objects wrap different Win32 menus.
+     */
+    bool operator!=(const basic_menu& other) const
+    {
+        return !(*this == other);
     }
 
     /**
@@ -128,14 +157,12 @@ public:
         return detail::win32::is_menu(m_menu.get());
     }
 
-protected:
+private:
 
     const menu_handle handle() const
     {
         return m_menu;
     }
-
-private:
 
     void insert_at_position(const description_type& item, UINT position)
     {
@@ -148,6 +175,6 @@ private:
     menu_handle m_menu;
 };
 
-}}}} // namespace winapi::gui::menu::detail
+}}} // namespace winapi::gui::menu
 
 #endif

@@ -45,13 +45,6 @@ class separator_menu_item;
 class command_menu_item;
 class sub_menu_item;
 
-namespace detail {
-
-    template<typename>
-    class menu_common_core;
-
-}
-
 /**
  * Convenience interface giving subclasses the static visitor concept necessary
  * to visit menu items.
@@ -98,7 +91,9 @@ public:
  */
 class menu_item
 {
-    template<typename> friend class detail::menu_common_core;
+    // to let basic_menu be our factory - the only class that can invoke
+    // our private constructor
+    template<typename,typename,typename> friend class basic_menu;
 
 public:
 

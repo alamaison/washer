@@ -56,11 +56,11 @@ set(LIBRARY_SOURCES_gui_detail
 source_group(winapi\\gui\\detail FILES ${LIBRARY_SOURCES_gui_detail})
 
 set(LIBRARY_SOURCES_gui_menu
+  ${LIBRARY_DIRECTORY}/gui/menu/basic_menu.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/buttons.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/item_descriptions.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/items.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/menu.hpp
-  ${LIBRARY_DIRECTORY}/gui/menu/menu_bar.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/menu_handle.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/menu_item.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/menu_item_description.hpp
@@ -73,7 +73,6 @@ set(LIBRARY_SOURCES_gui_menu_detail
   ${LIBRARY_DIRECTORY}/gui/menu/detail/item_common.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/item_position.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/menu.hpp
-  ${LIBRARY_DIRECTORY}/gui/menu/detail/menu_common_core.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/menu_item_iterator.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/menu_win32.hpp)
 source_group(winapi\\gui\\menu\\detail FILES ${LIBRARY_SOURCES_gui_menu_detail})
