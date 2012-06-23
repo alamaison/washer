@@ -148,6 +148,8 @@ class sub_menu_test : public winapi::gui::menu::menu_item_visitor<>
 {
 public:
 
+    sub_menu_test(const winapi::gui::menu::menu& menu) : m_menu(menu) {}
+
     template<typename T>
     void operator()(T&)
     {
@@ -159,11 +161,11 @@ public:
         winapi::gui::menu::menu& submenu = item.menu();
         BOOST_CHECK(submenu.valid());
 
-        /*
-         * TODO: Add something here that tests the menu is the same one
-         * as one taken in the constructor.
-         */
+        BOOST_CHECK(submenu == m_menu);
     }
+
+private:
+    winapi::gui::menu::menu m_menu;
 };
 
 class string_button_test : public winapi::gui::menu::menu_item_visitor<>

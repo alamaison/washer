@@ -284,7 +284,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     m[0].accept(is_sub_menu_test());
     m[0].accept(selectable_state_test());
     m[0].accept(string_button_test(L"Bob"));
-    m[0].accept(sub_menu_test());
+    m[0].accept(sub_menu_test(menu(submenu_handle)));
 
     F::do_ownership_test(m);
 }
