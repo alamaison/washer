@@ -76,6 +76,7 @@ namespace detail {
             return 1;
 
         default:
+            ::SetForegroundWindow(hwnd);
             return ::DefWindowProcW(hwnd, msg, wparam, lparam);
         }
     }
@@ -170,7 +171,8 @@ inline HBITMAP test_bitmap()
  * The other two scenarios take ownership of the menu's lifetime so this tests
  * how the menu copes with managing its own lifetime.
  */
-class lonely_fixture
+template<typename F>
+class lonely_fixture : public F
 {
 public:
     static void do_ownership_test(gui::menu::menu& m)
@@ -195,7 +197,8 @@ public:
  * The menu bar takes ownership of the menu so it has to cope with this
  * intrusion.
  */
-class no_window_fixture
+template<typename F>
+class no_window_fixture : public F
 {
 public:
     static void do_ownership_test(gui::menu::menu& m)
@@ -224,7 +227,8 @@ public:
  *
  * This window controls the lifetime of the menus.
  */
-class normal_usage_fixture
+template<typename F>
+class normal_usage_fixture : public F
 {
 public:
 
@@ -264,7 +268,8 @@ public:
 };
 
 typedef boost::mpl::vector<
-    lonely_fixture, no_window_fixture, normal_usage_fixture>
+    lonely_fixture<boost::mpl::_>, no_window_fixture<boost::mpl::_>,
+    normal_usage_fixture<boost::mpl::_> >
     menu_ownership_fixtures;
 
 template<typename T>
@@ -283,7 +288,7 @@ private:
 };
 
 template<typename F>
-struct normal_menu_creator : public F
+struct menu_creator : public F
 {
     typedef gui::menu::menu menu_type;
 
@@ -294,7 +299,7 @@ struct normal_menu_creator : public F
 };
 
 template<typename F>
-struct menu_bar_creator : public F
+struct bar_creator : public F
 {
     typedef gui::menu::menu_bar menu_type;
 
@@ -305,8 +310,13 @@ struct menu_bar_creator : public F
 };
 
 typedef boost::mpl::vector<
-    normal_menu_creator<boost::mpl::_>, menu_bar_creator<boost::mpl::_> >
-menu_creator_fixtures;
+    menu_creator<boost::mpl::_>, bar_creator<boost::mpl::_> >
+menu_type_fixtures;
+
+typedef fixture_permutator<
+    menu_type_fixtures,
+    menu_ownership_fixtures
+>::type menu_creator_fixtures;
 
 template<typename F>
 struct normal_menu_handle_creator : public F

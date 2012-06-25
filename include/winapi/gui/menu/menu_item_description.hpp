@@ -47,8 +47,7 @@ namespace menu {
  * Purpose: to separate the specification of a menu item we are about to
  *          create, from its identity once it exists in the menu.  The latter
  *          may have properties that only exist once it is created so cannot
- *          be represented by the former.  The former is immutable; the latter
- *          can be updated to reflect program state changes.
+ *          be represented by the former.
  *
  * Reason for having separate classes: menu items could have been created by
  * passing the properties directly to methods of the menu which would create the

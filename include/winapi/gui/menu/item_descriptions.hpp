@@ -44,6 +44,56 @@ namespace winapi {
 namespace gui {
 namespace menu {
 
+namespace detail {
+
+    inline void adjust_selectability(
+        BOOST_SCOPED_ENUM(selectability) state, MENUITEMINFOW& info)
+    {
+        switch (state)
+        {
+        case selectability::default:
+            break;
+
+        case selectability::disabled:
+            info.fState |= MFS_DISABLED;
+            break;
+
+        case selectability::enabled:
+            // MFS_ENABLED is zero so we have to negate disabled instead
+            info.fState &= (~MFS_DISABLED);
+            break;
+
+        default:
+            assert(!"Passed a selectability state that doesn't exist in enum");
+            BOOST_THROW_EXCEPTION(std::logic_error("Unknown selectability"));
+        }
+    }
+
+    inline void adjust_checkedness(
+        BOOST_SCOPED_ENUM(checkedness) state, MENUITEMINFOW& info)
+    {
+        switch (state)
+        {
+        case checkedness::default:
+            break;
+
+        case checkedness::checked:
+            info.fState |= MFS_CHECKED;
+            break;
+
+        case checkedness::unchecked:
+            // MFS_UNCHECKED is zero so we have to negate checked instead
+            info.fState &= (~MFS_CHECKED);
+            break;
+
+        default:
+            assert(!"Passed a check mark state that doesn't exist in enum");
+            BOOST_THROW_EXCEPTION(std::logic_error("Unknown checkedness"));
+        }
+    }
+
+}
+
 /**
  * Simple button menu entry with an associated command ID.
  *
@@ -56,7 +106,25 @@ public:
 
     command_item_description(
         const menu_button_nature& button_nature, UINT command_id)
-        : m_button(button_nature.clone()), m_command_id(command_id) {}
+        :
+        m_button(button_nature.clone()),
+        m_command_id(command_id),
+        m_selectability(selectability::default),
+        m_checkedness(checkedness::default) {}
+
+    virtual command_item_description& button_state(
+        BOOST_SCOPED_ENUM(selectability) state)
+    {
+        m_selectability = state;
+        return *this;
+    }
+
+    virtual command_item_description& check_mark(
+        BOOST_SCOPED_ENUM(checkedness) state)
+    {
+        m_checkedness = state;
+        return *this;
+    };
 
 private:
 
@@ -66,6 +134,15 @@ private:
 
         info.fMask |= MIIM_ID;
         info.wID = m_command_id;
+
+        if (m_selectability != selectability::default ||
+            m_checkedness != checkedness::default)
+        {
+            info.fMask |= MIIM_STATE;
+        }
+
+        detail::adjust_selectability(m_selectability, info);
+        detail::adjust_checkedness(m_checkedness, info);
 
         return info;
     }
@@ -77,6 +154,8 @@ private:
 
     const boost::shared_ptr<menu_button_nature> m_button;
     const UINT m_command_id;
+    BOOST_SCOPED_ENUM(selectability) m_selectability;
+    BOOST_SCOPED_ENUM(checkedness) m_checkedness;
 };
 
 /**
@@ -95,7 +174,26 @@ public:
 
     sub_menu_description(
         const menu_button_nature& button_nature, const menu& menu)
-        : m_button(button_nature.clone()), m_menu(menu) {}
+        :
+        m_button(button_nature.clone()),
+        m_menu(menu),
+        m_selectability(selectability::default),
+        m_checkedness(checkedness::default) {}
+
+
+    virtual sub_menu_description& button_state(
+        BOOST_SCOPED_ENUM(selectability) state)
+    {
+        m_selectability = state;
+        return *this;
+    }
+
+    virtual sub_menu_description& check_mark(
+        BOOST_SCOPED_ENUM(checkedness) state)
+    {
+        m_checkedness = state;
+        return *this;
+    };
 
 private:
 
@@ -107,6 +205,15 @@ private:
         info.hSubMenu = 
             detail::sub_menu_description_befriender(m_menu).handle().get();
 
+        if (m_selectability != selectability::default ||
+            m_checkedness != checkedness::default)
+        {
+            info.fMask |= MIIM_STATE;
+        }
+
+        detail::adjust_selectability(m_selectability, info);
+        detail::adjust_checkedness(m_checkedness, info);
+
         return info;
     }
 
@@ -117,6 +224,8 @@ private:
 
     const boost::shared_ptr<menu_button_nature> m_button;
     const ::winapi::gui::menu::menu m_menu;
+    BOOST_SCOPED_ENUM(selectability) m_selectability;
+    BOOST_SCOPED_ENUM(checkedness) m_checkedness;
 };
 
 /**

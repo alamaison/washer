@@ -35,11 +35,29 @@
 
 #include <winapi/gui/menu/menu_item_description.hpp>
 
+#include <boost/detail/scoped_enum_emulation.hpp> // BOOST_SCOPED_ENUM
+
 #include <Windows.h> // MENUITEMINFO
 
 namespace winapi {
 namespace gui {
 namespace menu {
+
+BOOST_SCOPED_ENUM_START(selectability)
+{
+    enabled,
+    disabled,
+    default
+};
+BOOST_SCOPED_ENUM_END;
+
+BOOST_SCOPED_ENUM_START(checkedness)
+{
+    checked,
+    unchecked,
+    default
+};
+BOOST_SCOPED_ENUM_END;
 
 /**
  * Interface to objects that describe (but aren't) menu items that, when 
@@ -63,6 +81,14 @@ class selectable_menu_item_description : public menu_item_description
     // To allow basic_menu to be the only class that can see our
     // underlying Win32 representation
     template<typename,typename,typename> friend class basic_menu;
+
+public:
+
+    virtual selectable_menu_item_description& button_state(
+        BOOST_SCOPED_ENUM(selectability) state) = 0;
+
+    virtual selectable_menu_item_description& check_mark(
+        BOOST_SCOPED_ENUM(checkedness) state) = 0;
 
 private:
 

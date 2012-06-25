@@ -67,6 +67,46 @@ public:
     }
 };
 
+class selectability_test : public winapi::gui::menu::menu_item_visitor<>
+{
+public:
+
+    selectability_test(bool expected) : m_expected(expected) {}
+
+    void operator()(winapi::gui::menu::separator_menu_item&)
+    {
+        BOOST_FAIL("Separator unexpected");
+    }
+
+    void operator()(winapi::gui::menu::selectable_menu_item& item)
+    {
+        BOOST_CHECK_EQUAL(item.is_enabled(), m_expected);
+    }
+
+private:
+    bool m_expected;
+};
+
+class checkedness_test : public winapi::gui::menu::menu_item_visitor<>
+{
+public:
+
+    checkedness_test(bool expected) : m_expected(expected) {}
+
+    void operator()(winapi::gui::menu::separator_menu_item&)
+    {
+        BOOST_FAIL("Separator unexpected");
+    }
+
+    void operator()(winapi::gui::menu::selectable_menu_item& item)
+    {
+        BOOST_CHECK_EQUAL(item.is_checked(), m_expected);
+    }
+
+private:
+    bool m_expected;
+};
+
 class is_separator_test : public winapi::gui::menu::menu_item_visitor<>
 {
 public:

@@ -36,6 +36,7 @@
 #include <boost/mpl/apply.hpp>
 #include <boost/mpl/copy.hpp>
 #include <boost/mpl/fold.hpp>
+#include <boost/mpl/is_sequence.hpp>
 #include <boost/mpl/push_back.hpp>
 #include <boost/mpl/vector.hpp>
 
@@ -47,6 +48,8 @@ namespace detail {
 template<typename Outer, typename Inner>
 struct fixtures_loop
 {
+    BOOST_MPL_ASSERT(( boost::mpl::is_sequence<Inner> ));
+
     template<typename T>
     struct use : boost::mpl::apply<Outer, T> {};
 
@@ -54,6 +57,8 @@ struct fixtures_loop
         Inner, boost::mpl::vector<>,
         boost::mpl::push_back< boost::mpl::_1, use<boost::mpl::_2> >
     >::type type;
+
+    BOOST_MPL_ASSERT(( boost::mpl::is_sequence<type> ));
 };
 
 }
@@ -68,6 +73,9 @@ struct fixtures_loop
 template<typename Outer, typename Inner>
 struct fixture_permutator
 {
+    BOOST_MPL_ASSERT(( boost::mpl::is_sequence<Outer> ));
+    BOOST_MPL_ASSERT(( boost::mpl::is_sequence<Inner> ));
+
     typedef typename boost::mpl::fold<
         Outer, boost::mpl::vector<>,
         boost::mpl::copy<
@@ -75,6 +83,8 @@ struct fixture_permutator
             boost::mpl::back_inserter<boost::mpl::_1>
         >
     >::type type;
+
+    BOOST_MPL_ASSERT(( boost::mpl::is_sequence<type> ));
 };
 
 }}
