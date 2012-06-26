@@ -84,11 +84,34 @@ class selectable_menu_item_description : public menu_item_description
 
 public:
 
+    /**
+     * Enable or disable the menu item's button.
+     *
+     * Will grey the button and prevent it reacting when hovered over or
+     * clicked.
+     */
     virtual selectable_menu_item_description& button_state(
         BOOST_SCOPED_ENUM(selectability) state) = 0;
 
+    /**
+     * Add or remove a check mark from beside the menu item.
+     *
+     * @note  Even popup sub-menu items can have a check mark, odd as that
+     *        may seem.
+     */
     virtual selectable_menu_item_description& check_mark(
         BOOST_SCOPED_ENUM(checkedness) state) = 0;
+
+    /**
+     * @class
+     *
+     * Although not explicitly said on MSDN, it seems that highlighting is
+     * not a property intended to be set when a menu item is created so this
+     * interface doesn't include a method to set it.
+     *
+     * Instead, items can be force-highlighted once in the menu
+     * (HiliteMenuItem) and tested for their highlight state to react to UI.
+     */
 
 private:
 
