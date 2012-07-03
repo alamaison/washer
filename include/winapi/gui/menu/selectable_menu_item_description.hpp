@@ -33,7 +33,7 @@
 #define WINAPI_GUI_MENU_SELECTABLE_MENU_ITEM_DESCRIPTION_HPP
 #pragma once
 
-#include <winapi/gui/menu/item_state.hpp> // selectability, checkedness
+#include <winapi/gui/menu/item_state.hpp> // selectability, check_mark
 #include <winapi/gui/menu/menu_item_description.hpp>
 
 #include <boost/detail/scoped_enum_emulation.hpp> // BOOST_SCOPED_ENUM
@@ -78,7 +78,7 @@ public:
      * If this method is not called, the item will be created enabled by
      * default.
      */
-    virtual selectable_menu_item_description& button_state(
+    virtual selectable_menu_item_description& selectability(
         BOOST_SCOPED_ENUM(selectability) state) = 0;
 
     /**
@@ -94,8 +94,8 @@ public:
      *        may seem.
      * @note  This has no visible effect on items added to menu bars.
      */
-    virtual selectable_menu_item_description& check_mark(
-        BOOST_SCOPED_ENUM(checkedness) state) = 0;
+    virtual selectable_menu_item_description& check_mark_visibility(
+        BOOST_SCOPED_ENUM(check_mark) state) = 0;
 
     /**
      * @class

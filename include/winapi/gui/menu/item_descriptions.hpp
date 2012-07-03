@@ -62,17 +62,17 @@ public:
         m_button(button_nature.clone()),
         m_command_id(command_id),
         m_selectability(selectability::default),
-        m_checkedness(checkedness::default) {}
+        m_checkedness(check_mark::default) {}
 
-    virtual command_item_description& button_state(
+    virtual command_item_description& selectability(
         BOOST_SCOPED_ENUM(selectability) state)
     {
         m_selectability = state;
         return *this;
     }
 
-    virtual command_item_description& check_mark(
-        BOOST_SCOPED_ENUM(checkedness) state)
+    virtual command_item_description& check_mark_visibility(
+        BOOST_SCOPED_ENUM(check_mark) state)
     {
         m_checkedness = state;
         return *this;
@@ -88,7 +88,7 @@ private:
         info.wID = m_command_id;
 
         if (m_selectability != selectability::default ||
-            m_checkedness != checkedness::default)
+            m_checkedness != check_mark::default)
         {
             info.fMask |= MIIM_STATE;
         }
@@ -107,7 +107,7 @@ private:
     const boost::shared_ptr<menu_button_nature> m_button;
     const UINT m_command_id;
     BOOST_SCOPED_ENUM(selectability) m_selectability;
-    BOOST_SCOPED_ENUM(checkedness) m_checkedness;
+    BOOST_SCOPED_ENUM(check_mark) m_checkedness;
 };
 
 /**
@@ -130,18 +130,18 @@ public:
         m_button(button_nature.clone()),
         m_menu(menu),
         m_selectability(selectability::default),
-        m_checkedness(checkedness::default) {}
+        m_checkedness(check_mark::default) {}
 
 
-    virtual sub_menu_description& button_state(
+    virtual sub_menu_description& selectability(
         BOOST_SCOPED_ENUM(selectability) state)
     {
         m_selectability = state;
         return *this;
     }
 
-    virtual sub_menu_description& check_mark(
-        BOOST_SCOPED_ENUM(checkedness) state)
+    virtual sub_menu_description& check_mark_visibility(
+        BOOST_SCOPED_ENUM(check_mark) state)
     {
         m_checkedness = state;
         return *this;
@@ -158,7 +158,7 @@ private:
             detail::sub_menu_description_befriender(m_menu).handle().get();
 
         if (m_selectability != selectability::default ||
-            m_checkedness != checkedness::default)
+            m_checkedness != check_mark::default)
         {
             info.fMask |= MIIM_STATE;
         }
@@ -177,7 +177,7 @@ private:
     const boost::shared_ptr<menu_button_nature> m_button;
     const ::winapi::gui::menu::menu m_menu;
     BOOST_SCOPED_ENUM(selectability) m_selectability;
-    BOOST_SCOPED_ENUM(checkedness) m_checkedness;
+    BOOST_SCOPED_ENUM(check_mark) m_checkedness;
 };
 
 /**

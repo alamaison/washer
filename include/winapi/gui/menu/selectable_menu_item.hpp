@@ -69,7 +69,7 @@ public:
      * Will grey the button and prevent it reacting when hovered over or
      * clicked.
      */
-    virtual selectable_menu_item& button_state(
+    virtual selectable_menu_item& selectability(
         BOOST_SCOPED_ENUM(selectability) state) = 0;
 
     /**
@@ -79,8 +79,8 @@ public:
      *        may seem.
      * @note  This has no visible effect on items in menu bars.
      */
-    virtual selectable_menu_item& check_mark(
-        BOOST_SCOPED_ENUM(checkedness) state) = 0;
+    virtual selectable_menu_item& check_mark_visibility(
+        BOOST_SCOPED_ENUM(check_mark) state) = 0;
 
     /**
      * The menu item's clickable appearance.

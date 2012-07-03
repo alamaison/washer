@@ -102,7 +102,7 @@ public:
 
     void operator()(winapi::gui::menu::selectable_menu_item& item)
     {
-        item.button_state(m_selectability);
+        item.selectability(m_selectability);
     }
 
 private:
@@ -133,7 +133,7 @@ class check_mutator : public winapi::gui::menu::menu_item_visitor<>
 {
 public:
 
-    check_mutator(BOOST_SCOPED_ENUM(winapi::gui::menu::checkedness) state)
+    check_mutator(BOOST_SCOPED_ENUM(winapi::gui::menu::check_mark) state)
         : m_checkedness(state) {}
 
     void operator()(winapi::gui::menu::separator_menu_item&)
@@ -143,11 +143,11 @@ public:
 
     void operator()(winapi::gui::menu::selectable_menu_item& item)
     {
-        item.check_mark(m_checkedness);
+        item.check_mark_visibility(m_checkedness);
     }
 
 private:
-    BOOST_SCOPED_ENUM(winapi::gui::menu::checkedness) m_checkedness;
+    BOOST_SCOPED_ENUM(winapi::gui::menu::check_mark) m_checkedness;
 };
 
 class is_separator_test : public winapi::gui::menu::menu_item_visitor<>

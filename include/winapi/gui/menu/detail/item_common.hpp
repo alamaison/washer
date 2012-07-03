@@ -35,7 +35,7 @@
 
 #include <winapi/gui/menu/detail/convert_button.hpp> // convert_menu_button
 #include <winapi/gui/menu/detail/item_position.hpp>
-#include <winapi/gui/menu/item_state.hpp> // selectability, checkedness,
+#include <winapi/gui/menu/item_state.hpp> // selectability, check_mark,
                                           // highlighting
 
 #include <boost/shared_ptr.hpp>
@@ -60,7 +60,7 @@ public:
         m_item.set_menuiteminfo(info);
     }
 
-    void check_mark(BOOST_SCOPED_ENUM(checkedness) state)
+    void check_mark(BOOST_SCOPED_ENUM(check_mark) state)
     {
         MENUITEMINFOW info = m_item.get_menuiteminfo(MIIM_STATE);
         detail::adjust_checkedness(state, info);

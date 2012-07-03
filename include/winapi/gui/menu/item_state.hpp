@@ -52,10 +52,10 @@ BOOST_SCOPED_ENUM_START(selectability)
 };
 BOOST_SCOPED_ENUM_END;
 
-BOOST_SCOPED_ENUM_START(checkedness)
+BOOST_SCOPED_ENUM_START(check_mark)
 {
-    checked,
-    unchecked,
+    visible,
+    invisible,
     default
 };
 BOOST_SCOPED_ENUM_END;
@@ -86,16 +86,16 @@ namespace detail {
     }
 
     inline void adjust_checkedness(
-        BOOST_SCOPED_ENUM(checkedness) state, MENUITEMINFOW& info)
+        BOOST_SCOPED_ENUM(check_mark) state, MENUITEMINFOW& info)
     {
         switch (state)
         {
-        case checkedness::checked:
+        case check_mark::visible:
             info.fState |= MFS_CHECKED;
             break;
 
-        case checkedness::default:
-        case checkedness::unchecked:
+        case check_mark::default:
+        case check_mark::invisible:
             // MFS_UNCHECKED is zero so we have to negate checked instead
             info.fState &= (~MFS_CHECKED);
             break;

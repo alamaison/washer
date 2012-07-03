@@ -190,7 +190,7 @@ struct enabled : public F
     template<typename D>
     void set_selectability(D& d)
     {
-        d.button_state(selectability::enabled);
+        d.selectability(selectability::enabled);
     }
 
     template<typename M>
@@ -206,7 +206,7 @@ struct disabled : public F
     template<typename D>
     void set_selectability(D& d)
     {
-        d.button_state(selectability::disabled);
+        d.selectability(selectability::disabled);
     }
 
     template<typename M>
@@ -222,7 +222,7 @@ struct default_enabled : public F
     template<typename D>
     void set_selectability(D& d)
     {
-        d.button_state(selectability::default);
+        d.selectability(selectability::default);
     }
 
     template<typename M>
@@ -262,7 +262,7 @@ struct checked : public F
     template<typename D>
     void set_check_state(D& d)
     {
-        d.check_mark(checkedness::checked);
+        d.check_mark_visibility(check_mark::visible);
     }
 
     template<typename M>
@@ -278,7 +278,7 @@ struct unchecked : public F
     template<typename D>
     void set_check_state(D& d)
     {
-        d.check_mark(checkedness::unchecked);
+        d.check_mark_visibility(check_mark::invisible);
     }
 
     template<typename M>
@@ -294,7 +294,7 @@ struct default_unchecked : public F
     template<typename D>
     void set_check_state(D& d)
     {
-        d.check_mark(checkedness::default);
+        d.check_mark_visibility(check_mark::default);
     }
 
     template<typename M>
@@ -380,7 +380,7 @@ struct mutate_to_checked : public F
     template<typename I>
     void mutate_check_state(I& i)
     {
-        i.accept(check_mutator(checkedness::checked));
+        i.accept(check_mutator(check_mark::visible));
     }
 
     template<typename M>
@@ -396,7 +396,7 @@ struct mutate_to_unchecked : public F
     template<typename I>
     void mutate_check_state(I& i)
     {
-        i.accept(check_mutator(checkedness::unchecked));
+        i.accept(check_mutator(check_mark::invisible));
     }
 
     template<typename M>
