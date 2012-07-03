@@ -87,8 +87,8 @@ public:
      */
     virtual boost::shared_ptr<menu_button_nature> button() const = 0;
 
-    virtual bool is_enabled() const = 0;
-    virtual bool is_checked() const = 0;
+    virtual bool is_selectable() const = 0;
+    virtual bool check_mark_is_visible() const = 0;
     virtual bool is_highlighted() const = 0;
 };
 

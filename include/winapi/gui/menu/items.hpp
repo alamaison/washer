@@ -84,14 +84,14 @@ public:
         return m_core.button();
     }
 
-    virtual bool is_enabled() const
+    virtual bool is_selectable() const
     {
-        return m_core.is_enabled();
+        return m_core.is_selectable();
     }
 
-    virtual bool is_checked() const
+    virtual bool check_mark_is_visible() const
     {
-        return m_core.is_checked();
+        return m_core.check_mark_is_visible();
     }
 
     virtual bool is_highlighted() const
@@ -150,14 +150,14 @@ public:
         return m_core.button();
     }
 
-    virtual bool is_enabled() const
+    virtual bool is_selectable() const
     {
-        return m_core.is_enabled();
+        return m_core.is_selectable();
     }
 
-    virtual bool is_checked() const
+    virtual bool check_mark_is_visible() const
     {
-        return m_core.is_checked();
+        return m_core.check_mark_is_visible();
     }
 
     virtual bool is_highlighted() const

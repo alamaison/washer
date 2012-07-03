@@ -72,12 +72,12 @@ public:
         return convert_menu_button(m_item);
     }
 
-    bool is_enabled() const
+    bool is_selectable() const
     {
         return !(m_item.get_menuiteminfo(MIIM_STATE).fState & MFS_DISABLED);
     }
 
-    bool is_checked() const
+    bool check_mark_is_visible() const
     {
         return (m_item.get_menuiteminfo(MIIM_STATE).fState & MFS_CHECKED) != 0;
     }

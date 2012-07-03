@@ -60,9 +60,9 @@ public:
 
     void operator()(winapi::gui::menu::selectable_menu_item& item)
     {
-        BOOST_CHECK(item.is_enabled());
+        BOOST_CHECK(item.is_selectable());
         BOOST_CHECK(!item.is_highlighted());
-        BOOST_CHECK(!item.is_checked());
+        BOOST_CHECK(!item.check_mark_is_visible());
     }
 };
 
@@ -79,7 +79,7 @@ public:
 
     void operator()(winapi::gui::menu::selectable_menu_item& item)
     {
-        BOOST_CHECK_EQUAL(item.is_enabled(), m_expected);
+        BOOST_CHECK_EQUAL(item.is_selectable(), m_expected);
     }
 
 private:
@@ -121,7 +121,7 @@ public:
 
     void operator()(winapi::gui::menu::selectable_menu_item& item)
     {
-        BOOST_CHECK_EQUAL(item.is_checked(), m_expected);
+        BOOST_CHECK_EQUAL(item.check_mark_is_visible(), m_expected);
     }
 
 private:
