@@ -77,11 +77,6 @@ public:
         return !(m_item.get_menuiteminfo(MIIM_STATE).fState & MFS_DISABLED);
     }
 
-    bool is_default() const
-    {
-        return (m_item.get_menuiteminfo(MIIM_STATE).fState & MFS_DEFAULT) != 0;
-    }
-
     bool is_checked() const
     {
         return (m_item.get_menuiteminfo(MIIM_STATE).fState & MFS_CHECKED) != 0;

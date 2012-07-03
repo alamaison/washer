@@ -84,11 +84,6 @@ public:
         return m_core.button();
     }
 
-    virtual bool is_default() const
-    {
-        return m_core.is_default();
-    }
-
     virtual bool is_enabled() const
     {
         return m_core.is_enabled();
@@ -153,11 +148,6 @@ public:
     virtual boost::shared_ptr<menu_button_nature> button() const
     {
         return m_core.button();
-    }
-
-    virtual bool is_default() const
-    {
-        return m_core.is_default();
     }
 
     virtual bool is_enabled() const

@@ -165,6 +165,23 @@ public:
         return reverse_iterator(begin());
     }
 
+    iterator default_item() const
+    {
+        UINT pos = detail::win32::get_menu_default_item(
+            m_menu.get(), TRUE, GMDI_USEDISABLED);
+
+        if (pos == -1)
+            return end();
+        else
+            return begin() + pos;
+    }
+
+    void default_item(iterator position)
+    {
+        detail::win32::set_menu_default_item(
+            m_menu.get(), position - begin(), TRUE);
+    }
+
     /**
      * Test if objects wrap the same Win32 menu.
      */

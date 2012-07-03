@@ -340,5 +340,33 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_distance, F, menu_fixtures )
     BOOST_CHECK_EQUAL(m.end() - m.begin(), 2);
 }
 
+/**
+ * Test menu's default item setting and finding.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( default_item, F, menu_fixtures )
+{
+    F::test_menu t = F::create_menu_to_test();
+    F::menu_type m = t.menu();
+
+    m.insert(command_item_description(string_menu_button(L"First"), 1));
+    menu sub;
+    sub.insert(command_item_description(string_menu_button(L"Boo"), 1));
+
+    m.insert(sub_menu_description(string_menu_button(L"Second"), sub));
+    m.insert(command_item_description(string_menu_button(L"Third"), 1));
+
+    BOOST_CHECK(m.default_item() == m.end());
+
+    m.default_item(m.begin());
+    BOOST_CHECK(m.default_item() == m.begin());
+
+    m.default_item(m.begin() + 1);
+    BOOST_CHECK(m.default_item() == m.begin() + 1);
+
+    m.default_item(m.begin() + 2);
+    BOOST_CHECK(m.default_item() == m.begin() + 2);
+
+    F::do_ownership_test(m);
+}
 BOOST_AUTO_TEST_SUITE_END()
 

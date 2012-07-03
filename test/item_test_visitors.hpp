@@ -61,7 +61,6 @@ public:
     void operator()(winapi::gui::menu::selectable_menu_item& item)
     {
         BOOST_CHECK(item.is_enabled());
-        BOOST_CHECK(!item.is_default());
         BOOST_CHECK(!item.is_highlighted());
         BOOST_CHECK(!item.is_checked());
     }

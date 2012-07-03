@@ -172,6 +172,20 @@ inline void enable_menu_item(HMENU menu, UINT item, UINT flags)
             boost::errinfo_api_function("EnableMenuItem"));
 }
 
+inline UINT get_menu_default_item(HMENU menu, BOOL by_position, UINT gdmi_flags)
+{
+    return ::GetMenuDefaultItem(menu, by_position, gdmi_flags);
+}
+
+inline void set_menu_default_item(HMENU menu, UINT item, BOOL by_position)
+{
+    BOOL success = ::SetMenuDefaultItem(menu, item, by_position);
+    if (!success)
+        BOOST_THROW_EXCEPTION(
+            boost::enable_error_info(winapi::last_error()) <<
+            boost::errinfo_api_function("SetMenuDefaultItem"));
+}
+
 }}}}} // namespace winapi::gui::menu::detail::win32
 
 #endif
