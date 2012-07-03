@@ -59,6 +59,7 @@ set(LIBRARY_SOURCES_gui_menu
   ${LIBRARY_DIRECTORY}/gui/menu/basic_menu.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/buttons.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/item_descriptions.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/item_state.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/items.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/menu.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/menu_handle.hpp

@@ -104,6 +104,12 @@ public:
         }
     }
 
+    void set_menuiteminfo(const MENUITEMINFOW& info)
+    {
+        detail::win32::set_menu_item_info(
+            m_handle.get(), m_position, TRUE, &info);
+    }
+
 private:
 
     const menu_handle m_handle;

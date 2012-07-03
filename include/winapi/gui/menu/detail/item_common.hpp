@@ -35,6 +35,8 @@
 
 #include <winapi/gui/menu/detail/convert_button.hpp> // convert_menu_button
 #include <winapi/gui/menu/detail/item_position.hpp>
+#include <winapi/gui/menu/item_state.hpp> // selectability, checkedness,
+                                          // highlighting
 
 #include <boost/shared_ptr.hpp>
 
@@ -50,6 +52,20 @@ class selectable_item_core
 public:
 
     explicit selectable_item_core(const item_position& item) : m_item(item) {}
+
+    void button_state(BOOST_SCOPED_ENUM(selectability) state)
+    {
+        MENUITEMINFOW info = m_item.get_menuiteminfo(MIIM_STATE);
+        detail::adjust_selectability(state, info);
+        m_item.set_menuiteminfo(info);
+    }
+
+    void check_mark(BOOST_SCOPED_ENUM(checkedness) state)
+    {
+        MENUITEMINFOW info = m_item.get_menuiteminfo(MIIM_STATE);
+        detail::adjust_checkedness(state, info);
+        m_item.set_menuiteminfo(info);
+    }
 
     boost::shared_ptr<menu_button_nature> button() const
     {

@@ -33,6 +33,7 @@
 #define WINAPI_GUI_MENU_SELECTABLE_MENU_ITEM_DESCRIPTION_HPP
 #pragma once
 
+#include <winapi/gui/menu/item_state.hpp> // selectability, checkedness
 #include <winapi/gui/menu/menu_item_description.hpp>
 
 #include <boost/detail/scoped_enum_emulation.hpp> // BOOST_SCOPED_ENUM
@@ -42,22 +43,6 @@
 namespace winapi {
 namespace gui {
 namespace menu {
-
-BOOST_SCOPED_ENUM_START(selectability)
-{
-    enabled,
-    disabled,
-    default
-};
-BOOST_SCOPED_ENUM_END;
-
-BOOST_SCOPED_ENUM_START(checkedness)
-{
-    checked,
-    unchecked,
-    default
-};
-BOOST_SCOPED_ENUM_END;
 
 /**
  * Interface to objects that describe (but aren't) menu items that, when 
@@ -85,19 +70,29 @@ class selectable_menu_item_description : public menu_item_description
 public:
 
     /**
-     * Enable or disable the menu item's button.
+     * Modify whether item is created with its button enabled or disabled.
      *
-     * Will grey the button and prevent it reacting when hovered over or
-     * clicked.
+     * This just sets the initial state and can be changed once the item is
+     * in created in the menu.
+     *
+     * If this method is not called, the item will be created enabled by
+     * default.
      */
     virtual selectable_menu_item_description& button_state(
         BOOST_SCOPED_ENUM(selectability) state) = 0;
 
     /**
-     * Add or remove a check mark from beside the menu item.
+     * Modify whether item is created with a visible check mark beside it.
+     *
+     * This just sets the initial state and can be changed once the item is
+     * in created in the menu.
+     *
+     * If this method is not called, the item will be created without a
+     * check mark by default.
      *
      * @note  Even popup sub-menu items can have a check mark, odd as that
      *        may seem.
+     * @note  This has no visible effect on items added to menu bars.
      */
     virtual selectable_menu_item_description& check_mark(
         BOOST_SCOPED_ENUM(checkedness) state) = 0;

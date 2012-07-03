@@ -73,6 +73,22 @@ namespace mpl {
 using namespace winapi::gui::menu;
 using namespace winapi::test;
 
+void use_in_context(const menu_bar& m)
+{    
+    winapi::gui::window<> w = winapi::test::detail::create_test_window();
+    w.menu(m);
+    winapi::test::detail::show_window(w);
+}
+
+void use_in_context(const menu& m)
+{    
+    menu_bar b;
+    b.insert(
+        sub_menu_description(
+            string_menu_button(L"Menu being tested is under here"), m));
+    use_in_context(b);
+}
+
 // All these fixtures are in the global namespace in order to keep the
 // displayed name of the generated fixture permutations as short as possible
 
@@ -236,6 +252,10 @@ typedef boost::mpl::vector<
     default_enabled<boost::mpl::_>, noop_enabled<boost::mpl::_> >
     selectability_fixtures;
 
+// One day, with spiffy compilers, we can do away with the reduced version
+typedef boost::mpl::vector< enabled<boost::mpl::_>, disabled<boost::mpl::_> >
+    reduced_selectability_fixtures;
+
 template<typename F>
 struct checked : public F
 {
@@ -290,7 +310,6 @@ struct noop_unchecked : public F
     template<typename D>
     void set_check_state(D& d)
     {
-        d.check_mark(checkedness::default);
     }
 
     template<typename M>
@@ -305,6 +324,9 @@ typedef boost::mpl::vector<
     default_unchecked<boost::mpl::_>, noop_unchecked<boost::mpl::_> >
     checkedness_fixtures;
 
+// One day, with spiffy compilers, we can do away with the reduced version
+typedef boost::mpl::vector< checked<boost::mpl::_>, unchecked<boost::mpl::_> >
+    reduced_checkedness_fixtures;
 
 typedef fixture_permutator<
     fixture_permutator<
@@ -315,23 +337,80 @@ typedef fixture_permutator<
         selectability_fixtures>::type,
     button_fixtures>::type selectable_item_test_permutations;
 
+
+template<typename F>
+struct mutate_to_enabled : public F
+{
+    template<typename I>
+    void mutate_selectability(I& i)
+    {
+        i.accept(selectability_mutator(selectability::enabled));
+    }
+
+    template<typename M>
+    void do_mutated_selectability_test(const M& m)
+    {
+        m[0].accept(selectability_test(true));
+    }
+};
+
+template<typename F>
+struct mutate_to_disabled : public F
+{
+    template<typename I>
+    void mutate_selectability(I& i)
+    {
+        i.accept(selectability_mutator(selectability::disabled));
+    }
+
+    template<typename M>
+    void do_mutated_selectability_test(const M& m)
+    {
+        m[0].accept(selectability_test(false));
+    }
+};
+
+typedef boost::mpl::vector<
+    mutate_to_enabled<boost::mpl::_>, mutate_to_disabled<boost::mpl::_> >
+    selectability_mutation_fixtures;
+
+template<typename F>
+struct mutate_to_checked : public F
+{
+    template<typename I>
+    void mutate_check_state(I& i)
+    {
+        i.accept(check_mutator(checkedness::checked));
+    }
+
+    template<typename M>
+    void do_mutated_check_state_test(const M& m)
+    {
+        m[0].accept(checkedness_test(true));
+    }
+};
+
+template<typename F>
+struct mutate_to_unchecked : public F
+{
+    template<typename I>
+    void mutate_check_state(I& i)
+    {
+        i.accept(check_mutator(checkedness::unchecked));
+    }
+
+    template<typename M>
+    void do_mutated_check_state_test(const M& m)
+    {
+        m[0].accept(checkedness_test(false));
+    }
+};
+
+typedef boost::mpl::vector<
+    mutate_to_checked<boost::mpl::_>, mutate_to_unchecked<boost::mpl::_> >
+    checkedness_mutation_fixtures;
+
 BOOST_AUTO_TEST_SUITE(menu_description_tests)
-
-void use_in_context(const menu_bar& m)
-{    
-    winapi::gui::window<> w = winapi::test::detail::create_test_window();
-    w.menu(m);
-    winapi::test::detail::show_window(w);
-}
-
-void use_in_context(const menu& m)
-{    
-    menu_bar b;
-    b.insert(
-        sub_menu_description(
-            string_menu_button(L"Menu being tested is under here"), m));
-    use_in_context(b);
-}
 
 /**
  * Test every permutation of the menu item descriptions and all their state
@@ -356,6 +435,58 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     f.do_button_test(m);
     f.do_selectability_test(m);
     f.do_check_state_test(m);
+
+    use_in_context(m);
+}
+
+// Using the reduced versions of the description creators as, for these tests,
+// we aren't really interested in the details of all possible description
+// uses.  We just want one that starts with the property set and another that
+// starts with the property unset.
+//
+// Also we don't vary the button type though this would be a good thing to do
+typedef fixture_permutator<
+    fixture_permutator<
+        fixture_permutator<
+            fixture_permutator<
+                item_description_type_fixtures,
+                reduced_checkedness_fixtures>::type,
+            reduced_selectability_fixtures>::type,
+        checkedness_mutation_fixtures>::type,
+    selectability_mutation_fixtures>::type
+selectable_item_mutation_test_permutations;
+
+/**
+ * Test every permutation of mutation on the created menu items and their state
+ * after the mutation.
+ *
+ * @todo If, one day, compilers can handle longer template lists, add menu type
+ *       and button type back into the list of permutations.
+ *
+ * THIS GENERATES HUNDREDS OF TEST CASES.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    item_mutation_test, F, selectable_item_mutation_test_permutations )
+{
+    menu m;
+    string_menu_button b(L"Hello");
+
+    F f;
+    F::description_type d = f.create_description(b);
+
+    f.set_selectability(d);
+    f.set_check_state(d);
+
+    m.insert(d);
+
+    f.do_item_type_test(m);
+    f.do_selectability_test(m);
+    f.do_check_state_test(m);
+
+    f.mutate_selectability(m[0]);
+    f.mutate_check_state(m[0]);
+    f.do_mutated_check_state_test(m);
+    f.do_mutated_selectability_test(m);
 
     use_in_context(m);
 }

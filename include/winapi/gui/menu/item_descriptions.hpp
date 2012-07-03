@@ -36,6 +36,8 @@
 #include <winapi/gui/menu/buttons.hpp> // menu_button_nature
 #include <winapi/gui/menu/menu.hpp>
 #include <winapi/gui/menu/menu_item_description.hpp>
+#include <winapi/gui/menu/item_state.hpp> // adjust_selectability,
+                                          // adjust_checkedness
 #include <winapi/gui/menu/selectable_menu_item_description.hpp>
 
 #include <Windows.h> // MENUITEMINFO
@@ -43,56 +45,6 @@
 namespace winapi {
 namespace gui {
 namespace menu {
-
-namespace detail {
-
-    inline void adjust_selectability(
-        BOOST_SCOPED_ENUM(selectability) state, MENUITEMINFOW& info)
-    {
-        switch (state)
-        {
-        case selectability::default:
-            break;
-
-        case selectability::disabled:
-            info.fState |= MFS_DISABLED;
-            break;
-
-        case selectability::enabled:
-            // MFS_ENABLED is zero so we have to negate disabled instead
-            info.fState &= (~MFS_DISABLED);
-            break;
-
-        default:
-            assert(!"Passed a selectability state that doesn't exist in enum");
-            BOOST_THROW_EXCEPTION(std::logic_error("Unknown selectability"));
-        }
-    }
-
-    inline void adjust_checkedness(
-        BOOST_SCOPED_ENUM(checkedness) state, MENUITEMINFOW& info)
-    {
-        switch (state)
-        {
-        case checkedness::default:
-            break;
-
-        case checkedness::checked:
-            info.fState |= MFS_CHECKED;
-            break;
-
-        case checkedness::unchecked:
-            // MFS_UNCHECKED is zero so we have to negate checked instead
-            info.fState &= (~MFS_CHECKED);
-            break;
-
-        default:
-            assert(!"Passed a check mark state that doesn't exist in enum");
-            BOOST_THROW_EXCEPTION(std::logic_error("Unknown checkedness"));
-        }
-    }
-
-}
 
 /**
  * Simple button menu entry with an associated command ID.

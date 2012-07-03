@@ -65,9 +65,19 @@ public:
         return visitor(*this);
     }
 
-    /**
-     * The button description for this command item.
-     */
+    virtual command_menu_item& button_state(
+        BOOST_SCOPED_ENUM(selectability) state)
+    {
+        m_core.button_state(state);
+        return *this;
+    }
+
+    virtual command_menu_item& check_mark(BOOST_SCOPED_ENUM(checkedness) state)
+    {
+        m_core.check_mark(state);
+        return *this;
+    }
+
     virtual boost::shared_ptr<menu_button_nature> button() const
     {
         return m_core.button();
@@ -125,6 +135,18 @@ public:
     typename Visitor::result_type accept(Visitor& visitor)
     {
         return visitor(*this);
+    }
+
+    virtual sub_menu_item& button_state(BOOST_SCOPED_ENUM(selectability) state)
+    {
+        m_core.button_state(state);
+        return *this;
+    }
+
+    virtual sub_menu_item& check_mark(BOOST_SCOPED_ENUM(checkedness) state)
+    {
+        m_core.check_mark(state);
+        return *this;
     }
 
     virtual boost::shared_ptr<menu_button_nature> button() const

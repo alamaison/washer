@@ -64,6 +64,25 @@ public:
     virtual ~selectable_menu_item() {}
 
     /**
+     * Enable or disable the menu item's button.
+     *
+     * Will grey the button and prevent it reacting when hovered over or
+     * clicked.
+     */
+    virtual selectable_menu_item& button_state(
+        BOOST_SCOPED_ENUM(selectability) state) = 0;
+
+    /**
+     * Add or remove a check mark from beside the menu item.
+     *
+     * @note  Even popup sub-menu items can have a check mark, odd as that
+     *        may seem.
+     * @note  This has no visible effect on items in menu bars.
+     */
+    virtual selectable_menu_item& check_mark(
+        BOOST_SCOPED_ENUM(checkedness) state) = 0;
+
+    /**
      * The menu item's clickable appearance.
      */
     virtual boost::shared_ptr<menu_button_nature> button() const = 0;

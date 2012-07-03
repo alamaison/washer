@@ -131,6 +131,24 @@ inline void get_menu_item_info(
             boost::errinfo_api_function("GetMenuItemInfo"));
 }
 
+inline void set_menu_item_info(
+    HMENU menu, UINT id, BOOL is_by_position, const MENUITEMINFOA* info)
+{
+    if (!::SetMenuItemInfoA(menu, id, is_by_position, info))
+        BOOST_THROW_EXCEPTION(
+            boost::enable_error_info(winapi::last_error()) <<
+            boost::errinfo_api_function("SetMenuItemInfo"));
+}
+
+inline void set_menu_item_info(
+    HMENU menu, UINT id, BOOL is_by_position, const MENUITEMINFOW* info)
+{
+    if (!::SetMenuItemInfoW(menu, id, is_by_position, info))
+        BOOST_THROW_EXCEPTION(
+            boost::enable_error_info(winapi::last_error()) <<
+            boost::errinfo_api_function("SetMenuItemInfo"));
+}
+
 inline int get_menu_item_count(HMENU menu)
 {
     int count = ::GetMenuItemCount(menu);

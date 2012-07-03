@@ -87,6 +87,28 @@ private:
     bool m_expected;
 };
 
+class selectability_mutator : public winapi::gui::menu::menu_item_visitor<>
+{
+public:
+
+    selectability_mutator(
+        BOOST_SCOPED_ENUM(winapi::gui::menu::selectability) state)
+        : m_selectability(state) {}
+
+    void operator()(winapi::gui::menu::separator_menu_item&)
+    {
+        BOOST_FAIL("Separator unexpected");
+    }
+
+    void operator()(winapi::gui::menu::selectable_menu_item& item)
+    {
+        item.button_state(m_selectability);
+    }
+
+private:
+    BOOST_SCOPED_ENUM(winapi::gui::menu::selectability) m_selectability;
+};
+
 class checkedness_test : public winapi::gui::menu::menu_item_visitor<>
 {
 public:
@@ -105,6 +127,27 @@ public:
 
 private:
     bool m_expected;
+};
+
+class check_mutator : public winapi::gui::menu::menu_item_visitor<>
+{
+public:
+
+    check_mutator(BOOST_SCOPED_ENUM(winapi::gui::menu::checkedness) state)
+        : m_checkedness(state) {}
+
+    void operator()(winapi::gui::menu::separator_menu_item&)
+    {
+        BOOST_FAIL("Separator unexpected");
+    }
+
+    void operator()(winapi::gui::menu::selectable_menu_item& item)
+    {
+        item.check_mark(m_checkedness);
+    }
+
+private:
+    BOOST_SCOPED_ENUM(winapi::gui::menu::checkedness) m_checkedness;
 };
 
 class is_separator_test : public winapi::gui::menu::menu_item_visitor<>
