@@ -1,7 +1,7 @@
 /**
     @file
 
-    Tests for menu item extraction.
+    Tests for description classes building new menu items.
 
     @if license
 
@@ -29,374 +29,518 @@
     @endif
 */
 
-#include "fixture_permutator.hpp"
+/**
+ * @file
+ *
+ * This file generates tests using the awesomeness of Boost.MPL such that
+ * every orthogonal aspect of menu item descriptions is tested in combination
+ * with every other orthogonal aspect.
+ *
+ * Each orthogonal aspect is represented by a boost::mpl::vector containing
+ * its individual possibilities, each a fragment of a test fixtures that
+ * sets/tests that possibility.  If two things are orthogonal, they should
+ * not share one of these boost::mpl::vectors but, instead, be held in another
+ * vector and permutated with the other orthoganal aspects.
+ */
+
 #include "item_test_visitors.hpp"
 #include "menu_fixtures.hpp"
 #include "wchar_output.hpp" // wchar_t test output
 
+#include <winapi/gui/menu/item_descriptions.hpp> // test subject
 #include <winapi/gui/menu/items.hpp> // test subject
 #include <winapi/gui/menu/menu.hpp> // test subject
 
-#include <boost/mpl/vector.hpp>
+#include <boost/mpl/aux_/config/ctps.hpp>
+#include <boost/mpl/vector/vector50.hpp> // max vector to extend
+#include <boost/preprocessor/iterate.hpp> // BOOST_PP_ITER*
 #include <boost/test/unit_test.hpp>
 
-#include <string>
+// This extends the maximum Boost.MPL vector from 20 to 200 elements.
+// Obviously this puts a huge strain on the compiler but as this is only used
+// for testing and the benefit (being able to test every permutation of
+// menu item description state) is huge, the tradeoff seems acceptable.
+// Especially if you consider that a fairly old compiler MSVC8 (VS2005) can
+// handle this gracefully and compilers are only going to be getting more
+// robust and efficient.
+namespace boost {
+namespace mpl {
+#define BOOST_PP_ITERATION_PARAMS_1 \
+    (3,(51, 200, "boost/mpl/vector/aux_/numbered.hpp"))
+#include BOOST_PP_ITERATE()
+}}
 
 using namespace winapi::gui::menu;
 using namespace winapi::test;
-namespace win32 = winapi::gui::menu::detail::win32;
 
-using std::string;
-using std::wstring;
+void use_in_context(const menu_bar& m)
+{    
+    winapi::gui::window<> w = winapi::test::detail::create_test_window();
+    w.menu(m);
+    winapi::test::detail::show_window(w);
+}
 
+void use_in_context(const menu& m)
+{    
+    menu_bar b;
+    b.insert(
+        sub_menu_description(
+            string_menu_button(L"Menu being tested is under here"), m));
+    use_in_context(b);
+}
 
-/**
- * Tests where the menu was created externally and passed to the wrapper as a
- * raw menu.
- *
- * These test make sure that, given a menu, we can extra items from it
- * correctly.
- */
-BOOST_AUTO_TEST_SUITE(menu_item_extraction_tests)
+// All these fixtures are in the global namespace in order to keep the
+// displayed name of the generated fixture permutations as short as possible
 
-/**
- * Wrap an empty menu.
- */
-BOOST_AUTO_TEST_CASE_TEMPLATE( empty_menu, F, menu_fixtures )
+template<typename F>
+struct command : public F
 {
-    F::test_menu t = F::create_menu_to_test();
-    F::menu_type m = t.menu();
+    typedef command_item_description description_type;
 
-    BOOST_CHECK(m.begin() == m.end());
+    template<typename B>
+    description_type create_description(const B& button)
+    {
+        return command_item_description(button, 96);
+    }
 
-    F::do_ownership_test(m);
+    template<typename M>
+    void do_item_type_test(const M& m)
+    {
+        m[0].accept(command_id_test(96));
+    }
+};
+
+template<typename F>
+class popup : public F
+{
+public:
+
+    typedef sub_menu_description description_type;
+
+    template<typename B>
+    description_type create_description(const B& button)
+    {
+        m_sub = menu();
+        m_sub.insert(
+            command_item_description(string_menu_button(L"Boo"), 987987));
+
+        return sub_menu_description(button, m_sub);
+    }
+
+    template<typename M>
+    void do_item_type_test(const M& m)
+    {
+        m[0].accept(sub_menu_test(m_sub));
+    }
+    
+private:
+
+    menu m_sub;
+};
+
+typedef boost::mpl::vector< command<boost::mpl::_>, popup<boost::mpl::_> >
+    item_description_type_fixtures;
+
+template<typename F>
+struct string_button : public F
+{
+    typedef string_menu_button button_type;
+
+    button_type create_button()
+    {
+        return string_menu_button(L"String button");
+    }
+
+    template<typename M>
+    void do_button_test(const M& m)
+    {
+        m[0].accept(string_button_test(L"String button"));
+    }
+};
+
+template<typename F>
+class bitmap_button : public F
+{
+public:
+    typedef bitmap_menu_button button_type;
+
+    bitmap_button() : m_hbitmap(test_bitmap()) {}
+
+    button_type create_button()
+    {
+        return bitmap_menu_button(m_hbitmap);
+    }
+
+    template<typename M>
+    void do_button_test(const M& m)
+    {
+        m[0].accept(bitmap_button_test(m_hbitmap));
+    }
+
+    HBITMAP m_hbitmap;
+};
+
+typedef boost::mpl::vector<
+    string_button<boost::mpl::_>, bitmap_button<boost::mpl::_>
+> button_fixtures;
+
+template<typename F>
+struct enabled : public F
+{
+    template<typename D>
+    void set_selectability(D& d)
+    {
+        d.selectability(selectability::enabled);
+    }
+
+    template<typename M>
+    void do_selectability_test(const M& m)
+    {
+        m[0].accept(selectability_test(true));
+    }
+};
+
+template<typename F>
+struct disabled : public F
+{
+    template<typename D>
+    void set_selectability(D& d)
+    {
+        d.selectability(selectability::disabled);
+    }
+
+    template<typename M>
+    void do_selectability_test(const M& m)
+    {
+        m[0].accept(selectability_test(false));
+    }
+};
+
+template<typename F>
+struct default_enabled : public F
+{
+    template<typename D>
+    void set_selectability(D& d)
+    {
+        d.selectability(selectability::default);
+    }
+
+    template<typename M>
+    void do_selectability_test(const M& m)
+    {
+        m[0].accept(selectability_test(true));
+    }
+};
+
+template<typename F>
+struct noop_enabled : public F
+{
+    template<typename D>
+    void set_selectability(D& d)
+    {
+    }
+
+    template<typename M>
+    void do_selectability_test(const M& m)
+    {
+        m[0].accept(selectability_test(true));
+    }
+};
+
+typedef boost::mpl::vector<
+    enabled<boost::mpl::_>, disabled<boost::mpl::_>,
+    default_enabled<boost::mpl::_>, noop_enabled<boost::mpl::_> >
+    selectability_fixtures;
+
+// One day, with spiffy compilers, we can do away with the reduced version
+typedef boost::mpl::vector< enabled<boost::mpl::_>, disabled<boost::mpl::_> >
+    reduced_selectability_fixtures;
+
+template<typename F>
+struct checked : public F
+{
+    template<typename D>
+    void set_check_state(D& d)
+    {
+        d.check_mark_visibility(check_mark::visible);
+    }
+
+    template<typename M>
+    void do_check_state_test(const M& m)
+    {
+        m[0].accept(checkedness_test(true));
+    }
+};
+
+template<typename F>
+struct unchecked : public F
+{
+    template<typename D>
+    void set_check_state(D& d)
+    {
+        d.check_mark_visibility(check_mark::invisible);
+    }
+
+    template<typename M>
+    void do_check_state_test(const M& m)
+    {
+        m[0].accept(checkedness_test(false));
+    }
+};
+
+template<typename F>
+struct default_unchecked : public F
+{
+    template<typename D>
+    void set_check_state(D& d)
+    {
+        d.check_mark_visibility(check_mark::default);
+    }
+
+    template<typename M>
+    void do_check_state_test(const M& m)
+    {
+        m[0].accept(checkedness_test(false));
+    }
+};
+
+template<typename F>
+struct noop_unchecked : public F
+{
+    template<typename D>
+    void set_check_state(D& d)
+    {
+    }
+
+    template<typename M>
+    void do_check_state_test(const M& m)
+    {
+        m[0].accept(checkedness_test(false));
+    }
+};
+
+typedef boost::mpl::vector<
+    checked<boost::mpl::_>, unchecked<boost::mpl::_>,
+    default_unchecked<boost::mpl::_>, noop_unchecked<boost::mpl::_> >
+    checkedness_fixtures;
+
+// One day, with spiffy compilers, we can do away with the reduced version
+typedef boost::mpl::vector< checked<boost::mpl::_>, unchecked<boost::mpl::_> >
+    reduced_checkedness_fixtures;
+
+typedef fixture_permutator<
+    fixture_permutator<
+        fixture_permutator<
+            fixture_permutator<
+                menu_type_fixtures, item_description_type_fixtures>::type,
+            checkedness_fixtures>::type,
+        selectability_fixtures>::type,
+    button_fixtures>::type selectable_item_test_permutations;
+
+
+template<typename F>
+struct mutate_to_enabled : public F
+{
+    template<typename I>
+    void mutate_selectability(I& i)
+    {
+        i.accept(selectability_mutator(selectability::enabled));
+    }
+
+    template<typename M>
+    void do_mutated_selectability_test(const M& m)
+    {
+        m[0].accept(selectability_test(true));
+    }
+};
+
+template<typename F>
+struct mutate_to_disabled : public F
+{
+    template<typename I>
+    void mutate_selectability(I& i)
+    {
+        i.accept(selectability_mutator(selectability::disabled));
+    }
+
+    template<typename M>
+    void do_mutated_selectability_test(const M& m)
+    {
+        m[0].accept(selectability_test(false));
+    }
+};
+
+typedef boost::mpl::vector<
+    mutate_to_enabled<boost::mpl::_>, mutate_to_disabled<boost::mpl::_> >
+    selectability_mutation_fixtures;
+
+template<typename F>
+struct mutate_to_checked : public F
+{
+    template<typename I>
+    void mutate_check_state(I& i)
+    {
+        i.accept(check_mutator(check_mark::visible));
+    }
+
+    template<typename M>
+    void do_mutated_check_state_test(const M& m)
+    {
+        m[0].accept(checkedness_test(true));
+    }
+};
+
+template<typename F>
+struct mutate_to_unchecked : public F
+{
+    template<typename I>
+    void mutate_check_state(I& i)
+    {
+        i.accept(check_mutator(check_mark::invisible));
+    }
+
+    template<typename M>
+    void do_mutated_check_state_test(const M& m)
+    {
+        m[0].accept(checkedness_test(false));
+    }
+};
+
+typedef boost::mpl::vector<
+    mutate_to_checked<boost::mpl::_>, mutate_to_unchecked<boost::mpl::_> >
+    checkedness_mutation_fixtures;
+
+BOOST_AUTO_TEST_SUITE(menu_item_tests)
+
+/**
+ * Test every permutation of the menu item descriptions and all their state
+ * variables in both menus and menu bars with every type of button.
+ *
+ * THIS GENERATES HUNDREDS OF TEST CASES.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    description_test, F, selectable_item_test_permutations )
+{
+    F f;
+    F::menu_type m = F::create_menu_to_test();
+    F::button_type b = f.create_button();
+    F::description_type d = f.create_description(b);
+
+    f.set_selectability(d);
+    f.set_check_state(d);
+
+    m.insert(d);
+
+    f.do_item_type_test(m);
+    f.do_button_test(m);
+    f.do_selectability_test(m);
+    f.do_check_state_test(m);
+
+    use_in_context(m);
+}
+
+// Using the reduced versions of the description creators as, for these tests,
+// we aren't really interested in the details of all possible description
+// uses.  We just want one that starts with the property set and another that
+// starts with the property unset.
+//
+// Also we don't vary the button type though this would be a good thing to do
+typedef fixture_permutator<
+    fixture_permutator<
+        fixture_permutator<
+            fixture_permutator<
+                item_description_type_fixtures,
+                reduced_checkedness_fixtures>::type,
+            reduced_selectability_fixtures>::type,
+        checkedness_mutation_fixtures>::type,
+    selectability_mutation_fixtures>::type
+selectable_item_mutation_test_permutations;
+
+/**
+ * Test every permutation of mutation on the created menu items and their state
+ * after the mutation.
+ *
+ * @todo If, one day, compilers can handle longer template lists, add menu type
+ *       and button type back into the list of permutations.
+ *
+ * THIS GENERATES HUNDREDS OF TEST CASES.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    item_mutation_test, F, selectable_item_mutation_test_permutations )
+{
+    menu m;
+    string_menu_button b(L"Hello");
+
+    F f;
+    F::description_type d = f.create_description(b);
+
+    f.set_selectability(d);
+    f.set_check_state(d);
+
+    m.insert(d);
+
+    f.do_item_type_test(m);
+    f.do_selectability_test(m);
+    f.do_check_state_test(m);
+
+    f.mutate_selectability(m[0]);
+    f.mutate_check_state(m[0]);
+    f.do_mutated_check_state_test(m);
+    f.do_mutated_selectability_test(m);
+
+    use_in_context(m);
+}
+
+BOOST_AUTO_TEST_SUITE_END();
+
+
+BOOST_AUTO_TEST_SUITE(non_generated_menu_item_description_tests)
+
+/**
+ * A separator.
+ */
+BOOST_AUTO_TEST_CASE( separator )
+{
+    menu m;
+    m.insert(separator_description());
+    m[0].accept(is_separator_test());
 }
 
 /**
- * Does insertion via the old insertion API.
- * The menu items are always retrieved using the new API so this tests that
- * the translation goes smoothly.
+ * A menu with multiple items.
  */
-template<typename F>
-struct old_style_string_command : public F
+BOOST_AUTO_TEST_CASE( mixed_items )
 {
-    static void do_insert(menu_handle handle, wstring caption, UINT command_id)
-    {
-        win32::insert_menu(
-            handle.get(), 0, MF_BYPOSITION | MF_STRING, command_id,
-            caption.c_str());
-    }
-};
-
-/**
- * Inserts string command using the new API.
- *
- * This version specifies the MIIM_FTYPE flag which may be redundant.  MSDN
- * implies that only MIIM_STRING is needed.  Testing this combination to make
- * sure its presence doesn't affect our extraction.
- */
-template<typename F>
-struct new_style_string_command : public F
-{
-    static void do_insert(menu_handle handle, wstring caption, UINT command_id)
-    {
-        do_insertion(
-            handle.get(), caption.c_str(), command_id, NULL,
-            MIIM_FTYPE | MIIM_ID | MIIM_STRING,
-            MFT_STRING);
-    }
-};
-
-/**
- * Inserts string command using the new API.
- *
- * This version does *not* specifiy the MIIM_FTYPE flag that MSDN implies
- * may be redundant.  Testing this combination to make sure its absence
- * doesn't affect our extraction.
- */
-template<typename F>
-struct new_style_string_command_no_ftype_set : public F
-{
-    static void do_insert(menu_handle handle, wstring caption, UINT command_id)
-    {
-        do_insertion(
-            handle.get(), caption.c_str(), command_id, NULL,
-            MIIM_ID | MIIM_STRING, // No FTYPE flag
-            MFT_STRING); // Zero so makes no difference
-    }
-};
-
-typedef fixture_permutator<
-    boost::mpl::vector<
-        old_style_string_command<boost::mpl::_>,
-        new_style_string_command<boost::mpl::_>,
-        new_style_string_command_no_ftype_set<boost::mpl::_>
-    >,
-    menu_fixtures
->::type string_command_fixtures;
-
-/**
- * Wrap a simple string command.
- */
-BOOST_AUTO_TEST_CASE_TEMPLATE(
-    extract_command_item_with_string_button, F, string_command_fixtures )
-{
-    F::test_menu t = F::create_menu_to_test();
-    F::menu_type m = t.menu();
-
-    F::do_insert(t.handle(), L"Bob", 42);
-
-    BOOST_CHECK(m.begin() != m.end());
-    BOOST_CHECK_NO_THROW(m[0]);
-
-    m[0].accept(is_command_test());
-    m[0].accept(selectable_state_test());
-    m[0].accept(command_id_test(42));
-    m[0].accept(string_button_test(L"Bob"));
-
-    F::do_ownership_test(m);
-}
-
-/**
- * Does insertion via the old insertion API.
- * The menu items are always retrieved using the new API so this tests that
- * the translation goes smoothly.
- */
-template<typename F>
-struct old_style_bitmap_command : public F
-{
-    static void do_insert(menu_handle handle, HBITMAP bitmap, UINT command_id)
-    {
-        win32::insert_menu(
-            handle.get(), 0, MF_BITMAP, command_id, (const wchar_t*)bitmap);
-    }
-};
-
-/**
- * Inserts string command using the new API.
- *
- * This specifies the MIIM_TYPE flag because it is using the (legacy) 
- * whole-button bitmap.
- */
-template<typename F>
-struct new_style_bitmap_command : public F
-{
-    static void do_insert(menu_handle handle, HBITMAP bitmap, UINT command_id)
-    {
-        do_insertion(
-            handle.get(), (const wchar_t*)bitmap, command_id, NULL,
-            MIIM_TYPE | MIIM_ID, MFT_BITMAP);
-    }
-};
-
-typedef fixture_permutator<
-    boost::mpl::vector<
-        old_style_bitmap_command<boost::mpl::_>,
-        new_style_bitmap_command<boost::mpl::_>
-    >,
-    menu_fixtures
->::type bitmap_command_fixtures;
-
-/**
- * Wrap a simple bitmap command.
- */
-BOOST_AUTO_TEST_CASE_TEMPLATE(
-    extract_command_item_with_bitmap_button, F, bitmap_command_fixtures )
-{
-    F::test_menu t = F::create_menu_to_test();
-    F::menu_type m = t.menu();
+    menu m;
 
     HBITMAP bitmap = test_bitmap();
 
-    F::do_insert(t.handle(), bitmap, 42);
+    m.insert(command_item_description(string_menu_button(L"String command"), 1));
 
-    BOOST_CHECK(m.begin() != m.end());
-    BOOST_CHECK_NO_THROW(m[0]);
+    m.insert(command_item_description(bitmap_menu_button(bitmap), 2));
 
-    m[0].accept(is_command_test());
-    m[0].accept(selectable_state_test());
-    m[0].accept(command_id_test(42));
-    m[0].accept(bitmap_button_test(bitmap));
+    m.insert(separator_description());
 
-    F::do_ownership_test(m);
+    menu sub;
+
+    sub.insert(command_item_description(string_menu_button(L"String sub"), 3));
+
+    sub.insert(separator_description());
+
+    sub.insert(command_item_description(bitmap_menu_button(bitmap), 4));
+
+    m.insert(sub_menu_description(string_menu_button(L"Lalala"), sub));
+
+    m[0].accept(command_id_test(1));
+    m[0].accept(string_button_test(L"String command"));
+
+    m[1].accept(command_id_test(2));
+    m[1].accept(bitmap_button_test(bitmap));
+
+    m[2].accept(is_separator_test());
+
+    m[3].accept(sub_menu_test(sub));
+    m[3].accept(string_button_test(L"Lalala"));
 }
 
-/**
- * Does string popup insertion via the old insertion API.
- * The menu items are always retrieved using the new API so this tests that
- * the translation goes smoothly.
- */
-template<typename F>
-struct old_style_string_popup : public F
-{
-    static void do_insert(HMENU handle, wstring caption, HMENU sub_menu)
-    {
-        win32::insert_menu(
-            handle, 0, MF_BYPOSITION | MF_STRING | MF_POPUP, (UINT_PTR)sub_menu,
-            caption.c_str());
-    }
-};
-
-/**
- * Inserts string popup using the new API.
- */
-template<typename F>
-struct new_style_string_popup : public F
-{
-    static void do_insert(HMENU handle, wstring caption, HMENU sub_menu)
-    {
-        do_insertion(
-            handle, caption.c_str(), 0, sub_menu,
-            MIIM_SUBMENU | MIIM_STRING,
-            MFT_STRING);
-    }
-};
-
-
-typedef fixture_permutator<
-    boost::mpl::vector<
-        old_style_string_popup<boost::mpl::_>,
-        new_style_string_popup<boost::mpl::_>
-    >,
-    menu_fixtures
->::type string_popup_fixtures;
-
-/**
- * Wrap a string item that pops open a menu.
- */
-BOOST_AUTO_TEST_CASE_TEMPLATE(
-    extract_popup_item_with_string_button, F, string_popup_fixtures )
-{
-    F::test_menu t = F::create_menu_to_test();
-    F::menu_type m = t.menu();
-
-    menu_handle submenu_handle = menu_handle::adopt_handle(
-        win32::create_popup_menu());
-    do_insertion(
-        submenu_handle.get(), L"Pop", 7, NULL, MIIM_STRING | MIIM_ID,
-        MFT_STRING);
-
-    F::do_insert(t.handle().get(), L"Bob", submenu_handle.get());
-
-    BOOST_CHECK(m.begin() != m.end());
-    BOOST_CHECK_NO_THROW(m[0]);
-
-    m[0].accept(is_sub_menu_test());
-    m[0].accept(selectable_state_test());
-    m[0].accept(string_button_test(L"Bob"));
-    m[0].accept(sub_menu_test(menu(submenu_handle)));
-
-    F::do_ownership_test(m);
-}
-
-/** @todo  Could do tests for bitmap with popup menu here. */
-
-/** @todo  Not tested owner-drawn buttons yet. */
-
-template<typename F>
-struct old_style_separator : public F
-{
-    static void do_insert(HMENU handle)
-    {
-        win32::insert_menu(
-            handle, 0, MF_BYPOSITION | MF_SEPARATOR, 0, (wchar_t*)(NULL));
-    }
-};
-
-template<typename F>
-struct new_style_separator : public F
-{
-    static void do_insert(HMENU handle)
-    {
-        do_insertion(handle, NULL, 0, NULL, MIIM_FTYPE, MFT_SEPARATOR);
-    }
-};
-
-template<typename F>
-struct weird_old_style_separator1 : public F
-{
-    static void do_insert(HMENU handle)
-    {
-        win32::insert_menu(
-            handle, 42, MF_BYPOSITION | MF_STRING | MF_SEPARATOR, 42,
-            L"I'm an odd separator with a caption");
-    }
-};
-
-template<typename F>
-struct weird_new_style_separator1 : public F
-{
-    static void do_insert(HMENU handle)
-    {
-        do_insertion(
-            handle, L"I'm an odd separator with a caption", 43, NULL,
-            MIIM_FTYPE | MIIM_ID | MIIM_STRING,
-            MFT_STRING | MFT_SEPARATOR);
-    }
-};
-
-template<typename F>
-struct weird_old_style_separator2 : public F
-{
-    static void do_insert(HMENU handle)
-    {
-        HMENU submenu = win32::create_popup_menu();
-        do_insertion(
-            submenu, L"Supposedly, I'm a submenu of a separator", 7, NULL,
-            MIIM_FTYPE | MIIM_ID | MIIM_STRING, MFT_STRING);
-
-        win32::insert_menu(
-            handle, 42, MF_BYPOSITION | MF_SEPARATOR, (UINT_PTR)submenu,
-            (const wchar_t*)NULL);
-        win32::enable_menu_item(handle, 0, MF_BYPOSITION);
-    }
-};
-
-template<typename F>
-struct weird_new_style_separator2 : public F
-{
-    static void do_insert(HMENU handle)
-    {
-        HMENU submenu = win32::create_popup_menu();
-        do_insertion(
-            submenu, L"Supposedly, I'm a submenu of a separator", 7, NULL,
-            MIIM_FTYPE | MIIM_ID | MIIM_STRING, MFT_STRING);
-
-        do_insertion(
-            handle, NULL, 101, submenu, MIIM_FTYPE | MIIM_SUBMENU,
-            MFT_SEPARATOR);
-        win32::enable_menu_item(handle, 0, MF_BYPOSITION);
-    }
-};
-
-typedef fixture_permutator<
-    boost::mpl::vector<
-        old_style_separator<boost::mpl::_>,
-        new_style_separator<boost::mpl::_>,
-        weird_old_style_separator1<boost::mpl::_>,
-        weird_new_style_separator1<boost::mpl::_>,
-        weird_old_style_separator2<boost::mpl::_>,
-        weird_new_style_separator2<boost::mpl::_>
-    >,
-    menu_ownership_fixtures
->::type separator_fixtures;
-
-/**
- * Wrap a separator.
- */
-BOOST_AUTO_TEST_CASE_TEMPLATE( extract_separator_item, F, separator_fixtures )
-{
-    HMENU handle = win32::create_popup_menu();
-    F::do_insert(handle);
-
-    menu m(menu_handle::adopt_handle(handle));
-
-    BOOST_CHECK(m.begin() != m.end());
-    BOOST_CHECK_NO_THROW(m[0]);
-
-    m[0].accept(is_separator_test());
-
-    F::do_ownership_test(m);
-}
-
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();
