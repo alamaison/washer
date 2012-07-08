@@ -29,17 +29,17 @@
     @endif
 */
 
-#ifndef WINAPI_GUI_MENU_SELECTABLE_MENU_ITEM_HPP
-#define WINAPI_GUI_MENU_SELECTABLE_MENU_ITEM_HPP
+#ifndef WINAPI_GUI_MENU_ITEM_SELECTABLE_ITEM_HPP
+#define WINAPI_GUI_MENU_ITEM_SELECTABLE_ITEM_HPP
 #pragma once
 
-#include <boost/shared_ptr.hpp>
+#include <winapi/gui/menu/item/item_state.hpp>
 
 namespace winapi {
 namespace gui {
 namespace menu {
 
-class menu_button_nature;
+class button;
 
 /**
  * Interface to items that, when clicked, might result in an action.
@@ -57,11 +57,11 @@ class menu_button_nature;
  *        However, as these are invalid uses of a separator, we don't support
  *        them.
  */
-class selectable_menu_item
+class selectable_item
 {
 public:
 
-    virtual ~selectable_menu_item() {}
+    virtual ~selectable_item() {}
 
     /**
      * Enable or disable the menu item's button.
@@ -69,7 +69,7 @@ public:
      * Will grey the button and prevent it reacting when hovered over or
      * clicked.
      */
-    virtual selectable_menu_item& selectability(
+    virtual selectable_item& selectability(
         BOOST_SCOPED_ENUM(selectability) state) = 0;
 
     /**
@@ -79,13 +79,13 @@ public:
      *        may seem.
      * @note  This has no visible effect on items in menu bars.
      */
-    virtual selectable_menu_item& check_mark_visibility(
+    virtual selectable_item& check_mark_visibility(
         BOOST_SCOPED_ENUM(check_mark) state) = 0;
 
     /**
      * The menu item's clickable appearance.
      */
-    virtual boost::shared_ptr<menu_button_nature> button() const = 0;
+    virtual button button() const = 0;
 
     virtual bool is_selectable() const = 0;
     virtual bool check_mark_is_visible() const = 0;

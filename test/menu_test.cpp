@@ -32,8 +32,8 @@
 #include "menu_fixtures.hpp"
 #include "wchar_output.hpp" // wchar_t test output
 
-#include <winapi/gui/menu/item_descriptions.hpp> // test subject
-#include <winapi/gui/menu/items.hpp> // test subject
+#include <winapi/gui/menu/item/command_item_description.hpp>
+#include <winapi/gui/menu/item/sub_menu_item_description.hpp>
 #include <winapi/gui/menu/menu.hpp> // test subject
 
 #include <boost/foreach.hpp> // BOOST_FOREACH
@@ -46,7 +46,7 @@ using namespace winapi::test;
  * These tests are not especially interested in the details of the items in
  * the menu (except where it may affect the menu's behaviour).  Instead they
  * just care about testing the menu and menu_bar classes.  The details of the
- * items are tested by the menu_item* test suites.
+ * items are tested by the item* test suites.
  */
 BOOST_AUTO_TEST_SUITE(menu_tests)
 
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( create_empty_menu, F, menu_ownership_fixtures )
     BOOST_CHECK(m.begin() == m.end());
     BOOST_CHECK_EQUAL(m.size(), 0);
     BOOST_CHECK_THROW(m[0], std::runtime_error);
-    BOOST_FOREACH(menu_item& item, m)
+    BOOST_FOREACH(item& item, m)
     {
         BOOST_FAIL("Empty menu should not iterate");
     }
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( empty_menu_bar, F, menu_ownership_fixtures )
     BOOST_CHECK(m.begin() == m.end());
     BOOST_CHECK_EQUAL(m.size(), 0);
     BOOST_CHECK_THROW(m[0], std::runtime_error);
-    BOOST_FOREACH(menu_item& item, m)
+    BOOST_FOREACH(item& item, m)
     {
         BOOST_FAIL("Empty menu should not iterate");
     }
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( existing_empty_menu, F, menu_fixtures )
     BOOST_CHECK(m.begin() == m.end());
     BOOST_CHECK_EQUAL(m.size(), 0);
     BOOST_CHECK_THROW(m[0], std::runtime_error);
-    BOOST_FOREACH(menu_item& item, m)
+    BOOST_FOREACH(item& item, m)
     {
         BOOST_FAIL("Empty menu should not iterate");
     }
@@ -134,7 +134,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( create_command, F, menu_fixtures )
     F::test_menu t = F::create_menu_to_test();
     F::menu_type m = t.menu();
 
-    m.insert(command_item_description(string_menu_button(L"Command"), 42));
+    m.insert(
+        command_item_description(string_button_description(L"Command"), 42));
 
     BOOST_CHECK(m.begin() != m.end());
     BOOST_CHECK_EQUAL(m.size(), 1);
@@ -175,9 +176,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( create_submenu, F, menu_fixtures )
     F::menu_type m = t.menu();
 
     menu sub;
-    sub.insert(command_item_description(string_menu_button(L"Boo"), 1));
+    sub.insert(command_item_description(string_button_description(L"Boo"), 1));
 
-    m.insert(sub_menu_description(string_menu_button(L"Pop"), sub));
+    m.insert(sub_menu_item_description(string_button_description(L"Pop"), sub));
 
     BOOST_CHECK(m.begin() != m.end());
     BOOST_CHECK_EQUAL(m.size(), 1);
@@ -348,12 +349,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( default_item, F, menu_fixtures )
     F::test_menu t = F::create_menu_to_test();
     F::menu_type m = t.menu();
 
-    m.insert(command_item_description(string_menu_button(L"First"), 1));
+    m.insert(command_item_description(string_button_description(L"First"), 1));
     menu sub;
-    sub.insert(command_item_description(string_menu_button(L"Boo"), 1));
+    sub.insert(command_item_description(string_button_description(L"Boo"), 1));
 
-    m.insert(sub_menu_description(string_menu_button(L"Second"), sub));
-    m.insert(command_item_description(string_menu_button(L"Third"), 1));
+    m.insert(
+        sub_menu_item_description(string_button_description(L"Second"), sub));
+    m.insert(command_item_description(string_button_description(L"Third"), 1));
 
     BOOST_CHECK(m.default_item() == m.end());
 

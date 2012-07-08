@@ -36,8 +36,8 @@
 #include <winapi/gui/menu/basic_menu.hpp>
 #include <winapi/gui/menu/detail/menu.hpp> 
                                  // menu_handle_creator, menu_bar_handle_creator
-#include <winapi/gui/menu/menu_item_description.hpp>
-#include <winapi/gui/menu/selectable_menu_item_description.hpp>
+#include <winapi/gui/menu/item/item_description.hpp>
+#include <winapi/gui/menu/item/selectable_item_description.hpp>
 
 #include <boost/concept/assert.hpp> // BOOST_CONCEPT_ASSERT
 #include <boost/concept_check.hpp> // Collection
@@ -49,7 +49,7 @@ namespace menu {
 
 namespace detail {
 
-    class sub_menu_description_befriender;
+    class sub_menu_item_description_befriender;
     class window_class_befriender;
 
 }
@@ -59,14 +59,14 @@ namespace detail {
  * a sub-menu of another menu.
  */
 typedef basic_menu<
-    menu_item_description, detail::menu_handle_creator,
-    detail::sub_menu_description_befriender> menu;
+    item_description, detail::menu_handle_creator,
+    detail::sub_menu_item_description_befriender> menu;
 
 /**
  * Main application window menu bar.
  */
 typedef basic_menu<
-    selectable_menu_item_description, detail::menu_bar_handle_creator,
+    selectable_item_description, detail::menu_bar_handle_creator,
     detail::window_class_befriender> menu_bar;
 
 }}} // namespace winapi::gui::menu

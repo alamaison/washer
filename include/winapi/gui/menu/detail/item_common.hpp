@@ -33,10 +33,10 @@
 #define WINAPI_GUI_MENU_DETAIL_ITEM_COMMON_HPP
 #pragma once
 
-#include <winapi/gui/menu/detail/convert_button.hpp> // convert_menu_button
+#include <winapi/gui/menu/button/button.hpp>
 #include <winapi/gui/menu/detail/item_position.hpp>
-#include <winapi/gui/menu/item_state.hpp> // selectability, check_mark,
-                                          // highlighting
+#include <winapi/gui/menu/item/item_state.hpp> // selectability, check_mark,
+                                               // highlighting
 
 #include <boost/shared_ptr.hpp>
 
@@ -67,9 +67,9 @@ public:
         m_item.set_menuiteminfo(info);
     }
 
-    boost::shared_ptr<menu_button_nature> button() const
+    button button() const
     {
-        return convert_menu_button(m_item);
+        return ::winapi::gui::menu::button(m_item);
     }
 
     bool is_selectable() const

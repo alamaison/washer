@@ -29,14 +29,12 @@
     @endif
 */
 
-#ifndef WINAPI_GUI_MENU_SELECTABLE_MENU_ITEM_DESCRIPTION_HPP
-#define WINAPI_GUI_MENU_SELECTABLE_MENU_ITEM_DESCRIPTION_HPP
+#ifndef WINAPI_GUI_MENU_ITEM_SELECTABLE_ITEM_DESCRIPTION_HPP
+#define WINAPI_GUI_MENU_ITEM_SELECTABLE_ITEM_DESCRIPTION_HPP
 #pragma once
 
-#include <winapi/gui/menu/item_state.hpp> // selectability, check_mark
-#include <winapi/gui/menu/menu_item_description.hpp>
-
-#include <boost/detail/scoped_enum_emulation.hpp> // BOOST_SCOPED_ENUM
+#include <winapi/gui/menu/item/item_state.hpp> // selectability, check_mark
+#include <winapi/gui/menu/item/item_description.hpp>
 
 #include <Windows.h> // MENUITEMINFO
 
@@ -61,7 +59,7 @@ namespace menu {
  *        However, as these are invalid uses of a separator, we don't support
  *        them.
  */
-class selectable_menu_item_description : public menu_item_description
+class selectable_item_description : public item_description
 {
     // To allow basic_menu to be the only class that can see our
     // underlying Win32 representation
@@ -78,7 +76,7 @@ public:
      * If this method is not called, the item will be created enabled by
      * default.
      */
-    virtual selectable_menu_item_description& selectability(
+    virtual selectable_item_description& selectability(
         BOOST_SCOPED_ENUM(selectability) state) = 0;
 
     /**
@@ -94,7 +92,7 @@ public:
      *        may seem.
      * @note  This has no visible effect on items added to menu bars.
      */
-    virtual selectable_menu_item_description& check_mark_visibility(
+    virtual selectable_item_description& check_mark_visibility(
         BOOST_SCOPED_ENUM(check_mark) state) = 0;
 
     /**

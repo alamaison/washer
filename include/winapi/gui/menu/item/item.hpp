@@ -1,7 +1,7 @@
 /**
     @file
 
-    Interface to items which can only be added to regular menus, not menu bars.
+    Type-agnostic representation of an item in a menu.
 
     @if license
 
@@ -29,8 +29,8 @@
     @endif
 */
 
-#ifndef WINAPI_GUI_MENU_MENU_ITEM_HPP
-#define WINAPI_GUI_MENU_MENU_ITEM_HPP
+#ifndef WINAPI_GUI_MENU_ITEM_ITEM_HPP
+#define WINAPI_GUI_MENU_ITEM_ITEM_HPP
 #pragma once
 
 #include <winapi/gui/menu/detail/item_position.hpp>
@@ -41,33 +41,9 @@ namespace winapi {
 namespace gui {
 namespace menu {
     
-class separator_menu_item;
-class command_menu_item;
+class separator_item;
+class command_item;
 class sub_menu_item;
-
-/**
- * Convenience interface giving subclasses the static visitor concept necessary
- * to visit menu items.
- *
- * Purpose: This class only exists to make it easier to create visitors suitable
- * to pass to `menu_item::accept` by defining their result type.  In particular,
- * classes are not required to inherit from this interface in order to be used
- * as menu item visitors.
- *
- * Classes implementing this interface must also provide at least one
- * implementation of `operator()` that can accept arguments of types
- * `separator_menu_item&`, `command_menu_item&` and `sub_menu_item&`.
- */
-template<typename ResultType=void>
-class menu_item_visitor
-{
-public:
-
-    typedef ResultType result_type;
-
-    ~menu_item_visitor() {}
-};
-
 
 /**
  * Type-agnostic representation of an item in a menu.
@@ -78,7 +54,7 @@ public:
  *
  * Menus entries can change their type either by an insertion/removal
  * shuffling items around or by explicitly setting an item.  Therefore, the
- * typed representations (`command_menu_item`, `sub_menu_item` and 
+ * typed representations (`command_item`, `sub_menu_item` and 
  * `separator_item`) must not be stored and used later as, by that time, their
  * underlying type in the Win32 menu may have become incompatible.
  *
@@ -89,7 +65,7 @@ public:
  * underlying menu: if the underlying menu type changes then a different typed
  * class is generated the next time a visitor is accepted.
  */
-class menu_item
+class item
 {
     // to let basic_menu be our factory - the only class that can invoke
     // our private constructor
@@ -97,8 +73,16 @@ class menu_item
 
 public:
 
+    /**
+     * Accept a visitor to access type-safe, mutable view of the menu item.
+     *
+     * Visitors passed to this method must provide at least one
+     * implementation of `operator()` that can accept arguments of types
+     * `separator_item&`, `command_item&` and `sub_menu_item&` as well
+     * as a `result_type` type.
+     */
     template<typename Visitor>
-    typename Visitor::result_type accept(Visitor& visitor) const
+    typename Visitor::result_type accept(Visitor& visitor)
     {
         // MIIM_SUBMENU is part of the mask so isn't set by GetMenuItemInfo.
         // We have to set it and check hSubMenu to decide if this is a popup
@@ -114,24 +98,24 @@ public:
             // In reality, a separator can be forced to have a submenu but as
             // this is clearly not what is intended, we don't give a way to get
             // access to it.
-            return separator_menu_item().accept(visitor);
+            return visitor(separator_item());
         }
         else
         {
             if (info.hSubMenu)
             {
-                return sub_menu_item(m_item).accept(visitor);
+                return visitor(sub_menu_item(m_item));
             }
             else
             {
-                return command_menu_item(m_item).accept(visitor);
+                return visitor(command_item(m_item));
             }
         }
     }
 
 private:
 
-    menu_item(const detail::item_position& item) : m_item(item) {}
+    explicit item(const detail::item_position& item) : m_item(item) {}
 
     detail::item_position m_item;
 };

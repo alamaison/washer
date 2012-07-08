@@ -43,12 +43,20 @@
  * vector and permutated with the other orthoganal aspects.
  */
 
+#include "button_test_visitors.hpp"
 #include "item_test_visitors.hpp"
 #include "menu_fixtures.hpp"
 #include "wchar_output.hpp" // wchar_t test output
 
-#include <winapi/gui/menu/item_descriptions.hpp> // test subject
-#include <winapi/gui/menu/items.hpp> // test subject
+#include <winapi/gui/menu/button/bitmap_button_description.hpp>
+#include <winapi/gui/menu/button/string_button_description.hpp>
+#include <winapi/gui/menu/item/command_item.hpp> // test subject
+#include <winapi/gui/menu/item/command_item_description.hpp> // test subject
+#include <winapi/gui/menu/item/item.hpp> // test subject
+#include <winapi/gui/menu/item/separator_item.hpp> // test subject
+#include <winapi/gui/menu/item/separator_item_description.hpp> // test subject
+#include <winapi/gui/menu/item/sub_menu_item.hpp> // test subject
+#include <winapi/gui/menu/item/sub_menu_item_description.hpp> // test subject
 #include <winapi/gui/menu/menu.hpp> // test subject
 
 #include <boost/mpl/aux_/config/ctps.hpp>
@@ -84,8 +92,8 @@ void use_in_context(const menu& m)
 {    
     menu_bar b;
     b.insert(
-        sub_menu_description(
-            string_menu_button(L"Menu being tested is under here"), m));
+        sub_menu_item_description(
+            string_button_description(L"Menu being tested is under here"), m));
     use_in_context(b);
 }
 
@@ -115,16 +123,16 @@ class popup : public F
 {
 public:
 
-    typedef sub_menu_description description_type;
+    typedef sub_menu_item_description description_type;
 
     template<typename B>
     description_type create_description(const B& button)
     {
         m_sub = menu();
         m_sub.insert(
-            command_item_description(string_menu_button(L"Boo"), 987987));
+            command_item_description(string_button_description(L"Boo"), 987987));
 
-        return sub_menu_description(button, m_sub);
+        return sub_menu_item_description(button, m_sub);
     }
 
     template<typename M>
@@ -142,47 +150,46 @@ typedef boost::mpl::vector< command<boost::mpl::_>, popup<boost::mpl::_> >
     item_description_type_fixtures;
 
 template<typename F>
-struct string_button : public F
+struct string_b : public F
 {
-    typedef string_menu_button button_type;
+    typedef string_button_description button_type;
 
     button_type create_button()
     {
-        return string_menu_button(L"String button");
+        return string_button_description(L"String button");
     }
 
     template<typename M>
     void do_button_test(const M& m)
     {
-        m[0].accept(string_button_test(L"String button"));
+        m[0].accept(make_button_test(string_button_test(L"String button")));
     }
 };
 
 template<typename F>
-class bitmap_button : public F
+class bitmap_b : public F
 {
 public:
-    typedef bitmap_menu_button button_type;
+    typedef bitmap_button_description button_type;
 
-    bitmap_button() : m_hbitmap(test_bitmap()) {}
+    bitmap_b() : m_hbitmap(test_bitmap()) {}
 
     button_type create_button()
     {
-        return bitmap_menu_button(m_hbitmap);
+        return bitmap_button_description(m_hbitmap);
     }
 
     template<typename M>
     void do_button_test(const M& m)
     {
-        m[0].accept(bitmap_button_test(m_hbitmap));
+        m[0].accept(make_button_test(bitmap_button_test(m_hbitmap)));
     }
 
     HBITMAP m_hbitmap;
 };
 
 typedef boost::mpl::vector<
-    string_button<boost::mpl::_>, bitmap_button<boost::mpl::_>
-> button_fixtures;
+    string_b<boost::mpl::_>, bitmap_b<boost::mpl::_> > button_fixtures;
 
 template<typename F>
 struct enabled : public F
@@ -469,7 +476,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     item_mutation_test, F, selectable_item_mutation_test_permutations )
 {
     menu m;
-    string_menu_button b(L"Hello");
+    string_button_description b(L"Hello");
 
     F f;
     F::description_type d = f.create_description(b);
@@ -494,7 +501,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
 BOOST_AUTO_TEST_SUITE_END();
 
 
-BOOST_AUTO_TEST_SUITE(non_generated_menu_item_description_tests)
+BOOST_AUTO_TEST_SUITE(non_generated_item_description_tests)
 
 /**
  * A separator.
@@ -502,7 +509,7 @@ BOOST_AUTO_TEST_SUITE(non_generated_menu_item_description_tests)
 BOOST_AUTO_TEST_CASE( separator )
 {
     menu m;
-    m.insert(separator_description());
+    m.insert(separator_item_description());
     m[0].accept(is_separator_test());
 }
 
@@ -515,32 +522,36 @@ BOOST_AUTO_TEST_CASE( mixed_items )
 
     HBITMAP bitmap = test_bitmap();
 
-    m.insert(command_item_description(string_menu_button(L"String command"), 1));
+    m.insert(
+        command_item_description(
+            string_button_description(L"String command"), 1));
 
-    m.insert(command_item_description(bitmap_menu_button(bitmap), 2));
+    m.insert(command_item_description(bitmap_button_description(bitmap), 2));
 
-    m.insert(separator_description());
+    m.insert(separator_item_description());
 
     menu sub;
 
-    sub.insert(command_item_description(string_menu_button(L"String sub"), 3));
+    sub.insert(
+        command_item_description(string_button_description(L"String sub"), 3));
 
-    sub.insert(separator_description());
+    sub.insert(separator_item_description());
 
-    sub.insert(command_item_description(bitmap_menu_button(bitmap), 4));
+    sub.insert(command_item_description(bitmap_button_description(bitmap), 4));
 
-    m.insert(sub_menu_description(string_menu_button(L"Lalala"), sub));
+    m.insert(
+        sub_menu_item_description(string_button_description(L"Lalala"), sub));
 
     m[0].accept(command_id_test(1));
-    m[0].accept(string_button_test(L"String command"));
+    m[0].accept(make_button_test(string_button_test(L"String command")));
 
     m[1].accept(command_id_test(2));
-    m[1].accept(bitmap_button_test(bitmap));
+    m[1].accept(make_button_test(bitmap_button_test(bitmap)));
 
     m[2].accept(is_separator_test());
 
     m[3].accept(sub_menu_test(sub));
-    m[3].accept(string_button_test(L"Lalala"));
+    m[3].accept(make_button_test(string_button_test(L"Lalala")));
 }
 
 BOOST_AUTO_TEST_SUITE_END();

@@ -30,11 +30,11 @@
 */
 
 #include "fixture_permutator.hpp"
+#include "button_test_visitors.hpp"
 #include "item_test_visitors.hpp"
 #include "menu_fixtures.hpp"
 #include "wchar_output.hpp" // wchar_t test output
 
-#include <winapi/gui/menu/items.hpp> // test subject
 #include <winapi/gui/menu/menu.hpp> // test subject
 
 #include <boost/mpl/vector.hpp>
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     m[0].accept(is_command_test());
     m[0].accept(selectable_state_test());
     m[0].accept(command_id_test(42));
-    m[0].accept(string_button_test(L"Bob"));
+    m[0].accept(button_test<string_button_test>(string_button_test(L"Bob")));
 
     F::do_ownership_test(m);
 }
@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     m[0].accept(is_command_test());
     m[0].accept(selectable_state_test());
     m[0].accept(command_id_test(42));
-    m[0].accept(bitmap_button_test(bitmap));
+    m[0].accept(button_test<bitmap_button_test>(bitmap_button_test(bitmap)));
 
     F::do_ownership_test(m);
 }
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
 
     m[0].accept(is_sub_menu_test());
     m[0].accept(selectable_state_test());
-    m[0].accept(string_button_test(L"Bob"));
+    m[0].accept(button_test<string_button_test>(string_button_test(L"Bob")));
     m[0].accept(sub_menu_test(menu(submenu_handle)));
 
     F::do_ownership_test(m);

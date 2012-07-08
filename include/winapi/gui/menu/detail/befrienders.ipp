@@ -43,21 +43,21 @@ class window;
 
 namespace menu {
 
-class sub_menu_description;
+class sub_menu_item_description;
 
 namespace detail {
 
 /**
- * Purpose: to indirect friendship between a menu and a sub_menu_description
+ * Purpose: to indirect friendship between a menu and a sub_menu_item_description
  *          so we can parameterise the basic_menu template with the friendship.
  */
-class sub_menu_description_befriender
+class sub_menu_item_description_befriender
 {
-    friend class sub_menu_description;
+    friend class sub_menu_item_description;
 
 private:
 
-    sub_menu_description_befriender(const menu& menu) : m_menu(menu) {}
+    sub_menu_item_description_befriender(const menu& menu) : m_menu(menu) {}
 
     const menu_handle handle() const
     {

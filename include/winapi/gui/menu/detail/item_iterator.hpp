@@ -29,8 +29,8 @@
     @endif
 */
 
-#ifndef WINAPI_GUI_DETAIL_MENU_ITEM_ITERATOR_HPP
-#define WINAPI_GUI_DETAIL_MENU_ITEM_ITERATOR_HPP
+#ifndef WINAPI_GUI_DETAIL_ITEM_ITERATOR_HPP
+#define WINAPI_GUI_DETAIL_ITEM_ITERATOR_HPP
 #pragma once
 
 #include <boost/iterator/iterator_categories.hpp> // random_access_traversal_tag
@@ -46,19 +46,19 @@ namespace menu {
 namespace detail {
 
 template<typename Menu, typename Item>
-class menu_item_iterator :
+class item_iterator :
     public boost::iterator_facade<
-        menu_item_iterator<Menu, Item>, Item,
+        item_iterator<Menu, Item>, Item,
         boost::random_access_traversal_tag, Item> // reference = value_type
         // using boost tag to allow non-& reference
 {
     friend boost::iterator_core_access;
     // Enables conversion constructor to work:
-    template<typename,typename> friend class menu_item_iterator;
+    template<typename,typename> friend class item_iterator;
 
 public:
 
-    explicit menu_item_iterator(const Menu& menu) : m_menu(menu), m_pos(0) {}
+    explicit item_iterator(const Menu& menu) : m_menu(menu), m_pos(0) {}
 
     /**
      * Copy conversion constructor.
@@ -66,22 +66,22 @@ public:
      * Purpose: to allow mutable iterators to be converted to const iterators.
      */
     template<typename OtherValue>
-    menu_item_iterator(const menu_item_iterator<Menu, OtherValue>& other)
+    item_iterator(const item_iterator<Menu, OtherValue>& other)
         : m_menu(other.m_menu), m_pos(other.m_pos) {}
 
-    static menu_item_iterator end(const Menu& menu)
+    static item_iterator end(const Menu& menu)
     {
-        return menu_item_iterator(menu, end_tag());
+        return item_iterator(menu, end_tag());
     }
 
 private:
 
     class end_tag {};
 
-    menu_item_iterator(const Menu& menu, const end_tag&)
+    item_iterator(const Menu& menu, const end_tag&)
         : m_menu(menu), m_pos(m_menu.size()) {}
 
-    bool equal(menu_item_iterator const& other) const
+    bool equal(item_iterator const& other) const
     {
         return m_menu == other.m_menu && this->m_pos == other.m_pos;
     }
@@ -123,7 +123,7 @@ private:
     }
 
     typename iterator_facade_::difference_type distance_to(
-        const menu_item_iterator& other) const
+        const item_iterator& other) const
     {
         return other.m_pos - m_pos;
     }

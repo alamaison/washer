@@ -34,9 +34,9 @@
 #pragma once
 
 #include <winapi/gui/menu/detail/item_position.hpp>
-#include <winapi/gui/menu/detail/menu_item_iterator.hpp>
+#include <winapi/gui/menu/detail/item_iterator.hpp>
 #include <winapi/gui/menu/menu_handle.hpp> // menu_handle
-#include <winapi/gui/menu/menu_item.hpp>
+#include <winapi/gui/menu/item/item.hpp>
 
 #include <boost/integer_traits.hpp>
 #include <boost/iterator/reverse_iterator.hpp>
@@ -62,14 +62,14 @@ class basic_menu
 
 public:
 
-    typedef menu_item value_type;
+    typedef item value_type;
     typedef value_type& reference;
     typedef const value_type& const_reference;
     typedef value_type* pointer;
     typedef const value_type* const_pointer;
-    typedef detail::menu_item_iterator<basic_menu, value_type>
+    typedef detail::item_iterator<basic_menu, value_type>
         iterator;
-    typedef detail::menu_item_iterator<basic_menu, const value_type>
+    typedef detail::item_iterator<basic_menu, const value_type>
         const_iterator;
     typedef boost::reverse_iterator<iterator> reverse_iterator;
     typedef boost::reverse_iterator<const_iterator> const_reverse_iterator;

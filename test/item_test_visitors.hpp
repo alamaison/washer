@@ -33,15 +33,14 @@
 #define WINAPI_TEST_MENU_ITEM_TEST_VISITORS_HPP
 #pragma once
 
-#include "menu_fixtures.hpp" // test_bitmap
 #include "wchar_output.hpp" // wchar_t test output
 
-#include <winapi/gui/menu/buttons.hpp>
-#include <winapi/gui/menu/items.hpp>
+#include <winapi/gui/menu/item/command_item.hpp>
+#include <winapi/gui/menu/item/separator_item.hpp>
+#include <winapi/gui/menu/item/sub_menu_item.hpp>
 #include <winapi/gui/menu/menu.hpp> // menu
-#include <winapi/gui/menu/menu_item.hpp> // menu_item_visitor
+#include <winapi/gui/menu/visitor.hpp> // menu_visitor
 
-#include <boost/shared_ptr.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <string>
@@ -49,16 +48,16 @@
 namespace winapi {
 namespace test {
 
-class selectable_state_test : public winapi::gui::menu::menu_item_visitor<>
+class selectable_state_test : public winapi::gui::menu::menu_visitor<>
 {
 public:
 
-    void operator()(winapi::gui::menu::separator_menu_item&)
+    void operator()(winapi::gui::menu::separator_item&)
     {
         BOOST_FAIL("Separator unexpected");
     }
 
-    void operator()(winapi::gui::menu::selectable_menu_item& item)
+    void operator()(winapi::gui::menu::selectable_item& item)
     {
         BOOST_CHECK(item.is_selectable());
         BOOST_CHECK(!item.is_highlighted());
@@ -66,18 +65,18 @@ public:
     }
 };
 
-class selectability_test : public winapi::gui::menu::menu_item_visitor<>
+class selectability_test : public winapi::gui::menu::menu_visitor<>
 {
 public:
 
     selectability_test(bool expected) : m_expected(expected) {}
 
-    void operator()(winapi::gui::menu::separator_menu_item&)
+    void operator()(winapi::gui::menu::separator_item&)
     {
         BOOST_FAIL("Separator unexpected");
     }
 
-    void operator()(winapi::gui::menu::selectable_menu_item& item)
+    void operator()(winapi::gui::menu::selectable_item& item)
     {
         BOOST_CHECK_EQUAL(item.is_selectable(), m_expected);
     }
@@ -86,7 +85,7 @@ private:
     bool m_expected;
 };
 
-class selectability_mutator : public winapi::gui::menu::menu_item_visitor<>
+class selectability_mutator : public winapi::gui::menu::menu_visitor<>
 {
 public:
 
@@ -94,12 +93,12 @@ public:
         BOOST_SCOPED_ENUM(winapi::gui::menu::selectability) state)
         : m_selectability(state) {}
 
-    void operator()(winapi::gui::menu::separator_menu_item&)
+    void operator()(winapi::gui::menu::separator_item&)
     {
         BOOST_FAIL("Separator unexpected");
     }
 
-    void operator()(winapi::gui::menu::selectable_menu_item& item)
+    void operator()(winapi::gui::menu::selectable_item& item)
     {
         item.selectability(m_selectability);
     }
@@ -108,18 +107,18 @@ private:
     BOOST_SCOPED_ENUM(winapi::gui::menu::selectability) m_selectability;
 };
 
-class checkedness_test : public winapi::gui::menu::menu_item_visitor<>
+class checkedness_test : public winapi::gui::menu::menu_visitor<>
 {
 public:
 
     checkedness_test(bool expected) : m_expected(expected) {}
 
-    void operator()(winapi::gui::menu::separator_menu_item&)
+    void operator()(winapi::gui::menu::separator_item&)
     {
         BOOST_FAIL("Separator unexpected");
     }
 
-    void operator()(winapi::gui::menu::selectable_menu_item& item)
+    void operator()(winapi::gui::menu::selectable_item& item)
     {
         BOOST_CHECK_EQUAL(item.check_mark_is_visible(), m_expected);
     }
@@ -128,19 +127,19 @@ private:
     bool m_expected;
 };
 
-class check_mutator : public winapi::gui::menu::menu_item_visitor<>
+class check_mutator : public winapi::gui::menu::menu_visitor<>
 {
 public:
 
     check_mutator(BOOST_SCOPED_ENUM(winapi::gui::menu::check_mark) state)
         : m_checkedness(state) {}
 
-    void operator()(winapi::gui::menu::separator_menu_item&)
+    void operator()(winapi::gui::menu::separator_item&)
     {
         BOOST_FAIL("Separator unexpected");
     }
 
-    void operator()(winapi::gui::menu::selectable_menu_item& item)
+    void operator()(winapi::gui::menu::selectable_item& item)
     {
         item.check_mark_visibility(m_checkedness);
     }
@@ -149,15 +148,15 @@ private:
     BOOST_SCOPED_ENUM(winapi::gui::menu::check_mark) m_checkedness;
 };
 
-class is_separator_test : public winapi::gui::menu::menu_item_visitor<>
+class is_separator_test : public winapi::gui::menu::menu_visitor<>
 {
 public:
 
-    void operator()(winapi::gui::menu::separator_menu_item&)
+    void operator()(winapi::gui::menu::separator_item&)
     {
     }
 
-    void operator()(winapi::gui::menu::command_menu_item&)
+    void operator()(winapi::gui::menu::command_item&)
     {
         BOOST_FAIL("Command item unexpected");
     }
@@ -168,16 +167,16 @@ public:
     }
 };
 
-class is_command_test : public winapi::gui::menu::menu_item_visitor<>
+class is_command_test : public winapi::gui::menu::menu_visitor<>
 {
 public:
 
-    void operator()(winapi::gui::menu::separator_menu_item&)
+    void operator()(winapi::gui::menu::separator_item&)
     {
         BOOST_FAIL("Separator unexpected");
     }
 
-    void operator()(winapi::gui::menu::command_menu_item&)
+    void operator()(winapi::gui::menu::command_item&)
     {
     }
 
@@ -187,16 +186,16 @@ public:
     }
 };
 
-class is_sub_menu_test : public winapi::gui::menu::menu_item_visitor<>
+class is_sub_menu_test : public winapi::gui::menu::menu_visitor<>
 {
 public:
 
-    void operator()(winapi::gui::menu::separator_menu_item&)
+    void operator()(winapi::gui::menu::separator_item&)
     {
         BOOST_FAIL("Separator unexpected");
     }
 
-    void operator()(winapi::gui::menu::command_menu_item&)
+    void operator()(winapi::gui::menu::command_item&)
     {
         BOOST_FAIL("Command item unexpected");
     }
@@ -206,12 +205,12 @@ public:
     }
 };
 
-class command_id_test : public winapi::gui::menu::menu_item_visitor<>
+class command_id_test : public winapi::gui::menu::menu_visitor<>
 {
 public:
     command_id_test(UINT command_id) : m_command_id(command_id) {}
 
-    void operator()(winapi::gui::menu::command_menu_item& item)
+    void operator()(winapi::gui::menu::command_item& item)
     {
         BOOST_CHECK_EQUAL(item.command_id(), m_command_id);
     }
@@ -226,7 +225,7 @@ private:
     UINT m_command_id;
 };
 
-class sub_menu_test : public winapi::gui::menu::menu_item_visitor<>
+class sub_menu_test : public winapi::gui::menu::menu_visitor<>
 {
 public:
 
@@ -250,51 +249,34 @@ private:
     winapi::gui::menu::menu m_menu;
 };
 
-class string_button_test : public winapi::gui::menu::menu_item_visitor<>
+template<typename ButtonVisitor>
+class button_test :
+    public winapi::gui::menu::menu_visitor<typename ButtonVisitor::result_type>
 {
 public:
-    string_button_test(const std::wstring& caption) : m_caption(caption) {}
 
-    void operator()(winapi::gui::menu::selectable_menu_item& item)
+    button_test(ButtonVisitor test) : m_test(test) {}
+
+    result_type operator()(winapi::gui::menu::separator_item&)
     {
-        boost::shared_ptr<winapi::gui::menu::string_menu_button> button =
-            boost::dynamic_pointer_cast<winapi::gui::menu::string_menu_button>(
-                item.button());
-
-        BOOST_CHECK_EQUAL(button->caption(), m_caption);
+        BOOST_FAIL("Separator unexpected");
+        return result_type();
     }
 
-    void operator()(winapi::gui::menu::separator_menu_item&)
+    result_type operator()(winapi::gui::menu::selectable_item& item)
     {
-        BOOST_FAIL("Unexpected separator");
+        return item.button().accept(m_test);
     }
 
 private:
-    std::wstring m_caption;
+    ButtonVisitor m_test;
 };
 
-class bitmap_button_test : public winapi::gui::menu::menu_item_visitor<>
+template<typename ButtonVisitor>
+inline button_test<ButtonVisitor> make_button_test(ButtonVisitor test)
 {
-public:
-    bitmap_button_test(HBITMAP bitmap) : m_bitmap(bitmap) {}
-
-    void operator()(winapi::gui::menu::selectable_menu_item& item)
-    {
-        boost::shared_ptr<winapi::gui::menu::bitmap_menu_button> button =
-            boost::dynamic_pointer_cast<winapi::gui::menu::bitmap_menu_button>(
-                item.button());
-
-        BOOST_CHECK_EQUAL(button->bitmap(), m_bitmap);
-    }
-
-    void operator()(winapi::gui::menu::separator_menu_item&)
-    {
-        BOOST_FAIL("Unexpected separator");
-    }
-
-private:
-    HBITMAP m_bitmap;
-};
+    return button_test<ButtonVisitor>(test);
+}
 
 }}
 

@@ -29,8 +29,8 @@
     @endif
 */
 
-#ifndef WINAPI_GUI_MENU_MENU_ITEM_DESCRIPTION_HPP
-#define WINAPI_GUI_MENU_MENU_ITEM_DESCRIPTION_HPP
+#ifndef WINAPI_GUI_MENU_ITEM_ITEM_DESCRIPTION_HPP
+#define WINAPI_GUI_MENU_ITEM_ITEM_DESCRIPTION_HPP
 #pragma once
 
 #include <cassert> // assert
@@ -59,7 +59,7 @@ namespace menu {
  * is extracted as a Win32 MENUITEMINFO struct by the menu when passed to its
  * `insert` method.
  */
-class menu_item_description
+class item_description
 {
     // To allow basic_menu to be the only class that can see our
     // underlying Win32 representation
@@ -67,11 +67,11 @@ class menu_item_description
 
 public:
 
-    virtual ~menu_item_description() {}
+    virtual ~item_description() {}
 
-    menu_item_description* clone() const
+    item_description* clone() const
     {
-        menu_item_description* item = do_clone();
+        item_description* item = do_clone();
         assert(typeid(*this) == typeid(*item) && "do_clone() sliced object!");
         return item;
     }
@@ -86,10 +86,10 @@ private:
      */
     virtual MENUITEMINFOW as_menuiteminfo() const = 0;
 
-    virtual menu_item_description* do_clone() const = 0;
+    virtual item_description* do_clone() const = 0;
 };
 
-inline menu_item_description* new_clone(const menu_item_description& item)
+inline item_description* new_clone(const item_description& item)
 {
     return item.clone();
 }

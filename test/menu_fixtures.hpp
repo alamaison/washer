@@ -37,8 +37,8 @@
 #include "wchar_output.hpp" // wchar_t test output
 
 // These are the tests subjects created by the fixtures
-#include <winapi/gui/menu/buttons.hpp>
-#include <winapi/gui/menu/item_descriptions.hpp>
+#include <winapi/gui/menu/button/string_button_description.hpp>
+#include <winapi/gui/menu/item/sub_menu_item_description.hpp>
 #include <winapi/gui/menu/menu.hpp>
 #include <winapi/gui/menu/menu_handle.hpp>
 
@@ -205,8 +205,8 @@ public:
     {
         gui::menu::menu_bar b;
         b.insert(
-            gui::menu::sub_menu_description(
-                gui::menu::string_menu_button(L"Menu"), m));
+            gui::menu::sub_menu_item_description(
+                gui::menu::string_button_description(L"Menu"), m));
         BOOST_CHECK(b.begin() != b.end());
 
         BOOST_CHECK(m.valid());
@@ -236,8 +236,8 @@ public:
     {
         gui::menu::menu_bar b;
         b.insert(
-            gui::menu::sub_menu_description(
-                gui::menu::string_menu_button(L"Menu"), m));
+            gui::menu::sub_menu_item_description(
+                gui::menu::string_button_description(L"Menu"), m));
         BOOST_CHECK(b.begin() != b.end());
 
         BOOST_CHECK(m.valid());

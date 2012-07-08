@@ -19,6 +19,7 @@ add_definitions(
 
 set(TEST_SOURCES
   fixture_permutator.hpp
+  button_test_visitors.hpp
   item_test_visitors.hpp
   menu_fixtures.hpp
   sandbox_fixture.hpp
@@ -30,6 +31,7 @@ set(TEST_SOURCES
   global_lock_test.cpp
   hook_test.cpp
   icon_test.cpp
+  menu_button_visitor_test.cpp
   menu_item_test.cpp
   menu_item_extraction_test.cpp
   menu_item_visitor_test.cpp

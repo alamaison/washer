@@ -57,27 +57,44 @@ source_group(winapi\\gui\\detail FILES ${LIBRARY_SOURCES_gui_detail})
 
 set(LIBRARY_SOURCES_gui_menu
   ${LIBRARY_DIRECTORY}/gui/menu/basic_menu.hpp
-  ${LIBRARY_DIRECTORY}/gui/menu/buttons.hpp
-  ${LIBRARY_DIRECTORY}/gui/menu/item_descriptions.hpp
-  ${LIBRARY_DIRECTORY}/gui/menu/item_state.hpp
-  ${LIBRARY_DIRECTORY}/gui/menu/items.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/menu.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/menu_handle.hpp
-  ${LIBRARY_DIRECTORY}/gui/menu/menu_item.hpp
-  ${LIBRARY_DIRECTORY}/gui/menu/menu_item_description.hpp
-  ${LIBRARY_DIRECTORY}/gui/menu/selectable_menu_item.hpp
-  ${LIBRARY_DIRECTORY}/gui/menu/selectable_menu_item_description.hpp)
+  ${LIBRARY_DIRECTORY}/gui/menu/visitor.hpp)
 source_group(winapi\\gui\\menu FILES ${LIBRARY_SOURCES_gui_menu})
+
+set(LIBRARY_SOURCES_gui_menu_button
+  ${LIBRARY_DIRECTORY}/gui/menu/button/bitmap_button.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/button/bitmap_button_description.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/button/button.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/button/button_description.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/button/owner_drawn_button.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/button/owner_drawn_button_description.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/button/string_button.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/button/string_button_description.hpp)
+source_group(winapi\\gui\\menu\\button FILES ${LIBRARY_SOURCES_gui_menu_button})
 
 set(LIBRARY_SOURCES_gui_menu_detail
   ${LIBRARY_DIRECTORY}/gui/menu/detail/befrienders.ipp
-  ${LIBRARY_DIRECTORY}/gui/menu/detail/convert_button.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/item_common.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/item_position.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/menu.hpp
-  ${LIBRARY_DIRECTORY}/gui/menu/detail/menu_item_iterator.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/detail/item_iterator.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/menu_win32.hpp)
 source_group(winapi\\gui\\menu\\detail FILES ${LIBRARY_SOURCES_gui_menu_detail})
+
+set(LIBRARY_SOURCES_gui_item
+  ${LIBRARY_DIRECTORY}/gui/menu/item/command_item.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/item/command_item_description.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/item/item.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/item/item_description.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/item/item_state.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/item/selectable_item.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/item/selectable_item_description.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/item/separator_item.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/item/separator_item_description.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/item/sub_menu_item.hpp
+  ${LIBRARY_DIRECTORY}/gui/menu/item/sub_menu_item_description.hpp)
+source_group(winapi\\gui\\menu\\item FILES ${LIBRARY_SOURCES_gui_item})
 
 set(LIBRARY_SOURCES_gui_windows
   ${LIBRARY_DIRECTORY}/gui/windows/dialog.hpp
@@ -105,7 +122,9 @@ add_custom_target(winapi SOURCES
   ${LIBRARY_SOURCES_gui}
   ${LIBRARY_SOURCES_gui_detail}
   ${LIBRARY_SOURCES_gui_menu}
+  ${LIBRARY_SOURCES_gui_menu_button}
   ${LIBRARY_SOURCES_gui_menu_detail}
+  ${LIBRARY_SOURCES_gui_item}
   ${LIBRARY_SOURCES_gui_windows}
   ${LIBRARY_SOURCES_shell})
 
