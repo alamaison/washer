@@ -62,6 +62,15 @@ public:
             m_item.get_menuiteminfo(MIIM_TYPE).dwTypeData);
     }
 
+    void user_defined_data(void* new_data)
+    {
+        MENUITEMINFOW info = m_item.get_menuiteminfo(MIIM_TYPE);
+
+        assert(info.fType == MFT_OWNERDRAW);
+
+        info.dwTypeData = static_cast<wchar_t*>(new_data);
+    }
+
 private:
 
     explicit owner_drawn_button(const detail::item_position& item)

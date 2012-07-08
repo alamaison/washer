@@ -164,6 +164,20 @@ struct string_b : public F
     {
         m[0].accept(make_button_test(string_button_test(L"String button")));
     }
+
+    template<typename M>
+    void mutate_button(M& m)
+    {
+        m[0].accept(
+            make_button_test(string_button_mutator(L"Mutated button text")));
+    }
+
+    template<typename M>
+    void do_mutated_button_test(const M& m)
+    {
+        m[0].accept(
+            make_button_test(string_button_test(L"Mutated button text")));
+    }
 };
 
 template<typename F>
@@ -172,20 +186,33 @@ class bitmap_b : public F
 public:
     typedef bitmap_button_description button_type;
 
-    bitmap_b() : m_hbitmap(test_bitmap()) {}
+    bitmap_b() : m_hbitmap1(test_bitmap()), m_hbitmap2(test_bitmap()) {}
 
     button_type create_button()
     {
-        return bitmap_button_description(m_hbitmap);
+        return bitmap_button_description(m_hbitmap1);
     }
 
     template<typename M>
     void do_button_test(const M& m)
     {
-        m[0].accept(make_button_test(bitmap_button_test(m_hbitmap)));
+        m[0].accept(make_button_test(bitmap_button_test(m_hbitmap1)));
     }
 
-    HBITMAP m_hbitmap;
+    template<typename M>
+    void mutate_button(M& m)
+    {
+        m[0].accept(make_button_test(bitmap_button_mutator(m_hbitmap2)));
+    }
+
+    template<typename M>
+    void do_mutated_button_test(const M& m)
+    {
+        m[0].accept(make_button_test(bitmap_button_test(m_hbitmap2)));
+    }
+
+    HBITMAP m_hbitmap1;
+    HBITMAP m_hbitmap2;
 };
 
 typedef boost::mpl::vector<
@@ -456,11 +483,13 @@ typedef fixture_permutator<
     fixture_permutator<
         fixture_permutator<
             fixture_permutator<
-                item_description_type_fixtures,
-                reduced_checkedness_fixtures>::type,
-            reduced_selectability_fixtures>::type,
-        checkedness_mutation_fixtures>::type,
-    selectability_mutation_fixtures>::type
+                fixture_permutator<
+                    item_description_type_fixtures,
+                    reduced_checkedness_fixtures>::type,
+                reduced_selectability_fixtures>::type,
+            checkedness_mutation_fixtures>::type,
+        selectability_mutation_fixtures>::type,
+    button_fixtures>::type
 selectable_item_mutation_test_permutations;
 
 /**
@@ -468,7 +497,7 @@ selectable_item_mutation_test_permutations;
  * after the mutation.
  *
  * @todo If, one day, compilers can handle longer template lists, add menu type
- *       and button type back into the list of permutations.
+ *       back into the list of permutations.
  *
  * THIS GENERATES HUNDREDS OF TEST CASES.
  */
@@ -476,9 +505,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     item_mutation_test, F, selectable_item_mutation_test_permutations )
 {
     menu m;
-    string_button_description b(L"Hello");
 
     F f;
+    F::button_type b = f.create_button();
     F::description_type d = f.create_description(b);
 
     f.set_selectability(d);
@@ -489,11 +518,25 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
     f.do_item_type_test(m);
     f.do_selectability_test(m);
     f.do_check_state_test(m);
+    f.do_button_test(m);
 
     f.mutate_selectability(m[0]);
+    f.do_mutated_selectability_test(m);
+    f.do_item_type_test(m);
+    f.do_check_state_test(m);
+    f.do_button_test(m);
+
     f.mutate_check_state(m[0]);
     f.do_mutated_check_state_test(m);
+    f.do_item_type_test(m);
     f.do_mutated_selectability_test(m);
+    f.do_button_test(m);
+
+    f.mutate_button(m);
+    f.do_mutated_button_test(m);
+    f.do_item_type_test(m);
+    f.do_mutated_selectability_test(m);
+    f.do_mutated_check_state_test(m);
 
     use_in_context(m);
 }

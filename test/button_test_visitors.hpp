@@ -86,6 +86,46 @@ private:
     HBITMAP m_bitmap;
 };
 
+class string_button_mutator : public winapi::gui::menu::menu_visitor<>
+{
+public:
+    string_button_mutator(const std::wstring& caption) : m_caption(caption) {}
+
+    void operator()(winapi::gui::menu::string_button& button)
+    {
+        button.caption(m_caption);
+    }
+
+    template<typename T>
+    void operator()(T&)
+    {
+        BOOST_FAIL("Unexpected button type");
+    }
+
+private:
+    std::wstring m_caption;
+};
+
+class bitmap_button_mutator : public winapi::gui::menu::menu_visitor<>
+{
+public:
+    bitmap_button_mutator(HBITMAP bitmap) : m_bitmap(bitmap) {}
+
+    void operator()(winapi::gui::menu::bitmap_button& button)
+    {
+        button.bitmap(m_bitmap);
+    }
+
+    template<typename T>
+    void operator()(T&)
+    {
+        BOOST_FAIL("Unexpected button type");
+    }
+
+private:
+    HBITMAP m_bitmap;
+};
+
 }}
 
 #endif

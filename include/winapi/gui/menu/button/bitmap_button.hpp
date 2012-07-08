@@ -61,6 +61,13 @@ public:
         return reinterpret_cast<HBITMAP>(info.dwTypeData);
     }
 
+    void bitmap(HBITMAP bitmap)
+    {
+        MENUITEMINFOW info = m_item.get_menuiteminfo(MIIM_TYPE);
+        info.dwTypeData = reinterpret_cast<wchar_t*>(bitmap);
+        m_item.set_menuiteminfo(info);
+    }
+
 private:
 
     explicit bitmap_button(const detail::item_position& item) : m_item(item) {}

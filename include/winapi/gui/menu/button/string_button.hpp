@@ -62,6 +62,23 @@ public:
         return m_item.get_caption();
     }
 
+    void caption(const std::wstring& new_caption)
+    {
+        // MIIM_STRING might be all that's needed but specifying MIIM_FTYPE as
+        // we do set fType and MFT_STRING just in case.
+        // The MSDN docs are hopelessly rubbish.  No idea if this is the right
+        // thing to do.
+        MENUITEMINFOW info = m_item.get_menuiteminfo(MIIM_FTYPE | MIIM_STRING);
+
+        assert(info.fType == MFT_STRING);
+
+        info.dwTypeData = const_cast<wchar_t*>(new_caption.c_str());
+        // doesn't seem to be necessary but better safe than sorry:
+        info.cch = new_caption.size();
+
+        m_item.set_menuiteminfo(info);
+    }
+
 private:
 
     explicit string_button(const detail::item_position& item) : m_item(item) {}
