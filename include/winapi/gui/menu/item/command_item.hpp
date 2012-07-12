@@ -58,6 +58,15 @@ class command_item : public selectable_item, private boost::noncopyable
 
 public:
 
+    /**
+     * The ID sent to the owner windows when this command on the menu is
+     * selected.
+     */
+    UINT id() const
+    {
+        return m_core.id();
+    }
+
     virtual command_item& selectability(BOOST_SCOPED_ENUM(selectability) state)
     {
         m_core.button_state(state);
@@ -89,15 +98,6 @@ public:
     virtual bool is_highlighted() const
     {
         return m_core.is_highlighted();
-    }
-
-    /**
-     * The ID sent to the owner windows when this command on the menu is
-     * selected.
-     */
-    UINT command_id() const
-    {
-        return m_core.get_menuiteminfo(MIIM_ID).wID;
     }
 
 private:

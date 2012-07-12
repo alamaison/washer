@@ -48,7 +48,20 @@ class separator_item : private boost::noncopyable
 
 public:
 
-    separator_item() {}
+    separator_item(const detail::item_position& item) : m_item(item) {}
+
+    /**
+     * The ID of the item.
+     *
+     * Used to find an item in a menu even if its position changes.
+     */
+    UINT id() const
+    {
+        return m_item.get_menuiteminfo(MIIM_ID).wID;
+    }
+
+private:
+    detail::item_position m_item;
 };
 
 }}} // namespace winapi::gui::menu

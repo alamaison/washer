@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
 
     m[0].accept(is_command_test());
     m[0].accept(selectable_state_test());
-    m[0].accept(command_id_test(42));
+    m[0].accept(id_test(42));
     m[0].accept(button_test<string_button_test>(string_button_test(L"Bob")));
 
     F::do_ownership_test(m);
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
 
     m[0].accept(is_command_test());
     m[0].accept(selectable_state_test());
-    m[0].accept(command_id_test(42));
+    m[0].accept(id_test(42));
     m[0].accept(button_test<bitmap_button_test>(bitmap_button_test(bitmap)));
 
     F::do_ownership_test(m);

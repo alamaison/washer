@@ -205,24 +205,19 @@ public:
     }
 };
 
-class command_id_test : public winapi::gui::menu::menu_visitor<>
+class id_test : public winapi::gui::menu::menu_visitor<>
 {
 public:
-    command_id_test(UINT command_id) : m_command_id(command_id) {}
-
-    void operator()(winapi::gui::menu::command_item& item)
-    {
-        BOOST_CHECK_EQUAL(item.command_id(), m_command_id);
-    }
+    id_test(UINT id) : m_id(id) {}
 
     template<typename T>
-    void operator()(T&)
+    void operator()(T& item)
     {
-        BOOST_FAIL("Unexpected");
+        BOOST_CHECK_EQUAL(item.id(), m_id);
     }
 
 private:
-    UINT m_command_id;
+    UINT m_id;
 };
 
 class sub_menu_test : public winapi::gui::menu::menu_visitor<>

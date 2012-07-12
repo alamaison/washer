@@ -56,6 +56,16 @@ class sub_menu_item : public selectable_item, private boost::noncopyable
 
 public:
 
+    /**
+     * The ID of the item.
+     *
+     * Used to find an item in a menu even if its position changes.
+     */
+    UINT id() const
+    {
+        return m_core.id();
+    }
+
     virtual sub_menu_item& selectability(
         BOOST_SCOPED_ENUM(selectability) state)
     {

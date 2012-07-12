@@ -114,7 +114,7 @@ struct command : public F
     template<typename M>
     void do_item_type_test(const M& m)
     {
-        m[0].accept(command_id_test(96));
+        m[0].accept(id_test(96));
     }
 };
 
@@ -132,13 +132,18 @@ public:
         m_sub.insert(
             command_item_description(string_button_description(L"Boo"), 987987));
 
-        return sub_menu_item_description(button, m_sub);
+        sub_menu_item_description description =
+            sub_menu_item_description(button, m_sub);
+        description.id(6565);
+
+        return description;
     }
 
     template<typename M>
     void do_item_type_test(const M& m)
     {
         m[0].accept(sub_menu_test(m_sub));
+        m[0].accept(id_test(6565));
     }
     
 private:
@@ -552,8 +557,11 @@ BOOST_AUTO_TEST_SUITE(non_generated_item_description_tests)
 BOOST_AUTO_TEST_CASE( separator )
 {
     menu m;
-    m.insert(separator_item_description());
+    separator_item_description d;
+    d.id(5698495068);
+    m.insert(d);
     m[0].accept(is_separator_test());
+    m[0].accept(id_test(5698495068));
 }
 
 /**
@@ -585,15 +593,17 @@ BOOST_AUTO_TEST_CASE( mixed_items )
     m.insert(
         sub_menu_item_description(string_button_description(L"Lalala"), sub));
 
-    m[0].accept(command_id_test(1));
+    m[0].accept(id_test(1));
     m[0].accept(make_button_test(string_button_test(L"String command")));
 
-    m[1].accept(command_id_test(2));
+    m[1].accept(id_test(2));
     m[1].accept(make_button_test(bitmap_button_test(bitmap)));
 
     m[2].accept(is_separator_test());
+    m[2].accept(id_test(0));
 
     m[3].accept(sub_menu_test(sub));
+    m[2].accept(id_test(0));
     m[3].accept(make_button_test(string_button_test(L"Lalala")));
 }
 

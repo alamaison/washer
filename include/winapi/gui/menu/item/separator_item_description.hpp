@@ -46,6 +46,15 @@ namespace menu {
  */
 class separator_item_description : public item_description
 {
+public:
+    separator_item_description() : m_id(0) {}
+
+    virtual separator_item_description& id(UINT new_id)
+    {
+        m_id = new_id;
+        return *this;
+    }
+
 private:
 
     virtual MENUITEMINFOW as_menuiteminfo() const
@@ -53,8 +62,9 @@ private:
         MENUITEMINFOW info = MENUITEMINFOW();
         info.cbSize = sizeof(MENUITEMINFOW);
 
-        info.fMask = MIIM_FTYPE;
+        info.fMask = MIIM_FTYPE | MIIM_ID;
         info.fType = MFT_SEPARATOR;
+        info.wID = m_id;
 
         return info;
     }
@@ -63,6 +73,8 @@ private:
     {
         return new separator_item_description(*this);
     }
+
+    UINT m_id;
 };
 
 }}} // namespace winapi::gui::menu

@@ -53,6 +53,16 @@ public:
 
     explicit selectable_item_core(const item_position& item) : m_item(item) {}
 
+    /**
+     * The ID of the item.
+     *
+     * Used to find an item in a menu even if its position changes.
+     */
+    UINT id() const
+    {
+        return m_item.get_menuiteminfo(MIIM_ID).wID;
+    }
+
     void button_state(BOOST_SCOPED_ENUM(selectability) state)
     {
         MENUITEMINFOW info = m_item.get_menuiteminfo(MIIM_STATE);

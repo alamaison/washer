@@ -62,11 +62,19 @@ public:
     sub_menu_item_description(
         const button_description& button, const menu& menu)
         :
+        m_id(0),
         m_button(button.clone()),
         m_menu(menu),
         m_selectability(selectability::default),
         m_checkedness(check_mark::default) {}
 
+    sub_menu_item_description() : m_id(0) {}
+
+    virtual sub_menu_item_description& id(UINT new_id)
+    {
+        m_id = new_id;
+        return *this;
+    }
 
     virtual sub_menu_item_description& selectability(
         BOOST_SCOPED_ENUM(selectability) state)
@@ -88,7 +96,8 @@ private:
     {
         MENUITEMINFOW info = m_button->as_menuiteminfo();
 
-        info.fMask |= MIIM_SUBMENU;
+        info.fMask |= MIIM_SUBMENU | MIIM_ID;
+        info.wID = m_id;
         info.hSubMenu = 
             detail::sub_menu_item_description_befriender(m_menu).handle().get();
 
@@ -109,6 +118,7 @@ private:
         return new sub_menu_item_description(*this);
     }
 
+    UINT m_id;
     boost::shared_ptr<button_description> m_button;
     ::winapi::gui::menu::menu m_menu;
     BOOST_SCOPED_ENUM(selectability) m_selectability;

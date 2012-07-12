@@ -63,6 +63,12 @@ public:
         m_selectability(selectability::default),
         m_checkedness(check_mark::default) {}
 
+    virtual command_item_description& id(UINT new_id)
+    {
+        m_command_id = new_id;
+        return *this;
+    }
+
     virtual command_item_description& selectability(
         BOOST_SCOPED_ENUM(selectability) state)
     {

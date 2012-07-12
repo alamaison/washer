@@ -98,7 +98,7 @@ public:
             // In reality, a separator can be forced to have a submenu but as
             // this is clearly not what is intended, we don't give a way to get
             // access to it.
-            return visitor(separator_item());
+            return visitor(separator_item(m_item));
         }
         else
         {

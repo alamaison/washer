@@ -69,6 +69,17 @@ public:
 
     virtual ~item_description() {}
 
+    /**
+     * Optional item ID.
+     *
+     * All items have an optional ID which can be used to identify the item
+     * in a menu even if its position has changed.
+     *
+     * @note  For command menu items, this ID is required as it is fundamental
+     *        to dispatching a command to a window.
+     */
+    virtual item_description& id(UINT new_id) = 0;
+
     item_description* clone() const
     {
         item_description* item = do_clone();
