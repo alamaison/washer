@@ -42,6 +42,12 @@
 using namespace winapi::gui::menu;
 using namespace winapi::test;
 
+namespace {
+
+    // redefine MIIM_STRING so that tests compile even with WINVER < 0x0500
+    const UINT miim_string = 0x00000040;
+}
+
 /**
  * These tests are not especially interested in the details of the items in
  * the menu (except where it may affect the menu's behaviour).  Instead they
@@ -154,7 +160,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( existing_command, F, menu_fixtures )
     F::menu_type m = t.menu();
 
     winapi::test::do_insertion(
-        t.handle().get(), L"C", 42, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+        t.handle().get(), L"C", 42, NULL, MIIM_ID | miim_string, MFT_STRING);
 
     BOOST_CHECK(m.begin() != m.end());
     BOOST_CHECK_EQUAL(m.size(), 1);
@@ -222,9 +228,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_increment, F, menu_fixtures )
     F::menu_type m = t.menu();
 
     do_insertion(
-        t.handle().get(), L"C", 42, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+        t.handle().get(), L"C", 42, NULL, MIIM_ID | miim_string, MFT_STRING);
     do_insertion(
-        t.handle().get(), L"D", 43, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+        t.handle().get(), L"D", 43, NULL, MIIM_ID | miim_string, MFT_STRING);
 
     F::menu_type::iterator it = m.begin();
 
@@ -251,9 +257,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_decrement, F, menu_fixtures )
     F::menu_type m = t.menu();
 
     do_insertion(
-        t.handle().get(), L"C", 42, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+        t.handle().get(), L"C", 42, NULL, MIIM_ID | miim_string, MFT_STRING);
     do_insertion(
-        t.handle().get(), L"D", 43, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+        t.handle().get(), L"D", 43, NULL, MIIM_ID | miim_string, MFT_STRING);
 
     F::menu_type::iterator it = m.end();
 
@@ -280,9 +286,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_advance, F, menu_fixtures )
     F::menu_type m = t.menu();
 
     do_insertion(
-        t.handle().get(), L"C", 42, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+        t.handle().get(), L"C", 42, NULL, MIIM_ID | miim_string, MFT_STRING);
     do_insertion(
-        t.handle().get(), L"D", 43, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+        t.handle().get(), L"D", 43, NULL, MIIM_ID | miim_string, MFT_STRING);
 
     F::menu_type::iterator it = m.begin();
 
@@ -305,9 +311,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_reverse, F, menu_fixtures )
     F::menu_type m = t.menu();
 
     do_insertion(
-        t.handle().get(), L"C", 42, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+        t.handle().get(), L"C", 42, NULL, MIIM_ID | miim_string, MFT_STRING);
     do_insertion(
-        t.handle().get(), L"D", 43, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+        t.handle().get(), L"D", 43, NULL, MIIM_ID | miim_string, MFT_STRING);
 
     F::menu_type::iterator it = m.end();
 
@@ -330,9 +336,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_distance, F, menu_fixtures )
     F::menu_type m = t.menu();
 
     do_insertion(
-        t.handle().get(), L"C", 42, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+        t.handle().get(), L"C", 42, NULL, MIIM_ID | miim_string, MFT_STRING);
     do_insertion(
-        t.handle().get(), L"D", 43, NULL, MIIM_ID | MIIM_STRING, MFT_STRING);
+        t.handle().get(), L"D", 43, NULL, MIIM_ID | miim_string, MFT_STRING);
 
     F::menu_type::iterator it = m.begin();
 

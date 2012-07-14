@@ -80,7 +80,9 @@ public:
     template<typename Visitor>
     typename Visitor::result_type accept(Visitor& visitor)
     {
-        UINT button_type_flag = m_item.get_menuiteminfo(MIIM_FTYPE).fType;
+        // Should really be MIIM_FTYPE here but using MIIM_TYPE for
+        // backward compatibility
+        UINT button_type_flag = m_item.get_menuiteminfo(MIIM_TYPE).fType;
 
         if (button_type_flag & MFT_BITMAP)
         {

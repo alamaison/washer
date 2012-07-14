@@ -62,7 +62,10 @@ private:
         MENUITEMINFOW info = MENUITEMINFOW();
         info.cbSize = sizeof(MENUITEMINFOW);
 
-        info.fMask = MIIM_FTYPE | MIIM_ID;
+        // Using MIIM_TYPE instead of MIIM_FTYPE for backward compatibility
+        // with Win 98.
+        //info.fMask = MIIM_FTYPE | MIIM_ID;
+        info.fMask = MIIM_TYPE | MIIM_ID;
         info.fType = MFT_SEPARATOR;
         info.wID = m_id;
 

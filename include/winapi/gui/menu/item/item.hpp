@@ -86,9 +86,13 @@ public:
     {
         // MIIM_SUBMENU is part of the mask so isn't set by GetMenuItemInfo.
         // We have to set it and check hSubMenu to decide if this is a popup
-        // item
+        // item.
+        // Using MIIM_TYPE instead of MIIM_FTYPE for backward compatibility
+        // with Win 98.
+        //const MENUITEMINFOW info =
+        //    m_item.get_menuiteminfo(MIIM_FTYPE | MIIM_SUBMENU);
         const MENUITEMINFOW info =
-            m_item.get_menuiteminfo(MIIM_FTYPE | MIIM_SUBMENU);
+            m_item.get_menuiteminfo(MIIM_TYPE | MIIM_SUBMENU);
 
         // Four mutually-exclusive menu possibilities.  The first, separator
         // determines the entire menu item behaviour while the others just

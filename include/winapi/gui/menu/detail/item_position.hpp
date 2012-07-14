@@ -81,7 +81,11 @@ public:
      */
     std::wstring get_caption() const
     {
-        MENUITEMINFOW info = get_menuiteminfo(MIIM_FTYPE | MIIM_STRING);
+        // Using MIIM_TYPE instead of MIIM_STRING for backward compatibility
+        // with Win 98.  When we allow side-bitmaps on string items,
+        // this will need to change back again.
+        //MENUITEMINFOW info = get_menuiteminfo(MIIM_FTYPE | MIIM_STRING);
+        MENUITEMINFOW info = get_menuiteminfo(MIIM_TYPE);
 
         assert(
             (info.fType & (MFT_BITMAP | MFT_OWNERDRAW | MFT_SEPARATOR))

@@ -64,11 +64,17 @@ public:
 
     void caption(const std::wstring& new_caption)
     {
+        // Using MIIM_TYPE instead of MIIM_STRING for backward compatibility
+        // with Win 98.  When we allow side-bitmaps on string items,
+        // this will need to change back again.
+        //
+        // Old comment:
         // MIIM_STRING might be all that's needed but specifying MIIM_FTYPE as
         // we do set fType and MFT_STRING just in case.
         // The MSDN docs are hopelessly rubbish.  No idea if this is the right
         // thing to do.
-        MENUITEMINFOW info = m_item.get_menuiteminfo(MIIM_FTYPE | MIIM_STRING);
+        //MENUITEMINFOW info = m_item.get_menuiteminfo(MIIM_FTYPE | MIIM_STRING);
+        MENUITEMINFOW info = m_item.get_menuiteminfo(MIIM_TYPE);
 
         assert(info.fType == MFT_STRING);
 

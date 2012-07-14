@@ -49,6 +49,13 @@ namespace win32 = winapi::gui::menu::detail::win32;
 using std::string;
 using std::wstring;
 
+namespace {
+
+    // redefine MIIM_STRING and MIIM_FTYPE so that tests compile even with
+    // WINVER < 0x0500
+    const UINT miim_string = 0x00000040;
+    const UINT miim_ftype = 0x00000100;
+}
 
 /**
  * Tests where the menu was created externally and passed to the wrapper as a
@@ -102,7 +109,7 @@ struct new_style_string_command : public F
     {
         do_insertion(
             handle.get(), caption.c_str(), command_id, NULL,
-            MIIM_FTYPE | MIIM_ID | MIIM_STRING,
+            miim_ftype | MIIM_ID | miim_string,
             MFT_STRING);
     }
 };
@@ -121,7 +128,7 @@ struct new_style_string_command_no_ftype_set : public F
     {
         do_insertion(
             handle.get(), caption.c_str(), command_id, NULL,
-            MIIM_ID | MIIM_STRING, // No FTYPE flag
+            MIIM_ID | miim_string, // No FTYPE flag
             MFT_STRING); // Zero so makes no difference
     }
 };
@@ -247,7 +254,7 @@ struct new_style_string_popup : public F
     {
         do_insertion(
             handle, caption.c_str(), 0, sub_menu,
-            MIIM_SUBMENU | MIIM_STRING,
+            MIIM_SUBMENU | miim_string,
             MFT_STRING);
     }
 };
@@ -272,8 +279,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
 
     menu_handle submenu_handle = menu_handle::adopt_handle(
         win32::create_popup_menu());
+
+    // so that tests compile even with WINVER < 0x0500
+    const UINT miim_string = 0x00000040;
     do_insertion(
-        submenu_handle.get(), L"Pop", 7, NULL, MIIM_STRING | MIIM_ID,
+        submenu_handle.get(), L"Pop", 7, NULL, miim_string | MIIM_ID,
         MFT_STRING);
 
     F::do_insert(t.handle().get(), L"Bob", submenu_handle.get());
@@ -308,7 +318,7 @@ struct new_style_separator : public F
 {
     static void do_insert(HMENU handle)
     {
-        do_insertion(handle, NULL, 0, NULL, MIIM_FTYPE, MFT_SEPARATOR);
+        do_insertion(handle, NULL, 0, NULL, miim_ftype, MFT_SEPARATOR);
     }
 };
 
@@ -330,7 +340,7 @@ struct weird_new_style_separator1 : public F
     {
         do_insertion(
             handle, L"I'm an odd separator with a caption", 43, NULL,
-            MIIM_FTYPE | MIIM_ID | MIIM_STRING,
+            miim_ftype | MIIM_ID | miim_string,
             MFT_STRING | MFT_SEPARATOR);
     }
 };
@@ -343,7 +353,7 @@ struct weird_old_style_separator2 : public F
         HMENU submenu = win32::create_popup_menu();
         do_insertion(
             submenu, L"Supposedly, I'm a submenu of a separator", 7, NULL,
-            MIIM_FTYPE | MIIM_ID | MIIM_STRING, MFT_STRING);
+            miim_ftype | MIIM_ID | miim_string, MFT_STRING);
 
         win32::insert_menu(
             handle, 42, MF_BYPOSITION | MF_SEPARATOR, (UINT_PTR)submenu,
@@ -360,10 +370,10 @@ struct weird_new_style_separator2 : public F
         HMENU submenu = win32::create_popup_menu();
         do_insertion(
             submenu, L"Supposedly, I'm a submenu of a separator", 7, NULL,
-            MIIM_FTYPE | MIIM_ID | MIIM_STRING, MFT_STRING);
+            miim_ftype | MIIM_ID | miim_string, MFT_STRING);
 
         do_insertion(
-            handle, NULL, 101, submenu, MIIM_FTYPE | MIIM_SUBMENU,
+            handle, NULL, 101, submenu, miim_ftype | MIIM_SUBMENU,
             MFT_SEPARATOR);
         win32::enable_menu_item(handle, 0, MF_BYPOSITION);
     }

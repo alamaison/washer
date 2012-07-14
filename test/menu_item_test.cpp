@@ -558,10 +558,10 @@ BOOST_AUTO_TEST_CASE( separator )
 {
     menu m;
     separator_item_description d;
-    d.id(5698495068);
+    d.id(56984950);
     m.insert(d);
     m[0].accept(is_separator_test());
-    m[0].accept(id_test(5698495068));
+    m[0].accept(id_test(56984950));
 }
 
 /**

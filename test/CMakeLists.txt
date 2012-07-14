@@ -52,7 +52,13 @@ add_executable(tests_unicode ${TEST_SOURCES})
 get_target_property(test_unicode_EXE tests_unicode LOCATION)
 set_target_properties(
   tests_unicode PROPERTIES
-  COMPILE_DEFINITIONS _UNICODE COMPILE_DEFINITIONS _UNICODE)
+  COMPILE_DEFINITIONS _UNICODE)
+
+add_executable(tests_win9x ${TEST_SOURCES})
+get_target_property(test_win9x_EXE tests_win9x LOCATION)
+set_target_properties(
+  tests_win9x PROPERTIES
+  COMPILE_DEFINITIONS WINVER=0x0400)
 
 set(TEST_RUNNER_ARGUMENTS
   --catch_system_errors --detect_memory_leaks
@@ -62,3 +68,5 @@ ADD_CUSTOM_TARGET(RUN_TESTS
   ${test_EXE} ${TEST_RUNNER_ARGUMENTS} DEPENDS tests)
 ADD_CUSTOM_TARGET(RUN_UNICODE_TESTS
   ${test_unicode_EXE} ${TEST_RUNNER_ARGUMENTS} DEPENDS tests_unicode)
+ADD_CUSTOM_TARGET(RUN_WIN9X_TESTS
+  ${test_unicode_EXE} ${TEST_RUNNER_ARGUMENTS} DEPENDS tests_win9x)

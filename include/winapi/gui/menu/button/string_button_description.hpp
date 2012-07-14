@@ -62,11 +62,17 @@ private:
         MENUITEMINFOW info = MENUITEMINFOW();
         info.cbSize = sizeof(MENUITEMINFOW);
 
+        // Using MIIM_TYPE instead of MIIM_STRING for backward compatibility
+        // with Win 98.  When we allow side-bitmaps on string items,
+        // this will need to change back again.
+        //
+        // Old comment:
         // MIIM_STRING might be all that's needed but specifying MIIM_FTYPE as
         // we do set fType and MFT_STRING just in case.
         // The MSDN docs are hopelessly rubbish.  No idea if this is the right
         // thing to do.
-        info.fMask = MIIM_FTYPE | MIIM_STRING;
+        //info.fMask = MIIM_FTYPE | MIIM_STRING;
+        info.fMask = MIIM_TYPE;
         info.fType = MFT_STRING;
         info.dwTypeData = const_cast<wchar_t*>(m_caption.c_str());
         // doesn't seem to be necessary but better safe than sorry:
