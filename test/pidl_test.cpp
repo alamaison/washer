@@ -268,7 +268,7 @@ inline void do_combine_test(const T* pidl1, const U* pidl2)
 
     shared_ptr<IDRELATIVE> expected(
         reinterpret_cast<PIDLIST_RELATIVE>(::ILCombine(
-            reinterpret_cast<PCUIDLIST_ABSOLUTE>(pidl1), pidl2)),
+            reinterpret_cast<PCIDLIST_ABSOLUTE>(pidl1), pidl2)),
         ::ILFree);
 
     BOOST_REQUIRE(binary_equal_pidls(combined_pidl.get(), expected.get()));
@@ -473,7 +473,7 @@ void do_join_test(const T& pidl1, const U& pidl2)
 
     shared_ptr<join_type> expected(
         reinterpret_cast<join_type*>(::ILCombine(
-            reinterpret_cast<PCUIDLIST_ABSOLUTE>(get(pidl1)), get(pidl2))),
+            reinterpret_cast<PCIDLIST_ABSOLUTE>(get(pidl1)), get(pidl2))),
         ::ILFree);
 
     join_pidl joined_pidl = pidl1 + pidl2;
@@ -584,7 +584,7 @@ void do_append_test(basic_pidl<T, Alloc>& pidl1, const U& pidl2)
 {
     shared_ptr<T> expected(
         reinterpret_cast<T*>(::ILCombine(
-            reinterpret_cast<PCUIDLIST_ABSOLUTE>(get(pidl1)), get(pidl2))),
+            reinterpret_cast<PCIDLIST_ABSOLUTE>(get(pidl1)), get(pidl2))),
         ::ILFree);
 
     pidl1 += pidl2;

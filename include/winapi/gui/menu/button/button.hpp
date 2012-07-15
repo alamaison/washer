@@ -68,7 +68,6 @@ class button
 {
 public:
 
-
     /**
      * Accept a visitor to access type-safe, mutable view of the button.
      *
@@ -78,7 +77,7 @@ public:
      * as a `result_type` type.
      */
     template<typename Visitor>
-    typename Visitor::result_type accept(Visitor& visitor)
+    typename Visitor::result_type accept(Visitor visitor)
     {
         // Should really be MIIM_FTYPE here but using MIIM_TYPE for
         // backward compatibility
@@ -86,7 +85,8 @@ public:
 
         if (button_type_flag & MFT_BITMAP)
         {
-            return visitor(bitmap_button(m_item));
+            bitmap_button button_view(m_item);
+            return visitor(button_view);
         }
         else if (button_type_flag & MFT_OWNERDRAW)
         {
@@ -94,12 +94,14 @@ public:
             // mutually exclusive set of flags but I don't see how it couldn't
             // be.  These flags specify the meaning of dwTypeData and cch which
             // MFT_OWNERDRAWN gives a user-defined meaning.
-            return visitor(owner_drawn_button(m_item));
+            owner_drawn_button button_view(m_item);
+            return visitor(button_view);
         }
         else
         {
             // MFT_STRING which is zero so can only be detected by elimination
-            return visitor(string_button(m_item));
+            string_button button_view(m_item);
+            return visitor(button_view);
         }
     }
 

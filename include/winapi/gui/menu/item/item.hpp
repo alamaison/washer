@@ -82,7 +82,7 @@ public:
      * as a `result_type` type.
      */
     template<typename Visitor>
-    typename Visitor::result_type accept(Visitor& visitor)
+    typename Visitor::result_type accept(Visitor visitor)
     {
         // MIIM_SUBMENU is part of the mask so isn't set by GetMenuItemInfo.
         // We have to set it and check hSubMenu to decide if this is a popup
@@ -102,17 +102,20 @@ public:
             // In reality, a separator can be forced to have a submenu but as
             // this is clearly not what is intended, we don't give a way to get
             // access to it.
-            return visitor(separator_item(m_item));
+            separator_item item_view(m_item);
+            return visitor(item_view);
         }
         else
         {
             if (info.hSubMenu)
             {
-                return visitor(sub_menu_item(m_item));
+                sub_menu_item item_view(m_item);
+                return visitor(item_view);
             }
             else
             {
-                return visitor(command_item(m_item));
+                command_item item_view(m_item);
+                return visitor(item_view);
             }
         }
     }

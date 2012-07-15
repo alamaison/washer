@@ -36,6 +36,7 @@
 #include <winapi/gui/menu/detail/item_position.hpp>
 
 #include <boost/noncopyable.hpp>
+#include <boost/numeric/conversion/cast.hpp> // numeric_cast
 
 #include <string>
 
@@ -80,7 +81,7 @@ public:
 
         info.dwTypeData = const_cast<wchar_t*>(new_caption.c_str());
         // doesn't seem to be necessary but better safe than sorry:
-        info.cch = new_caption.size();
+        info.cch = boost::numeric_cast<UINT>(new_caption.size());
 
         m_item.set_menuiteminfo(info);
     }

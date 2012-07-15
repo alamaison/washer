@@ -64,10 +64,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( create_empty_menu, F, menu_ownership_fixtures )
     menu m;
 
     BOOST_CHECK(m.begin() == m.end());
-    BOOST_CHECK_EQUAL(m.size(), 0);
+    BOOST_CHECK_EQUAL(m.size(), 0U);
     BOOST_CHECK_THROW(m[0], std::runtime_error);
-    BOOST_FOREACH(item& item, m)
+    BOOST_FOREACH(item i, m)
     {
+        (void)i;
         BOOST_FAIL("Empty menu should not iterate");
     }
 
@@ -101,10 +102,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( empty_menu_bar, F, menu_ownership_fixtures )
     menu_bar m;
 
     BOOST_CHECK(m.begin() == m.end());
-    BOOST_CHECK_EQUAL(m.size(), 0);
+    BOOST_CHECK_EQUAL(m.size(), 0U);
     BOOST_CHECK_THROW(m[0], std::runtime_error);
-    BOOST_FOREACH(item& item, m)
+    BOOST_FOREACH(item i, m)
     {
+        (void)i;
         BOOST_FAIL("Empty menu should not iterate");
     }
 
@@ -120,10 +122,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( existing_empty_menu, F, menu_fixtures )
     F::menu_type m = t.menu();
 
     BOOST_CHECK(m.begin() == m.end());
-    BOOST_CHECK_EQUAL(m.size(), 0);
+    BOOST_CHECK_EQUAL(m.size(), 0U);
     BOOST_CHECK_THROW(m[0], std::runtime_error);
-    BOOST_FOREACH(item& item, m)
+    BOOST_FOREACH(item i, m)
     {
+        (void)i;
         BOOST_FAIL("Empty menu should not iterate");
     }
 
@@ -144,7 +147,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( create_command, F, menu_fixtures )
         command_item_description(string_button_description(L"Command"), 42));
 
     BOOST_CHECK(m.begin() != m.end());
-    BOOST_CHECK_EQUAL(m.size(), 1);
+    BOOST_CHECK_EQUAL(m.size(), 1U);
     BOOST_CHECK_NO_THROW(m[0]);
     BOOST_CHECK_THROW(m[1], std::runtime_error);
 
@@ -163,7 +166,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( existing_command, F, menu_fixtures )
         t.handle().get(), L"C", 42, NULL, MIIM_ID | miim_string, MFT_STRING);
 
     BOOST_CHECK(m.begin() != m.end());
-    BOOST_CHECK_EQUAL(m.size(), 1);
+    BOOST_CHECK_EQUAL(m.size(), 1U);
     BOOST_CHECK_NO_THROW(m[0]);
     BOOST_CHECK_THROW(m[1], std::runtime_error);
 
@@ -187,7 +190,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( create_submenu, F, menu_fixtures )
     m.insert(sub_menu_item_description(string_button_description(L"Pop"), sub));
 
     BOOST_CHECK(m.begin() != m.end());
-    BOOST_CHECK_EQUAL(m.size(), 1);
+    BOOST_CHECK_EQUAL(m.size(), 1U);
     BOOST_CHECK_NO_THROW(m[0]);
     BOOST_CHECK_THROW(m[1], std::runtime_error);
 

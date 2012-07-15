@@ -40,6 +40,7 @@
 
 #include <boost/integer_traits.hpp>
 #include <boost/iterator/reverse_iterator.hpp>
+#include <boost/numeric/conversion/cast.hpp> // numeric_cast
 #include <boost/utility/swap.hpp>
 
 #include <Windows.h> // MENUITEMINFO
@@ -133,7 +134,7 @@ public:
      */
     void insert(const description_type& item)
     {
-        insert_at_position(item, -1);
+        insert_at_position(item, (UINT)-1);
     }
 
     value_type operator[](size_type position) const
@@ -142,7 +143,9 @@ public:
             BOOST_THROW_EXCEPTION(
                 std::range_error("Menu item index out of range"));
 
-        return value_type(detail::item_position(handle(), position));
+        return value_type(
+            detail::item_position(
+                handle(), boost::numeric_cast<UINT>(position)));
     }
 
     iterator begin() const
@@ -179,7 +182,7 @@ public:
     void default_item(iterator position)
     {
         detail::win32::set_menu_default_item(
-            m_menu.get(), position - begin(), TRUE);
+            m_menu.get(), boost::numeric_cast<UINT>(position - begin()), TRUE);
     }
 
     /**

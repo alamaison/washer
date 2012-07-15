@@ -143,8 +143,8 @@ private:
      *
      * This operation cannot fail and offers the strong guarantee.
      */
-    template<typename T>
-    inline friend void swap(global_lock<T>& lhs, global_lock<T>& rhs) throw()
+    template<typename U>
+    inline friend void swap(global_lock<U>& lhs, global_lock<U>& rhs) throw()
     {
         std::swap(lhs.m_hglobal, rhs.m_hglobal);
         std::swap(lhs.m_mem, rhs.m_mem);

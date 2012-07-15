@@ -86,7 +86,7 @@ inline typename T::ToType convert_string(const typename T::FromType& from)
 {
     const int size = boost::numeric_cast<int>(from.size());
     if (size == 0)
-        return T::ToType();
+        return typename T::ToType();
 
     // Calculate necessary buffer size
     int len = T()(from.data(), size, NULL, 0);
@@ -94,14 +94,14 @@ inline typename T::ToType convert_string(const typename T::FromType& from)
     // Perform actual conversion
     if (len > 0)
     {
-        std::vector<T::ToElem> buffer(len);
+        std::vector<typename T::ToElem> buffer(len);
         len = T()(
             from.data(), size,
             &buffer[0], static_cast<int>(buffer.size()));
         if (len > 0)
         {
             assert(len == boost::numeric_cast<int>(buffer.size()));
-            return T::ToType(&buffer[0], len);
+            return typename T::ToType(&buffer[0], len);
         }
     }
 

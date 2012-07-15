@@ -35,6 +35,8 @@
 
 #include <winapi/gui/menu/button/button_description.hpp>
 
+#include <boost/numeric/conversion/cast.hpp> // numeric_cast
+
 #include <string>
 
 #include <Windows.h> // MENUITEMINFO
@@ -76,7 +78,7 @@ private:
         info.fType = MFT_STRING;
         info.dwTypeData = const_cast<wchar_t*>(m_caption.c_str());
         // doesn't seem to be necessary but better safe than sorry:
-        info.cch = m_caption.size();
+        info.cch = boost::numeric_cast<UINT>(m_caption.size());
 
         return info;
     }

@@ -171,7 +171,7 @@ struct string_b : public F
     }
 
     template<typename M>
-    void mutate_button(M& m)
+    void mutate_button(M m)
     {
         m[0].accept(
             make_button_test(string_button_mutator(L"Mutated button text")));
@@ -205,7 +205,7 @@ public:
     }
 
     template<typename M>
-    void mutate_button(M& m)
+    void mutate_button(M m)
     {
         m[0].accept(make_button_test(bitmap_button_mutator(m_hbitmap2)));
     }
@@ -227,7 +227,7 @@ template<typename F>
 struct enabled : public F
 {
     template<typename D>
-    void set_selectability(D& d)
+    void set_selectability(D d)
     {
         d.selectability(selectability::enabled);
     }
@@ -243,7 +243,7 @@ template<typename F>
 struct disabled : public F
 {
     template<typename D>
-    void set_selectability(D& d)
+    void set_selectability(D d)
     {
         d.selectability(selectability::disabled);
     }
@@ -259,7 +259,7 @@ template<typename F>
 struct default_enabled : public F
 {
     template<typename D>
-    void set_selectability(D& d)
+    void set_selectability(D d)
     {
         d.selectability(selectability::default);
     }
@@ -275,7 +275,7 @@ template<typename F>
 struct noop_enabled : public F
 {
     template<typename D>
-    void set_selectability(D& d)
+    void set_selectability(D)
     {
     }
 
@@ -299,7 +299,7 @@ template<typename F>
 struct checked : public F
 {
     template<typename D>
-    void set_check_state(D& d)
+    void set_check_state(D d)
     {
         d.check_mark_visibility(check_mark::visible);
     }
@@ -315,7 +315,7 @@ template<typename F>
 struct unchecked : public F
 {
     template<typename D>
-    void set_check_state(D& d)
+    void set_check_state(D d)
     {
         d.check_mark_visibility(check_mark::invisible);
     }
@@ -331,7 +331,7 @@ template<typename F>
 struct default_unchecked : public F
 {
     template<typename D>
-    void set_check_state(D& d)
+    void set_check_state(D d)
     {
         d.check_mark_visibility(check_mark::default);
     }
@@ -347,7 +347,7 @@ template<typename F>
 struct noop_unchecked : public F
 {
     template<typename D>
-    void set_check_state(D& d)
+    void set_check_state(D)
     {
     }
 
@@ -381,7 +381,7 @@ template<typename F>
 struct mutate_to_enabled : public F
 {
     template<typename I>
-    void mutate_selectability(I& i)
+    void mutate_selectability(I i)
     {
         i.accept(selectability_mutator(selectability::enabled));
     }
@@ -397,7 +397,7 @@ template<typename F>
 struct mutate_to_disabled : public F
 {
     template<typename I>
-    void mutate_selectability(I& i)
+    void mutate_selectability(I i)
     {
         i.accept(selectability_mutator(selectability::disabled));
     }
@@ -417,7 +417,7 @@ template<typename F>
 struct mutate_to_checked : public F
 {
     template<typename I>
-    void mutate_check_state(I& i)
+    void mutate_check_state(I i)
     {
         i.accept(check_mutator(check_mark::visible));
     }
@@ -433,7 +433,7 @@ template<typename F>
 struct mutate_to_unchecked : public F
 {
     template<typename I>
-    void mutate_check_state(I& i)
+    void mutate_check_state(I i)
     {
         i.accept(check_mutator(check_mark::invisible));
     }

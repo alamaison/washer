@@ -39,9 +39,13 @@
 #include <winapi/gui/menu/item/item_description.hpp>
 #include <winapi/gui/menu/item/selectable_item_description.hpp>
 
+#pragma warning(push)
+#pragma warning(disable : 4510)
+#pragma warning(disable : 4610)
 #include <boost/concept/assert.hpp> // BOOST_CONCEPT_ASSERT
 #include <boost/concept_check.hpp> // Collection
 #include <boost/iterator/iterator_concepts.hpp> // ReadableIterator
+#pragma warning(pop)
 
 namespace winapi {
 namespace gui {

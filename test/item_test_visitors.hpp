@@ -234,7 +234,7 @@ public:
 
     void operator()(winapi::gui::menu::sub_menu_item& item)
     {
-        winapi::gui::menu::menu& submenu = item.menu();
+        winapi::gui::menu::menu submenu = item.menu();
         BOOST_CHECK(submenu.valid());
 
         BOOST_CHECK(submenu == m_menu);

@@ -57,6 +57,9 @@ class sub_menu_item_description_befriender
 
 private:
 
+    sub_menu_item_description_befriender& operator=(
+        const sub_menu_item_description_befriender&);
+
     sub_menu_item_description_befriender(const menu& menu) : m_menu(menu) {}
 
     const menu_handle handle() const
@@ -85,6 +88,8 @@ class window_class_befriender
 #endif
 
 private:
+
+    window_class_befriender& operator=(const window_class_befriender&);
 
     window_class_befriender(const menu_bar& menu) : m_menu(menu) {}
 

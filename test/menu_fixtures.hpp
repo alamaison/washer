@@ -103,7 +103,8 @@ namespace detail {
         window_class.lpszClassName = L"testclass";
         window_class.lpfnWndProc = &wnd_proc;
 
-        ATOM klass = ::RegisterClassExW(&window_class);
+        ::RegisterClassExW(&window_class);
+        //ATOM klass = ::RegisterClassExW(&window_class);
         //if (klass == 0)
         //    BOOST_THROW_EXCEPTION(
         //        boost::enable_error_info(winapi::last_error()) <<

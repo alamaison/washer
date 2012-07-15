@@ -84,7 +84,7 @@ public:
         return "owner";
     }
 
-    string operator()(string_button& item)
+    string operator()(string_button&)
     {
         BOOST_REQUIRE(m_case == expected_case::string);
         return "string";
@@ -111,7 +111,7 @@ public:
         BOOST_REQUIRE(m_case == expected_case::owner);
     }
 
-    void operator()(string_button& item)
+    void operator()(string_button&)
     {
         BOOST_REQUIRE(m_case == expected_case::string);
     }

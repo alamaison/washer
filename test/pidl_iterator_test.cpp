@@ -35,6 +35,7 @@
 
 #include <winapi/shell/shell.hpp> // special_folder_pidl
 
+#include <boost/numeric/conversion/cast.hpp> // numeric_cast
 #include <boost/test/unit_test.hpp>
 
 #include <algorithm> // copy
@@ -44,6 +45,7 @@
 using namespace winapi::shell::pidl;
 using winapi::shell::special_folder_pidl;
 
+using boost::numeric_cast;
 using boost::test_tools::predicate_result;
 
 using std::copy;
@@ -71,7 +73,7 @@ namespace {
 #pragma warning(pop)
 
         PUITEMID_CHILD pidl = reinterpret_cast<PUITEMID_CHILD>(&buffer[0]);
-        pidl->mkid.cb = pidl_length - sizeof(SHITEMID);
+        pidl->mkid.cb = numeric_cast<USHORT>(pidl_length - sizeof(SHITEMID));
         return cpidl_t(pidl);
     }
     

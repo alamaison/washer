@@ -36,6 +36,7 @@
 #include <winapi/gui/menu/detail/menu_win32.hpp> // get_menu_item_info
 #include <winapi/gui/menu/menu_handle.hpp>
 
+#include <boost/numeric/conversion/cast.hpp> // numeric_cast
 #include <cassert> // assert
 #include <string>
 #include <vector>
@@ -92,7 +93,7 @@ public:
             == 0);
 
         std::vector<wchar_t> buffer(info.cch + 1);
-        info.cch = buffer.size();
+        info.cch = boost::numeric_cast<UINT>(buffer.size());
         info.dwTypeData = (!buffer.empty()) ? &buffer[0] : NULL;
         detail::win32::get_menu_item_info(
             m_handle.get(), m_position, TRUE, &info);
@@ -116,8 +117,8 @@ public:
 
 private:
 
-    const menu_handle m_handle;
-    const UINT m_position;
+    menu_handle m_handle;
+    UINT m_position;
 };
 
 }}}} // namespace winapi::gui::menu::detail

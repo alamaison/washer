@@ -54,7 +54,7 @@ inline void safe_destroy_menu(HMENU hmenu)
     }
 }
 
-inline void no_destroy_menu(HMENU hmenu)
+inline void no_destroy_menu(HMENU)
 {
 }
 
