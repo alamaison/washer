@@ -38,10 +38,10 @@
 namespace winapi {
 namespace detail {
 
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION < 3
+
 /**
  * Helper to work around lack of genericity in path/wpath selection.
- *
- * @todo Work with Boost.Filesystem V3.
  */
 template<typename T>
 struct path_traits_chooser;
@@ -56,6 +56,8 @@ template<> struct path_traits_chooser<wchar_t>
     typedef boost::filesystem::wpath_traits trait;
 };
 
+#endif
+
 /**
  * Templated typedef shrink path-choosing declaration.
  *
@@ -69,8 +71,13 @@ template<> struct path_traits_chooser<wchar_t>
 template<typename T>
 struct choose_path
 {
+
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION < 3
     typedef boost::filesystem::basic_path<
         std::basic_string<T>, typename path_traits_chooser<T>::trait> type;
+#else
+    typedef boost::filesystem::path type;
+#endif
 };
 
 }} // namespace winapi::detail

@@ -39,7 +39,7 @@
 #include <boost/exception/info.hpp> // errinfo
 #include <boost/exception/errinfo_file_name.hpp> // errinfo_file_name
 #include <boost/exception/errinfo_api_function.hpp> // errinfo_api_function
-#include <boost/filesystem.hpp> // basic_path
+#include <boost/filesystem.hpp> // basic_path, path
 #include <boost/numeric/conversion/cast.hpp>  // numeric_cast
 #include <boost/shared_ptr.hpp> // shared_ptr
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
@@ -89,6 +89,19 @@ namespace detail {
      *        filesystem v3 which allows all paths to be converted
      *        to std::string.
      */
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION > 2
+    inline hmodule load_library(const boost::filesystem::path& library_path)
+    {
+        HMODULE hinst = native::load_library(library_path.native().c_str());
+        if (hinst == NULL)
+            BOOST_THROW_EXCEPTION(
+                boost::enable_error_info(winapi::last_error()) <<
+                boost::errinfo_file_name(library_path.string()) <<
+                boost::errinfo_api_function("LoadLibrary"));
+
+        return hmodule(hinst, ::FreeLibrary);
+    }
+#else
     template<typename T, typename Traits>
     inline hmodule load_library(
         const boost::filesystem::basic_path<T, Traits>& library_path)
@@ -102,16 +115,27 @@ namespace detail {
 
         return hmodule(hinst, ::FreeLibrary);
     }
+#endif
 
     /**
      * Get handle of an already-loaded DLL by file name.
      *
      * This implementation works for wide or narrow paths.
-     *
-     * @todo  Use boost::errinfo_file_name(library_path) once we use
-     *        filesystem v3 which allows all paths to be converted
-     *        to std::string.
      */
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION > 2
+    inline HMODULE module_handle(const boost::filesystem::path& module_path)
+    {
+        HMODULE hinst = native::get_module_handle(
+            (module_path.empty()) ? NULL : module_path.native().c_str());
+        if (hinst == NULL)
+            BOOST_THROW_EXCEPTION(
+                boost::enable_error_info(winapi::last_error()) <<
+                boost::errinfo_file_name(module_path.string()) <<
+                boost::errinfo_api_function("GetModuleHandle"));
+
+        return hinst;
+    }
+#else
     template<typename T, typename Traits>
     inline HMODULE module_handle(
         const boost::filesystem::basic_path<T, Traits>& module_path)
@@ -126,6 +150,7 @@ namespace detail {
 
         return hinst;
     }
+#endif
 
     /**
      * Get handle of currently-loaded executable.
@@ -145,8 +170,10 @@ inline hmodule load_library(const boost::filesystem::path& library_path)
 /**
  * Load a DLL by file name.
  */
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION < 3
 inline hmodule load_library(const boost::filesystem::wpath& library_path)
 { return detail::load_library(library_path); }
+#endif
 
 /**
  * Get handle of an already-loaded module by file name.
@@ -157,8 +184,10 @@ inline HMODULE module_handle(const boost::filesystem::path& module_path)
 /**
  * Get handle of an already-loaded module by file name.
  */
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION < 3
 inline HMODULE module_handle(const boost::filesystem::wpath& module_path)
 { return detail::module_handle(module_path); }
+#endif
 
 /**
  * Get handle of current executable.
@@ -197,7 +226,7 @@ inline typename detail::choose_path<T>::type module_path(H module)
 template<typename T>
 inline typename detail::choose_path<T>::type module_path()
 {
-    return module_path(NULL);
+    return module_path<T, HMODULE>(NULL);
 }
 
 /**
@@ -237,10 +266,16 @@ namespace detail {
     /**
      * Dynamically bind to function given by name.
      */
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION > 2
+    template<typename T>
+    inline T proc_address(
+        const boost::filesystem::path& library_path, const std::string& name)
+#else
     template<typename T, typename String, typename Traits>
     inline T proc_address(
         const boost::filesystem::basic_path<String, Traits>& library_path,
         const std::string& name)
+#endif
     {
         return ::winapi::proc_address<T>(
             ::winapi::load_library(library_path), name);
@@ -268,10 +303,13 @@ inline T proc_address(
  * @param name          Name of the function.
  * @returns  Pointer to the function with signature T.
  */
+
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION < 3
 template<typename T>
 inline T proc_address(
     const boost::filesystem::wpath& library_path, const std::string& name)
 { return detail::proc_address<T>(library_path, name); }
+#endif
 
 } // namespace winapi
 

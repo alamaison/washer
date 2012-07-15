@@ -14,8 +14,7 @@ find_package(
 link_directories(${Boost_LIBRARY_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 
-add_definitions(
-  -DWIN32_LEAN_AND_MEAN -DBOOST_FILESYSTEM_VERSION=2 -DSTRICT_TYPED_ITEMIDS)
+add_definitions(-DWIN32_LEAN_AND_MEAN -DSTRICT_TYPED_ITEMIDS)
 
 set(TEST_SOURCES
   fixture_permutator.hpp
@@ -57,7 +56,7 @@ if(CMAKE_BUILD_TOOL MATCHES "(msdev|devenv|nmake)")
   else()
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4")
   endif()
-  
+
   # Disable deprecation warnings for standard C functions in VS2005 and later
   add_definitions(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
   # Disable warnings when using std::copy

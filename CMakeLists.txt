@@ -18,7 +18,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 
 add_definitions(
-  -DWIN32_LEAN_AND_MEAN -DBOOST_FILESYSTEM_VERSION=2 -DSTRICT_TYPED_ITEMIDS)
+  -DWIN32_LEAN_AND_MEAN -DSTRICT_TYPED_ITEMIDS)
   
 set(LIBRARY_SOURCES
   ${LIBRARY_DIRECTORY}/clipboard.hpp

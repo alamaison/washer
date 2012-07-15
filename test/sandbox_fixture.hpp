@@ -120,7 +120,11 @@ public:
         boost::filesystem::wpath filename =
             winapi::filesystem::unique_path<wchar_t>();
         boost::filesystem::wpath p =
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION > 2
+            subdirectory / (filename.wstring() + extension);
+#else
             subdirectory / (filename.string() + extension);
+#endif
 
         BOOST_REQUIRE(!exists(p));
         BOOST_REQUIRE(p.is_complete());

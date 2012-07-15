@@ -64,7 +64,11 @@ namespace {
         sandbox_fixture(),
         m_file(new_file_in_sandbox(new_directory_in_sandbox(), L".txt")),
         m_shell_item(
-            pidl_shell_item(pidl_from_parsing_name(m_file.file_string())))
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION > 2
+        pidl_shell_item(pidl_from_parsing_name(m_file.wstring())))
+#else
+        pidl_shell_item(pidl_from_parsing_name(m_file.string())))
+#endif
         {}
 
         const shell_item& item()
@@ -78,7 +82,7 @@ namespace {
         }
 
     private:
-        const wpath m_file;
+        wpath m_file;
         pidl_shell_item m_shell_item;
     };
 
@@ -91,7 +95,11 @@ BOOST_AUTO_TEST_CASE( absolute_parsing_name )
 {
     wstring name = item().parsing_name(shell_item::parsing_name_type::absolute);
 
-    BOOST_CHECK_EQUAL(name, file().file_string());
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION > 2
+    BOOST_CHECK_EQUAL(name, file().wstring());
+#else
+    BOOST_CHECK_EQUAL(name, file().string());
+#endif
 }
 
 BOOST_AUTO_TEST_CASE( relative_parsing_name )
@@ -130,7 +138,11 @@ BOOST_AUTO_TEST_CASE( absolute_friendly_name )
     wstring name = item().friendly_name(
         shell_item::friendly_name_type::absolute);
 
-    BOOST_CHECK_EQUAL(name, file().file_string()); // includes extension
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION > 2
+    BOOST_CHECK_EQUAL(name, file().wstring()); // includes extension
+#else
+    BOOST_CHECK_EQUAL(name, file().string()); // includes extension
+#endif
 }
 
 BOOST_AUTO_TEST_CASE( relative_friendly_name )

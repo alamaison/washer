@@ -74,7 +74,7 @@ namespace { // private
             predicate_result res(false);
             res.message()
                 << "Different items [" << parsing_name
-                << " != " << path.file_string() << "]";
+                << " != " << path.string() << "]";
             return res;
         }
 
@@ -127,17 +127,22 @@ BOOST_AUTO_TEST_CASE( stream_from_file_pidl )
     test_file.close();
 
     com_ptr<IStream> stream = stream_from_pidl(
-        pidl_from_parsing_name(test_file_path.file_string()));
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION < 3
+        pidl_from_parsing_name(test_file_path.string()));
+#else
+        pidl_from_parsing_name(test_file_path.wstring()));
+#endif
 
     vector<char> stream_output(100); // bigger than test input
     ULONG bytes_read = 0;
     HRESULT hr = stream->Read(
         &stream_output[0], (ULONG)stream_output.size(), &bytes_read);
     BOOST_REQUIRE_EQUAL(hr, S_FALSE); // should be short read
+
     // shrink vector to size read
-    stream_output.swap(
-        vector<char>(
-            stream_output.begin(), stream_output.begin() + bytes_read));
+    vector<char> shrunk(
+        stream_output.begin(), stream_output.begin() + bytes_read);
+    stream_output.swap(shrunk);
 
     BOOST_CHECK_EQUAL_COLLECTIONS(
         stream_output.begin(), stream_output.end(),
@@ -154,7 +159,12 @@ BOOST_AUTO_TEST_CASE( handler_object )
 {
     wpath file = new_file_in_sandbox();
 
-    apidl_t sandbox_pidl = pidl_from_parsing_name(sandbox().directory_string());
+#if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION < 3
+    apidl_t sandbox_pidl = pidl_from_parsing_name(sandbox().string());
+#else
+    apidl_t sandbox_pidl = pidl_from_parsing_name(sandbox().wstring());
+#endif
+
     com_ptr<IShellFolder> folder = bind_to_handler_object<IShellFolder>(
         sandbox_pidl);
 
