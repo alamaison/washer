@@ -156,7 +156,7 @@ inline HICON load_icon(
     HMODULE module, const std::basic_string<T>& resource_name,
     int width, int height)
 {
-    return detail::load_icon(module, name.c_str(), width, height);
+    return detail::load_icon(module, resource_name.c_str(), width, height);
 }
 
 /**
