@@ -33,9 +33,14 @@
 #define WINAPI_SHELL_FOLDER_INTERFACES_HPP
 #pragma once
 
+#include <ole2.h> // basic COM types
 #include <ObjIdl.h> // IBindCtx
+#if defined(__MINGW32__)
+#include <shlobj.h> // IEnumIDList, IDLIST, ITEMID
+#else
 #include <shobjidl.h> // IEnumIDList
 #include <ShTypes.h> // IDLIST, ITEMID
+#endif
 
 namespace winapi {
 namespace shell {

@@ -50,7 +50,9 @@
 #include <cstring> // memset
 
 #include <Shlobj.h> // IShellDetails
+#if !defined(__MINGW32__)
 #include <ShObjIdl.h> // IShellFolder, IShellFolder2
+#endif
 
 /**
  * @file
