@@ -77,7 +77,7 @@ public:
         m_item.set_menuiteminfo(info);
     }
 
-    button button() const
+    ::winapi::gui::menu::button button() const
     {
         return ::winapi::gui::menu::button(m_item);
     }

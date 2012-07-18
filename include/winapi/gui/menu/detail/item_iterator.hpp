@@ -52,9 +52,15 @@ class item_iterator :
         boost::random_access_traversal_tag, Item> // reference = value_type
         // using boost tag to allow non-& reference
 {
-    friend boost::iterator_core_access;
+    friend class boost::iterator_core_access;
     // Enables conversion constructor to work:
     template<typename,typename> friend class item_iterator;
+
+    // For some reason GCC doesn't see the iterator_facade_ typedef that
+    // we're supposed to inherit
+    typedef boost::iterator_facade<
+        item_iterator<Menu, Item>, Item, boost::random_access_traversal_tag, Item>
+    iterator_facade_;
 
 public:
 
@@ -86,7 +92,7 @@ private:
         return m_menu == other.m_menu && this->m_pos == other.m_pos;
     }
 
-    reference dereference() const
+    typename iterator_facade_::reference dereference() const
     {
         if (m_pos >= m_menu.size())
             BOOST_THROW_EXCEPTION(

@@ -85,7 +85,7 @@ public:
     /**
      * The menu item's clickable appearance.
      */
-    virtual button button() const = 0;
+    virtual ::winapi::gui::menu::button button() const = 0;
 
     virtual bool is_selectable() const = 0;
     virtual bool check_mark_is_visible() const = 0;

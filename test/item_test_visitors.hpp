@@ -252,13 +252,15 @@ public:
 
     button_test(ButtonVisitor test) : m_test(test) {}
 
-    result_type operator()(winapi::gui::menu::separator_item&)
+    typename ButtonVisitor::result_type operator()(
+        winapi::gui::menu::separator_item&)
     {
         BOOST_FAIL("Separator unexpected");
-        return result_type();
+        return typename ButtonVisitor::result_type();
     }
 
-    result_type operator()(winapi::gui::menu::selectable_item& item)
+    typename ButtonVisitor::result_type operator()(
+        winapi::gui::menu::selectable_item& item)
     {
         return item.button().accept(m_test);
     }
