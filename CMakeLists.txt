@@ -130,25 +130,30 @@ add_custom_target(winapi SOURCES
 add_subdirectory(test)
 
 # Target to generate documentation with Doxygen
-find_package(Doxygen)
-if(DOXYGEN_FOUND)
+option(BUILD_DOCS "Build documentation if Doxygen is available" ON)
+if(BUILD_DOCS)
 
-  get_property(
-    INCLUDE_LIST
-    DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} 
-    PROPERTY INCLUDE_DIRECTORIES)
+  find_package(Doxygen)
 
-  foreach(arg ${INCLUDE_LIST})
-    set(DOXY_INCLUDE_DIRS "${DOXY_INCLUDE_DIRS} \"${arg}\"")
-  endforeach()
+  if(DOXYGEN_FOUND)
+    get_property(
+      INCLUDE_LIST
+      DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      PROPERTY INCLUDE_DIRECTORIES)
 
-  configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-    ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+    foreach(arg ${INCLUDE_LIST})
+      set(DOXY_INCLUDE_DIRS "${DOXY_INCLUDE_DIRS} \"${arg}\"")
+    endforeach()
 
-  add_custom_target(
-    doc ALL
-    ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "Generating documentation with Doxygen" VERBATIM)
+    configure_file(
+      ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+      ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+
+    add_custom_target(
+      doc ALL
+      ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+      COMMENT "Generating documentation with Doxygen" VERBATIM)
+  endif()
+
 endif()
