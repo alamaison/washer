@@ -40,7 +40,7 @@
 namespace winapi {
 namespace gui {
 namespace menu {
-    
+
 class separator_item;
 class command_item;
 class sub_menu_item;
@@ -54,7 +54,7 @@ class sub_menu_item;
  *
  * Menus entries can change their type either by an insertion/removal
  * shuffling items around or by explicitly setting an item.  Therefore, the
- * typed representations (`command_item`, `sub_menu_item` and 
+ * typed representations (`command_item`, `sub_menu_item` and
  * `separator_item`) must not be stored and used later as, by that time, their
  * underlying type in the Win32 menu may have become incompatible.
  *
@@ -69,7 +69,7 @@ class item
 {
     // to let basic_menu be our factory - the only class that can invoke
     // our private constructor
-    template<typename,typename,typename> friend class basic_menu;
+    template<typename,typename> friend class basic_menu;
 
 public:
 

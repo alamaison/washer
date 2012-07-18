@@ -98,8 +98,7 @@ private:
 
         info.fMask |= MIIM_SUBMENU | MIIM_ID;
         info.wID = m_id;
-        info.hSubMenu = 
-            detail::sub_menu_item_description_befriender(m_menu).handle().get();
+        info.hSubMenu = m_menu.handle().get();
 
         if (m_selectability != selectability::default ||
             m_checkedness != check_mark::default)

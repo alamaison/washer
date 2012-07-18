@@ -47,6 +47,9 @@
 
 namespace winapi {
 namespace gui {
+
+template<typename> class window;
+
 namespace menu {
 
 /**
@@ -54,12 +57,23 @@ namespace menu {
  *
  * Purpose: to implement the common aspects of wrapping a menu and a menu bar.
  */
-template<typename DescriptionType, typename HandleCreator, typename Friend>
+template<typename DescriptionType, typename HandleCreator>
 class basic_menu
 {
     typedef DescriptionType description_type;
 
-    friend Friend;
+#if defined (_MSC_VER) && (_MSC_VER > 1400)
+    template<typename>
+    friend class window;
+#else
+    // HACK to workaround VC8 (2005) and presumably earlier that can't
+    // befriend a template class in a parent namespace.
+    // See: http://stackoverflow.com/q/10694416/67013
+    friend class window<char>;
+    friend class window<wchar_t>;
+#endif
+
+    friend class sub_menu_item_description;
 
 public:
 
@@ -93,7 +107,7 @@ public:
      *           type as would be created by the handle creator type.
      *           Ideally this would check that the handle passed in is of the
      *           correct type, but there is no way to tell them apart once they
-     *           have been created.  
+     *           have been created.
      */
     basic_menu(const menu_handle& handle) : m_menu(handle) {}
 

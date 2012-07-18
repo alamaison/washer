@@ -19,7 +19,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 add_definitions(
   -DWIN32_LEAN_AND_MEAN -DSTRICT_TYPED_ITEMIDS)
-  
+
 set(LIBRARY_SOURCES
   ${LIBRARY_DIRECTORY}/clipboard.hpp
   ${LIBRARY_DIRECTORY}/dynamic_link.hpp
@@ -74,7 +74,6 @@ set(LIBRARY_SOURCES_gui_menu_button
 source_group(winapi\\gui\\menu\\button FILES ${LIBRARY_SOURCES_gui_menu_button})
 
 set(LIBRARY_SOURCES_gui_menu_detail
-  ${LIBRARY_DIRECTORY}/gui/menu/detail/befrienders.ipp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/item_common.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/item_position.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/detail/menu.hpp

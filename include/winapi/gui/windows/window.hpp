@@ -203,9 +203,7 @@ public:
      */
     void menu(const menu::menu_bar& menu)
     {
-        menu::detail::window_class_befriender befriender(menu);
-        
-        detail::win32::set_menu(hwnd(), befriender.handle().get());
+        detail::win32::set_menu(hwnd(), menu.handle().get());
     }
 
     /**

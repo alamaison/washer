@@ -63,7 +63,7 @@ class item_description
 {
     // To allow basic_menu to be the only class that can see our
     // underlying Win32 representation
-    template<typename,typename,typename> friend class basic_menu;
+    template<typename,typename> friend class basic_menu;
 
 public:
 

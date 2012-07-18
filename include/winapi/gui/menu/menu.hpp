@@ -34,7 +34,7 @@
 #pragma once
 
 #include <winapi/gui/menu/basic_menu.hpp>
-#include <winapi/gui/menu/detail/menu.hpp> 
+#include <winapi/gui/menu/detail/menu.hpp>
                                  // menu_handle_creator, menu_bar_handle_creator
 #include <winapi/gui/menu/item/item_description.hpp>
 #include <winapi/gui/menu/item/selectable_item_description.hpp>
@@ -51,31 +51,19 @@ namespace winapi {
 namespace gui {
 namespace menu {
 
-namespace detail {
-
-    class sub_menu_item_description_befriender;
-    class window_class_befriender;
-
-}
-
 /**
  * Menu that can be used as a context menu, as a sub-menu of a menu bar or as
  * a sub-menu of another menu.
  */
-typedef basic_menu<
-    item_description, detail::menu_handle_creator,
-    detail::sub_menu_item_description_befriender> menu;
+typedef basic_menu<item_description, detail::menu_handle_creator> menu;
 
 /**
  * Main application window menu bar.
  */
 typedef basic_menu<
-    selectable_item_description, detail::menu_bar_handle_creator,
-    detail::window_class_befriender> menu_bar;
+    selectable_item_description, detail::menu_bar_handle_creator> menu_bar;
 
 }}} // namespace winapi::gui::menu
-
-#include <winapi/gui/menu/detail/befrienders.ipp>
 
 BOOST_CONCEPT_ASSERT((boost::Collection<winapi::gui::menu::menu>));
 BOOST_CONCEPT_ASSERT((boost::Collection<winapi::gui::menu::menu_bar>));
