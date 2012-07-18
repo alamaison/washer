@@ -65,8 +65,8 @@ public:
         m_id(0),
         m_button(button.clone()),
         m_menu(menu),
-        m_selectability(selectability::default),
-        m_checkedness(check_mark::default) {}
+        m_selectability(selectability::default_state),
+        m_checkedness(check_mark::default_state) {}
 
     sub_menu_item_description() : m_id(0) {}
 
@@ -100,8 +100,8 @@ private:
         info.wID = m_id;
         info.hSubMenu = m_menu.handle().get();
 
-        if (m_selectability != selectability::default ||
-            m_checkedness != check_mark::default)
+        if (m_selectability != selectability::default_state ||
+            m_checkedness != check_mark::default_state)
         {
             info.fMask |= MIIM_STATE;
         }

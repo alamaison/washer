@@ -60,8 +60,8 @@ public:
         :
         m_button(button.clone()),
         m_command_id(command_id),
-        m_selectability(selectability::default),
-        m_checkedness(check_mark::default) {}
+        m_selectability(selectability::default_state),
+        m_checkedness(check_mark::default_state) {}
 
     virtual command_item_description& id(UINT new_id)
     {
@@ -92,8 +92,8 @@ private:
         info.fMask |= MIIM_ID;
         info.wID = m_command_id;
 
-        if (m_selectability != selectability::default ||
-            m_checkedness != check_mark::default)
+        if (m_selectability != selectability::default_state ||
+            m_checkedness != check_mark::default_state)
         {
             info.fMask |= MIIM_STATE;
         }

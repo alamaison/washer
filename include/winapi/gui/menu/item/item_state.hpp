@@ -48,7 +48,7 @@ BOOST_SCOPED_ENUM_START(selectability)
 {
     enabled,
     disabled,
-    default
+    default_state
 };
 BOOST_SCOPED_ENUM_END;
 
@@ -56,7 +56,7 @@ BOOST_SCOPED_ENUM_START(check_mark)
 {
     visible,
     invisible,
-    default
+    default_state
 };
 BOOST_SCOPED_ENUM_END;
 
@@ -73,7 +73,7 @@ namespace detail {
             info.fState |= MFS_DISABLED;
             break;
 
-        case selectability::default:
+        case selectability::default_state:
         case selectability::enabled:
             // MFS_ENABLED is zero so we have to negate disabled instead
             info.fState &= (~MFS_DISABLED);
@@ -94,7 +94,7 @@ namespace detail {
             info.fState |= MFS_CHECKED;
             break;
 
-        case check_mark::default:
+        case check_mark::default_state:
         case check_mark::invisible:
             // MFS_UNCHECKED is zero so we have to negate checked instead
             info.fState &= (~MFS_CHECKED);

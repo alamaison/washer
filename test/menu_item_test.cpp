@@ -82,14 +82,14 @@ using namespace winapi::gui::menu;
 using namespace winapi::test;
 
 void use_in_context(const menu_bar& m)
-{    
+{
     winapi::gui::window<> w = winapi::test::detail::create_test_window();
     w.menu(m);
     winapi::test::detail::show_window(w);
 }
 
 void use_in_context(const menu& m)
-{    
+{
     menu_bar b;
     b.insert(
         sub_menu_item_description(
@@ -145,7 +145,7 @@ public:
         m[0].accept(sub_menu_test(m_sub));
         m[0].accept(id_test(6565));
     }
-    
+
 private:
 
     menu m_sub;
@@ -261,7 +261,7 @@ struct default_enabled : public F
     template<typename D>
     void set_selectability(D& d)
     {
-        d.selectability(selectability::default);
+        d.selectability(selectability::default_state);
     }
 
     template<typename M>
@@ -333,7 +333,7 @@ struct default_unchecked : public F
     template<typename D>
     void set_check_state(D& d)
     {
-        d.check_mark_visibility(check_mark::default);
+        d.check_mark_visibility(check_mark::default_state);
     }
 
     template<typename M>
