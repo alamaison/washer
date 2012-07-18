@@ -29,6 +29,7 @@
     @endif
 */
 
+#include "item_test_visitors.hpp"
 #include "menu_fixtures.hpp"
 #include "wchar_output.hpp" // wchar_t test output
 
@@ -379,5 +380,92 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( default_item, F, menu_fixtures )
 
     F::do_ownership_test(m);
 }
-BOOST_AUTO_TEST_SUITE_END()
 
+namespace {
+
+    template<typename M>
+    void set_up_test_menu(M& m)
+    {
+        m.insert(
+            command_item_description(
+                string_button_description(L"Command1"), 1));
+        m.insert(
+            command_item_description(
+                string_button_description(L"Command2"), 2));
+        m.insert(
+            command_item_description(
+                string_button_description(L"Command3"), 3));
+    }
+
+}
+
+/**
+ * Insert an item at the beginning of a menu.
+ *
+ * Should shuffle other items along.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( insert_beginning, F, menu_fixtures )
+{
+    F::test_menu t = F::create_menu_to_test();
+    F::menu_type m = t.menu();
+
+    set_up_test_menu(m);
+
+    m.insert(
+        command_item_description(string_button_description(L"Interloper"), 42),
+        m.begin());
+
+    BOOST_CHECK_EQUAL(m.size(), 4U);
+    m[0].accept(id_test(42));
+    m[1].accept(id_test(1));
+    m[2].accept(id_test(2));
+    m[3].accept(id_test(3));
+}
+
+/**
+ * Insert an item in the middle of a menu.
+ *
+ * Should shuffle later items along.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( insert_middle, F, menu_fixtures )
+{
+    F::test_menu t = F::create_menu_to_test();
+    F::menu_type m = t.menu();
+
+    set_up_test_menu(m);
+
+    m.insert(
+        command_item_description(string_button_description(L"Interloper"), 42),
+        m.begin() + 2);
+
+    BOOST_CHECK_EQUAL(m.size(), 4U);
+    m[0].accept(id_test(1));
+    m[1].accept(id_test(2));
+    m[2].accept(id_test(42));
+    m[3].accept(id_test(3));
+}
+
+/**
+ * Insert an item explicitly at the end of a menu.
+ *
+ * Should shuffle other items along.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( insert_end, F, menu_fixtures )
+{
+    F::test_menu t = F::create_menu_to_test();
+    F::menu_type m = t.menu();
+
+    set_up_test_menu(m);
+
+    m.insert(
+        command_item_description(string_button_description(L"Interloper"), 42),
+        m.end());
+
+    BOOST_CHECK_EQUAL(m.size(), 4U);
+    m[0].accept(id_test(1));
+    m[1].accept(id_test(2));
+    m[2].accept(id_test(3));
+    m[3].accept(id_test(42));
+}
+
+BOOST_AUTO_TEST_SUITE_END()

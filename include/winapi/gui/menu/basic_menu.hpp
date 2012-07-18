@@ -126,7 +126,7 @@ public:
      */
     void insert(const description_type& item, const iterator& position)
     {
-        insert_at_position(item, position);
+        insert_at_position(item, position - begin());
     }
 
     /**
