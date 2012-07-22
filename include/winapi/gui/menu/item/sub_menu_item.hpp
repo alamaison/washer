@@ -52,8 +52,6 @@ namespace menu {
  */
 class sub_menu_item : public selectable_item, private boost::noncopyable
 {
-    friend class item;
-
 public:
 
     /**
@@ -107,12 +105,24 @@ public:
         return ::winapi::gui::menu::menu(menu_handle::foster_handle(submenu));
     }
 
-private:
-
     explicit sub_menu_item(const detail::item_position& item) : m_core(item) {}
+
+private:
 
     detail::selectable_item_core m_core;
 };
+
+namespace detail {
+
+    template<typename Visitor>
+    inline typename Visitor::result_type do_sub_menu_item_accept(
+        const item_position& item, Visitor& visitor)
+    {
+        sub_menu_item item_view(item);
+        return visitor(item_view);
+    }
+
+}
 
 }}} // namespace winapi::gui::menu
 

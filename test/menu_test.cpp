@@ -29,7 +29,8 @@
     @endif
 */
 
-#include "item_test_visitors.hpp"
+#include "button_test_visitors.hpp" // string_button_test
+#include "item_test_visitors.hpp" // id_test
 #include "menu_fixtures.hpp"
 #include "wchar_output.hpp" // wchar_t test output
 
@@ -201,7 +202,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( create_submenu, F, menu_fixtures )
 /**
  * Test iterator copying.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_copy, F, menu_fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    iterator_copy, F, menu_with_handle_creator_fixtures )
 {
     F::test_menu t = F::create_menu_to_test();
     F::menu_type m = t.menu();
@@ -226,7 +228,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_copy, F, menu_fixtures )
 /**
  * Test iterator forward-traversal.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_increment, F, menu_fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    iterator_increment, F, menu_with_handle_creator_fixtures )
 {
     F::test_menu t = F::create_menu_to_test();
     F::menu_type m = t.menu();
@@ -255,7 +258,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_increment, F, menu_fixtures )
 /**
  * Test iterator backward-traversal.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_decrement, F, menu_fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    iterator_decrement, F, menu_with_handle_creator_fixtures )
 {
     F::test_menu t = F::create_menu_to_test();
     F::menu_type m = t.menu();
@@ -284,7 +288,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_decrement, F, menu_fixtures )
 /**
  * Test iterator forward skip.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_advance, F, menu_fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    iterator_advance, F, menu_with_handle_creator_fixtures )
 {
     F::test_menu t = F::create_menu_to_test();
     F::menu_type m = t.menu();
@@ -309,7 +314,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_advance, F, menu_fixtures )
 /**
  * Test iterator reverse skip.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_reverse, F, menu_fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    iterator_reverse, F, menu_with_handle_creator_fixtures )
 {
     F::test_menu t = F::create_menu_to_test();
     F::menu_type m = t.menu();
@@ -334,7 +340,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_reverse, F, menu_fixtures )
 /**
  * Test iterator forward skip.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( iterator_distance, F, menu_fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    iterator_distance, F, menu_with_handle_creator_fixtures )
 {
     F::test_menu t = F::create_menu_to_test();
     F::menu_type m = t.menu();
@@ -404,7 +411,8 @@ namespace {
  *
  * Should shuffle other items along.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( insert_beginning, F, menu_fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    insert_beginning, F, menu_with_handle_creator_fixtures )
 {
     F::test_menu t = F::create_menu_to_test();
     F::menu_type m = t.menu();
@@ -427,7 +435,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( insert_beginning, F, menu_fixtures )
  *
  * Should shuffle later items along.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( insert_middle, F, menu_fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    insert_middle, F, menu_with_handle_creator_fixtures )
 {
     F::test_menu t = F::create_menu_to_test();
     F::menu_type m = t.menu();
@@ -450,7 +459,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( insert_middle, F, menu_fixtures )
  *
  * Should shuffle other items along.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( insert_end, F, menu_fixtures )
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    insert_end, F, menu_with_handle_creator_fixtures )
 {
     F::test_menu t = F::create_menu_to_test();
     F::menu_type m = t.menu();
@@ -466,6 +476,75 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( insert_end, F, menu_fixtures )
     m[1].accept(id_test(2));
     m[2].accept(id_test(3));
     m[3].accept(id_test(42));
+}
+
+
+/**
+ * Fail to find items in empty menu.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    find_empty, F, menu_with_handle_creator_fixtures )
+{
+    F::test_menu t = F::create_menu_to_test();
+    F::menu_type m = t.menu();
+
+    BOOST_CHECK(find_first_item_with_id(m.begin(), m.end(), 1) == m.end());
+}
+
+/**
+ * Find items in menu.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE( find, F, menu_with_handle_creator_fixtures )
+{
+    F::test_menu t = F::create_menu_to_test();
+    F::menu_type m = t.menu();
+
+    set_up_test_menu(m);
+
+    find_first_item_with_id(m.begin(), m.end(), 1)->accept(id_test(1));
+    find_first_item_with_id(m.begin(), m.end(), 2)->accept(id_test(2));
+    find_first_item_with_id(m.begin(), m.end(), 3)->accept(id_test(3));
+
+    // No-existent item should not be found
+    BOOST_CHECK(find_first_item_with_id(m.begin(), m.end(), 42) == m.end());
+     
+    // Items outside the range should not be found
+    BOOST_CHECK(find_first_item_with_id(m.begin() + 1, m.end(), 1) == m.end());
+    BOOST_CHECK(find_first_item_with_id(m.begin() + 2, m.end(), 2) == m.end());
+    BOOST_CHECK(find_first_item_with_id(m.begin() + 3, m.end(), 3) == m.end());
+    BOOST_CHECK(
+        find_first_item_with_id(m.begin(), m.end() - 1, 3) == m.end() - 1);
+    BOOST_CHECK(
+        find_first_item_with_id(m.begin(), m.end() - 2, 2) == m.end() - 2);
+    BOOST_CHECK(
+        find_first_item_with_id(m.begin(), m.end() - 3, 3) == m.end() - 3);
+}
+
+/**
+ * Find items in menu.
+ */
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    find_despite_duplicates, F, menu_with_handle_creator_fixtures )
+{
+    F::test_menu t = F::create_menu_to_test();
+    F::menu_type m = t.menu();
+
+    set_up_test_menu(m);
+
+    m.insert(
+        command_item_description(string_button_description(L"Interloper"), 2));
+
+    typename F::menu_type::iterator first = find_first_item_with_id(
+        m.begin(), m.end(), 2);
+    
+    first->accept(make_button_test(string_button_test(L"Command2")));
+
+    typename F::menu_type::iterator second = find_first_item_with_id(
+        first + 1, m.end(), 2);
+
+    second->accept(make_button_test(string_button_test(L"Interloper")));
+
+    BOOST_CHECK(first != second);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

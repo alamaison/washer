@@ -44,8 +44,6 @@ namespace menu {
  */
 class separator_item : private boost::noncopyable
 {
-    friend class item;
-
 public:
 
     separator_item(const detail::item_position& item) : m_item(item) {}
@@ -63,6 +61,18 @@ public:
 private:
     detail::item_position m_item;
 };
+
+namespace detail {
+
+    template<typename Visitor>
+    inline typename Visitor::result_type do_separator_item_accept(
+        const item_position& item, Visitor& visitor)
+    {
+        separator_item item_view(item);
+        return visitor(item_view);
+    }
+
+}
 
 }}} // namespace winapi::gui::menu
 

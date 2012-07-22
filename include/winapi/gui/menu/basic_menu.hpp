@@ -43,6 +43,8 @@
 #include <boost/numeric/conversion/cast.hpp> // numeric_cast
 #include <boost/utility/swap.hpp>
 
+#include <algorithm> // find_if
+
 #include <Windows.h> // MENUITEMINFO
 
 namespace winapi {
@@ -249,6 +251,48 @@ private:
 
     menu_handle m_menu;
 };
+
+namespace detail {
+
+    class id_match
+    {
+    public:
+        typedef bool result_type;
+
+        id_match(UINT id) : m_id(id) {}
+
+        template<typename T>
+        bool operator()(const T& item) const
+        {
+            return item.id() == m_id;
+        }
+
+    private:
+        UINT m_id;
+    };
+
+    class item_id_matches
+    {
+    public:
+        item_id_matches(UINT id) : m_id(id) {}
+
+        bool operator()(item& menu_item) const
+        {
+            return menu_item.accept(id_match(m_id));
+        }
+
+    private:
+        UINT m_id;
+    };
+
+}
+
+template<typename ItemIterator>
+ItemIterator find_first_item_with_id(
+    ItemIterator begin, ItemIterator end, UINT menu_id)
+{
+    return std::find_if(begin, end, detail::item_id_matches(menu_id));
+}
 
 }}} // namespace winapi::gui::menu
 

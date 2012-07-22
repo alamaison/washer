@@ -54,8 +54,6 @@ namespace menu {
  */
 class command_item : public selectable_item, private boost::noncopyable
 {
-    friend class item;
-
 public:
 
     /**
@@ -100,12 +98,24 @@ public:
         return m_core.is_highlighted();
     }
 
-private:
-
     explicit command_item(const detail::item_position& item) : m_core(item) {}
+
+private:
 
     detail::selectable_item_core m_core;
 };
+
+namespace detail {
+
+    template<typename Visitor>
+    inline typename Visitor::result_type do_command_item_accept(
+        const item_position& item, Visitor& visitor)
+    {
+        command_item item_view(item);
+        return visitor(item_view);
+    }
+
+}
 
 }}} // namespace winapi::gui::menu
 

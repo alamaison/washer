@@ -41,9 +41,25 @@ namespace winapi {
 namespace gui {
 namespace menu {
 
-class separator_item;
-class command_item;
-class sub_menu_item;
+namespace detail {
+
+    // The specific item visitation has been moved to the specific item's header
+    // file to prevent a header dependency cycle.  It look strange but is
+    // necessary.  These forward-declarations allow us to call the
+    // specific visitation below without including its implementation.
+    template<typename Visitor>
+    typename Visitor::result_type do_command_item_accept(
+        const item_position&, Visitor&);
+
+    template<typename Visitor>
+    typename Visitor::result_type do_separator_item_accept(
+        const item_position&, Visitor&);
+
+    template<typename Visitor>
+    typename Visitor::result_type do_sub_menu_item_accept(
+        const item_position&, Visitor&);
+
+}
 
 /**
  * Type-agnostic representation of an item in a menu.
@@ -102,20 +118,17 @@ public:
             // In reality, a separator can be forced to have a submenu but as
             // this is clearly not what is intended, we don't give a way to get
             // access to it.
-            separator_item item_view(m_item);
-            return visitor(item_view);
+            return do_separator_item_accept(m_item, visitor);
         }
         else
         {
             if (info.hSubMenu)
             {
-                sub_menu_item item_view(m_item);
-                return visitor(item_view);
+                return do_sub_menu_item_accept(m_item, visitor);
             }
             else
             {
-                command_item item_view(m_item);
-                return visitor(item_view);
+                return do_command_item_accept(m_item, visitor);
             }
         }
     }
