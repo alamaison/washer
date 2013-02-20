@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2012, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,6 +41,8 @@
 
 #include <Windows.h> // MENUITEMINFO
 
+#include <cassert> // assert
+
 namespace winapi {
 namespace gui {
 namespace menu {
@@ -66,7 +68,10 @@ public:
         m_button(button.clone()),
         m_menu(menu),
         m_selectability(selectability::default_state),
-        m_checkedness(check_mark::default_state) {}
+        m_checkedness(check_mark::default_state)
+    {
+        assert(m_menu.valid() || !"Constructed from invalid menu");
+    }
 
     sub_menu_item_description() : m_id(0) {}
 
@@ -98,6 +103,7 @@ private:
 
         info.fMask |= MIIM_SUBMENU | MIIM_ID;
         info.wID = m_id;
+        assert(m_menu.valid() || !"Invalid menu");
         info.hSubMenu = m_menu.handle().get();
 
         if (m_selectability != selectability::default_state ||

@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2012, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,9 +34,12 @@
 #pragma once
 
 #include <winapi/gui/menu/detail/menu.hpp> // safe_destroy_menu
+#include <winapi/gui/menu/detail/menu_win32.hpp> // is_menu
 
 #include <boost/shared_ptr.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
+
+#include <cassert> // assert
 
 namespace winapi {
 namespace gui {
@@ -58,12 +61,14 @@ public:
 
     static menu_handle foster_handle(HMENU handle)
     {
+        assert(detail::win32::is_menu(handle) || !"Must be valid handle");
         return menu_handle(
             shared_menu_handle(handle, detail::no_destroy_menu));
     }
 
     static menu_handle adopt_handle(HMENU handle)
     {
+        assert(detail::win32::is_menu(handle) || !"Must be valid handle");
         return menu_handle(
             shared_menu_handle(handle, detail::safe_destroy_menu));
     }
