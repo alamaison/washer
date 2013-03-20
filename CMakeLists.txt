@@ -34,7 +34,8 @@ source_group(winapi FILES ${LIBRARY_SOURCES})
 
 set(LIBRARY_SOURCES_com
   ${LIBRARY_DIRECTORY}/com/catch.hpp
-  ${LIBRARY_DIRECTORY}/com/object.hpp)
+  ${LIBRARY_DIRECTORY}/com/object.hpp
+  ${LIBRARY_DIRECTORY}/com/ole_window.hpp)
 source_group(winapi\\com FILES ${LIBRARY_SOURCES_com})
 
 set(LIBRARY_SOURCES_detail

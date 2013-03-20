@@ -33,12 +33,15 @@
 #define WINAPI_GUI_PROGRESS_HPP
 #pragma once
 
+#include <winapi/com/ole_window.hpp> // window_from_ole_window
+
 #include <boost/detail/scoped_enum_emulation.hpp> // BOOST_SCOPED_ENUM
 #include <boost/exception/errinfo_api_function.hpp> // errinfo_api_function
 #include <boost/exception/info.hpp> // errinfo
 #include <boost/filesystem/path.hpp> // wpath
 #include <boost/move/move.hpp>
 #include <boost/noncopyable.hpp> // noncopyable
+#include <boost/optional.hpp>
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
 
 #include <comet/error.h>
@@ -254,6 +257,18 @@ public:
     bool user_cancelled() const
     {
         return m_progress->HasUserCancelled() != FALSE;
+    }
+
+    /**
+     * Return the dialogue window, if any.
+     *
+     * Useful, for instance, to temporarily hide the progress display while
+     * displaying other dialogues, to use as a parent for other dialogues
+     * or to force the dialogue to appear earlier than it otherwise might.
+     */
+    boost::optional< winapi::gui::window<wchar_t> > window()
+    {
+        return winapi::com::window_from_ole_window(m_progress);
     }
 
 private:
