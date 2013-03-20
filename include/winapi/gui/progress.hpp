@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2012, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@
 #include <boost/exception/errinfo_api_function.hpp> // errinfo_api_function
 #include <boost/exception/info.hpp> // errinfo
 #include <boost/filesystem/path.hpp> // wpath
+#include <boost/move/move.hpp>
 #include <boost/noncopyable.hpp> // noncopyable
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
 
@@ -182,9 +183,28 @@ public:
             minimisable, cancellability, ole_site);
     }
 
+    // Move constructor
+    progress(BOOST_RV_REF(progress) other) : m_progress(other.m_progress)
+    {
+        other.m_progress = comet::com_ptr<IProgressDialog>();
+    }
+
+    // Move assignment
+    progress& operator=(BOOST_RV_REF(progress) other)
+    {
+        if (this != &other)
+        {
+            m_progress->StopProgressDialog();
+            m_progress = other.m_progress;
+            other.m_progress = comet::com_ptr<IProgressDialog>();
+        }
+        return *this;
+    }
+
     ~progress()
     {
-        m_progress->StopProgressDialog();
+        if (m_progress)
+            m_progress->StopProgressDialog();
     }
 
     /**
@@ -237,6 +257,8 @@ public:
     }
 
 private:
+    
+    BOOST_MOVABLE_BUT_NOT_COPYABLE(progress)
 
     /**
      * Common constructor.
