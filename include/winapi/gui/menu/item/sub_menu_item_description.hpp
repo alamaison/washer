@@ -97,6 +97,18 @@ public:
 
 private:
 
+    virtual void do_insertion_and_relinquish_resources(
+        const boost::function<void(const MENUITEMINFOW&)>& inserter) const
+    {
+        inserter(as_menuiteminfo());
+        m_menu.m_menu.release();
+    }
+
+    virtual sub_menu_item_description* do_clone() const
+    {
+        return new sub_menu_item_description(*this);
+    }
+
     MENUITEMINFOW as_menuiteminfo() const
     {
         MENUITEMINFOW info = m_button->as_menuiteminfo();
@@ -116,11 +128,6 @@ private:
         detail::adjust_checkedness(m_checkedness, info);
 
         return info;
-    }
-
-    virtual sub_menu_item_description* do_clone() const
-    {
-        return new sub_menu_item_description(*this);
     }
 
     UINT m_id;

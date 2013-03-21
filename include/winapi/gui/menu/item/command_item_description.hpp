@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2012, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -85,7 +85,19 @@ public:
 
 private:
 
-    virtual MENUITEMINFOW as_menuiteminfo() const
+    virtual void do_insertion_and_relinquish_resources(
+        const boost::function<void(const MENUITEMINFOW&)>& inserter) const
+    {
+        inserter(as_menuiteminfo());
+        // No resources to release
+    }
+
+    virtual command_item_description* do_clone() const
+    {
+        return new command_item_description(*this);
+    }
+
+    MENUITEMINFOW as_menuiteminfo() const
     {
         MENUITEMINFOW info = m_button->as_menuiteminfo();
 
@@ -102,11 +114,6 @@ private:
         detail::adjust_checkedness(m_checkedness, info);
 
         return info;
-    }
-
-    virtual command_item_description* do_clone() const
-    {
-        return new command_item_description(*this);
     }
 
     boost::shared_ptr<button_description> m_button;

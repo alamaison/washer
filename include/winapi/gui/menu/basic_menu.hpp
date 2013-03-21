@@ -243,16 +243,50 @@ private:
     {
         return m_menu;
     }
+    
+    class inserter
+    {
+    public:
+        inserter(HMENU menu, UINT id, BOOL is_by_position)
+            : m_menu(menu), m_id(id), m_is_by_position(is_by_position) {}
+
+        inline void operator()(const MENUITEMINFOW& info)
+        {
+            detail::win32::insert_menu_item(
+                m_menu, m_id, m_is_by_position, &info);
+        }
+
+    private:
+        HMENU m_menu;
+        UINT m_id;
+        BOOL m_is_by_position;
+    };
 
     void insert_at_position(const description_type& item, UINT position)
     {
-        MENUITEMINFOW info = item.as_menuiteminfo();
-        // BUG: this function takes ownership of the submenu HMENU but the
-        // passed-in menu will still try to destroy it
-        detail::win32::insert_menu_item(m_menu.get(), position, TRUE, &info);
+        // Menu items (sub_menus only AFAIK) can have resources and the
+        // menu takes ownership of these resources when the item is inserted.
+        // We need to allow the item description to manage this transfer of
+        // ownership
+
+        item.do_insertion_and_relinquish_resources(
+            inserter(m_menu.get(), position, TRUE));
     }
 
-    menu_handle m_menu;
+    // TODO: The menu handle is mutable so that, when being inserted into
+    // another menu via a sub_menu_item_description, the description is
+    // able to modify the ownership.
+    // This is a bit of a hack allowing us to treat the menu item
+    // description as const.  A better way round this would be to redesign
+    // insert() to take the descriptions as a non-const template parameter.
+    // Then most descriptions could be simple, copyable objects, but the
+    // submenu_description, which has to manage its own resources, would
+    // do something more complicated like being move-only.  This may
+    // require an extra overload of insert().
+    // The complication is that this would also mean ditching the
+    // item_description interface, so we would have to find another
+    // way to make sure some item can't be inserted into menu bars.
+    mutable menu_handle m_menu;
 };
 
 namespace detail {

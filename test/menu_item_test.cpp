@@ -648,8 +648,6 @@ BOOST_AUTO_TEST_CASE( sub_menu_lifetime )
     // description go out of scope before the code retrieves the submenu
     // again via the parent.
     {
-        menu empty_menu;
-
         sub_menu_item_description d(
             string_button_description(L"Bert"), menu());
 
@@ -658,6 +656,30 @@ BOOST_AUTO_TEST_CASE( sub_menu_lifetime )
 
     item sub_menu = bar[0];
     sub_menu.accept(valid_sub_menu_test());
+}
+
+/**
+ * This tests relates to the one above.
+ *
+ * The submenu, when inserted gives its lifetime over to the containing
+ * menu.  But copies of the submenu may have been made before it was inserted
+ * so it must be communicated to all the copies that the menu owns them now.
+ * Otherwise they will try to destroy the menu again.
+ */
+BOOST_AUTO_TEST_CASE( sub_menu_lifetime_sharing )
+{
+    sub_menu_item_description d(
+            string_button_description(L"Bert"), menu());
+
+    // The submenu is inserted but both the sub-menu object and its
+    // description go out of scope before the code retrieves the submenu
+    // again via the parent.
+    {
+        menu_bar bar;
+        sub_menu_item_description e = d;
+
+        bar.insert(e);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END();
