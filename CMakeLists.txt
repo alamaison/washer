@@ -17,6 +17,13 @@ find_package(
 link_directories(${Boost_LIBRARY_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 
+# Find comet library - not required for much of the Windows API
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+find_package(Comet)
+if(COMET_FOUND)
+  include_directories(${COMET_INCLUDE_DIRS})
+endif()
+
 add_definitions(
   -DWIN32_LEAN_AND_MEAN -DSTRICT_TYPED_ITEMIDS)
 
