@@ -29,11 +29,11 @@
     @endif
 */
 
-#ifndef WINAPI_GUI_WINDOW_HANDLE_HPP
-#define WINAPI_GUI_WINDOW_HANDLE_HPP
+#ifndef WINAPI_WINDOW_WINDOW_HANDLE_HPP
+#define WINAPI_WINDOW_WINDOW_HANDLE_HPP
 #pragma once
 
-#include <winapi/gui/windows/detail/window.hpp>
+#include <winapi/window/detail/window.hpp>
                                       // safe_destroy_window, no_destroy_window
 
 #include <boost/shared_ptr.hpp>
@@ -42,8 +42,7 @@
 #include <Windows.h> // HWND
 
 namespace winapi {
-namespace gui {
-namespace windows {
+namespace window {
 
 /**
  * Lifetime characteristics for wrapped window handle.
@@ -108,6 +107,6 @@ private:
     shared_window_handle m_handle;
 };
 
-}}} // namespace winapi::gui::windows
+}} // namespace winapi::window
 
 #endif

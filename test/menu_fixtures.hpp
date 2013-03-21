@@ -43,8 +43,8 @@
 #include <winapi/gui/menu/menu_handle.hpp>
 
 #include <winapi/dynamic_link.hpp> // module_handle
-#include <winapi/gui/windows/window.hpp>
 #include <winapi/error.hpp> // last_error
+#include <winapi/window/window.hpp>
 
 #include <boost/exception/errinfo_api_function.hpp> // errinfo_api_function
 #include <boost/exception/info.hpp> // errinfo
@@ -96,7 +96,7 @@ namespace detail {
                 boost::errinfo_api_function("GetMessage"));
     }
 
-    inline gui::window<> create_test_window()
+    inline window::window<> create_test_window()
     {
         WNDCLASSEXW window_class = WNDCLASSEXW();
         window_class.cbSize = sizeof(WNDCLASSEXW);
@@ -121,11 +121,11 @@ namespace detail {
                 boost::enable_error_info(winapi::last_error()) <<
                 boost::errinfo_api_function("CreateWindowEx"));
 
-        return gui::window<>(gui::windows::window_handle::adopt_handle(hwnd));
+        return window::window<>(window::window_handle::adopt_handle(hwnd));
     }
 
     template<typename AorW>
-    inline void show_window(gui::window<AorW>& w)
+    inline void show_window(window::window<AorW>& w)
     {
         w.text(boost::unit_test::framework::current_test_case().p_name);
         //w.visible(true);
@@ -245,7 +245,7 @@ public:
         BOOST_CHECK(b.valid());
 
         {
-            gui::window<> w = detail::create_test_window();
+            window::window<> w = detail::create_test_window();
             w.menu(b);
             detail::show_window(w);
         }
@@ -259,7 +259,7 @@ public:
         BOOST_CHECK(m.valid());
 
         {
-            gui::window<> w = detail::create_test_window();
+            window::window<> w = detail::create_test_window();
             w.menu(m);
             detail::show_window(w);
         }

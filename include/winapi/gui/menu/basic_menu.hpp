@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2012, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -48,10 +48,13 @@
 #include <Windows.h> // MENUITEMINFO
 
 namespace winapi {
-namespace gui {
+namespace window {
 
 template<typename> class window;
 
+}
+
+namespace gui {
 namespace menu {
 
 /**
@@ -66,13 +69,13 @@ class basic_menu
 
 #if defined (_MSC_VER) && (_MSC_VER > 1400)
     template<typename>
-    friend class window;
+    friend class winapi::window::window;
 #else
     // HACK to workaround VC8 (2005) and presumably earlier that can't
     // befriend a template class in a parent namespace.
     // See: http://stackoverflow.com/q/10694416/67013
-    friend class window<char>;
-    friend class window<wchar_t>;
+    friend class winapi::window::window<char>;
+    friend class winapi::window::window<wchar_t>;
 #endif
 
     friend class sub_menu_item_description;

@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@
     @endif
 */
 
-#ifndef WINAPI_GUI_DETAIL_WINDOW_WIN32_HPP
-#define WINAPI_GUI_DETAIL_WINDOW_WIN32_HPP
+#ifndef WINAPI_WINDOW_DETAIL_WINDOW_WIN32_HPP
+#define WINAPI_WINDOW_DETAIL_WINDOW_WIN32_HPP
 #pragma once
 
 #include <winapi/error.hpp> // last_error
@@ -39,12 +39,22 @@
 #include <boost/exception/info.hpp> // errinfo
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
 
-#include <Winuser.h> // CreateMenu, DestroyMenu
+#include <Winuser.h> // SetWindowLongPtr, GetWindowLongPtr, GetWindowTextLength
+                     // GetWindowText, SetWindowText, DestroyWindow, SetMenu,
+                     // GetWidowRect
 
 namespace winapi {
-namespace gui {
+namespace window {
 namespace detail {
 namespace win32 {
+
+inline void destroy_window(HWND hwnd)
+{
+    if (!::DestroyWindow(hwnd))
+        BOOST_THROW_EXCEPTION(
+            boost::enable_error_info(winapi::last_error()) <<
+            boost::errinfo_api_function("DestroyMenu"));
+}
 
 inline void set_menu(HWND hwnd, HMENU hmenu)
 {
@@ -62,6 +72,40 @@ inline void get_window_rect(HWND hwnd, RECT* rect)
             boost::errinfo_api_function("GetWindowRect"));
 }
 
-}}}} // namespace winapi::gui::detail::win32
+
+/// @name GetWindowTextLength
+// @{
+template<typename T>
+inline int get_window_text_length(HWND hwnd);
+
+template<> inline int get_window_text_length<char>(HWND hwnd)
+{ return ::GetWindowTextLengthA(hwnd); }
+
+template<> inline int get_window_text_length<wchar_t>(HWND hwnd)
+{ return ::GetWindowTextLengthW(hwnd); }
+// @}
+
+/// @name GetWindowText
+// @{
+inline int get_window_text(
+    HWND hwnd, char* out_buffer, int out_buffer_size)
+{ return ::GetWindowTextA(hwnd, out_buffer, out_buffer_size); }
+
+inline int get_window_text(
+    HWND hwnd, wchar_t* out_buffer, int out_buffer_size)
+{ return ::GetWindowTextW(hwnd, out_buffer, out_buffer_size); }
+// @}
+// @}
+
+/// @name SetWindowText
+// @{
+inline BOOL set_window_text(HWND hwnd, const char* text)
+{ return ::SetWindowTextA(hwnd, text); }
+
+inline BOOL set_window_text(HWND hwnd, const wchar_t* text)
+{ return ::SetWindowTextW(hwnd, text); }
+// @}
+
+}}}} // namespace winapi::window::detail::win32
 
 #endif

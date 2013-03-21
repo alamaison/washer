@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2012, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -80,10 +80,11 @@ namespace mpl {
 
 using namespace winapi::gui::menu;
 using namespace winapi::test;
+using winapi::window::window;
 
 void use_in_context(const menu_bar& m)
 {
-    winapi::gui::window<> w = winapi::test::detail::create_test_window();
+    window<> w = winapi::test::detail::create_test_window();
     w.menu(m);
     winapi::test::detail::show_window(w);
 }

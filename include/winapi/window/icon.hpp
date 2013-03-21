@@ -1,11 +1,11 @@
 /**
     @file
 
-    Thin layer around Win32 window functions.
+    Icon HWND wrapper class.
 
     @if license
 
-    Copyright (C) 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,32 +29,42 @@
     @endif
 */
 
-#ifndef WINAPI_GUI_WINDOW_DETAIL_WINDOW_WIN32_HPP
-#define WINAPI_GUI_WINDOW_DETAIL_WINDOW_WIN32_HPP
+#ifndef WINAPI_WINDOW_ICON_HPP
+#define WINAPI_WINDOW_ICON_HPP
 #pragma once
 
 #include <winapi/error.hpp> // last_error
+#include <winapi/window/window.hpp> // window base class
+#include <winapi/message.hpp> // send_message
 
-#include <boost/exception/errinfo_api_function.hpp>
+#include <boost/exception/errinfo_api_function.hpp> // errinfo_api_function
 #include <boost/exception/info.hpp> // errinfo
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
 
-#include <Winuser.h> // DestroyWindow
+#include <cassert> // assert
 
 namespace winapi {
-namespace gui {
-namespace windows {
-namespace detail {
-namespace win32 {
+namespace window {
 
-inline void destroy_window(HWND hwnd)
+/**
+ * Wrapper around an icon (a STATIC window with SS_ICON style).
+ *
+ * @todo  Consider if it is worth checking class and style and throwing
+ *        an exception if it fails.
+ */
+template<typename T>
+class icon_window : public window<T>
 {
-    if (!::DestroyWindow(hwnd))
-        BOOST_THROW_EXCEPTION(
-            boost::enable_error_info(winapi::last_error()) <<
-            boost::errinfo_api_function("DestroyMenu"));
-}
+public:
+    explicit icon_window(const window_handle& handle) : window(handle) {}
 
-}}}}} // namespace winapi::gui::windows::detail::win32
+    HICON change_icon(HICON new_icon)
+    {
+        return winapi::send_message_return<T, HICON>(
+            hwnd(), STM_SETIMAGE, IMAGE_ICON, new_icon);
+    }
+};
+
+}} // namespace winapi::window
 
 #endif

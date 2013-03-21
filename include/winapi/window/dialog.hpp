@@ -1,11 +1,11 @@
 /**
     @file
 
-    Window wrapper implementation details.
+    Dialog HWND wrapper class.
 
     @if license
 
-    Copyright (C) 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,36 +29,49 @@
     @endif
 */
 
-#ifndef WINAPI_GUI_WINDOW_DETAIL_WINDOW_HPP
-#define WINAPI_GUI_WINDOW_DETAIL_WINDOW_HPP
+#ifndef WINAPI_WINDOW_DIALOG_HPP
+#define WINAPI_WINDOW_DIALOG_HPP
 #pragma once
 
-#include <winapi/gui/windows/detail/window_win32.hpp> // destroy_window
-#include <winapi/trace.hpp>
-
-#include <exception>
+#include <winapi/window/window.hpp> // window base class
 
 namespace winapi {
-namespace gui {
-namespace windows {
-namespace detail {
+namespace window {
 
-inline void safe_destroy_window(HWND hwnd)
+/**
+ * Wrapper around an icon (a STATIC window with SS_ICON style).
+ *
+ * @todo  Consider if it is worth checking class and style and throwing
+ *        an exception if it fails.
+ */
+template<typename T>
+class dialog_window : public window<T>
 {
-    try
-    {
-        win32::destroy_window(hwnd);
-    }
-    catch (const std::exception& e)
-    {
-        winapi::trace("Exception while destroying window: %s") % e.what();
-    }
-}
+public:
+    explicit dialog_window(const window_handle& handle) : window(handle) {}
 
-inline void no_destroy_window(HWND)
-{
-}
+    /**
+     * Dialog manager message handling procedure.
+     */
+    DLGPROC dialog_procedure()
+    {
+        return window_field<T, DLGPROC>(hwnd(), DWLP_DLGPROC);
+    }
 
-}}}} // namespace winapi::gui::windows::detail
+    /**
+     * Change the function that handles dialog messages.
+     *
+     * This method is used to 'subclass' the dialog manager.
+     *
+     * @returns  Pointer to previous dialog message procedure.
+     */
+    DLGPROC change_dialog_procedure(DLGPROC new_dlgproc)
+    {
+        return set_window_field<T>(hwnd(), DWLP_DLGPROC, new_dlgproc);
+    }
+
+};
+
+}} // namespace winapi::window
 
 #endif

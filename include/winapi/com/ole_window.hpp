@@ -32,7 +32,7 @@
 #ifndef WINAPI_COM_OLE_WINDOW_HPP
 #define WINAPI_COM_OLE_WINDOW_HPP
 
-#include <winapi/gui/windows/window.hpp>
+#include <winapi/window/window.hpp>
 
 #include <boost/optional.hpp>
 
@@ -71,7 +71,7 @@ namespace com {
  *
  * @todo  Add more supported OLE object types.
  */
-inline boost::optional< winapi::gui::window<wchar_t> > window_from_ole_window(
+inline boost::optional< winapi::window::window<wchar_t> > window_from_ole_window(
     comet::com_ptr<IUnknown> ole_window)
 {
     HWND hwnd = NULL;
@@ -86,10 +86,10 @@ inline boost::optional< winapi::gui::window<wchar_t> > window_from_ole_window(
     }
 
     if (hwnd)
-        return winapi::gui::window<wchar_t>(
-            winapi::gui::windows::window_handle::foster_handle(hwnd));
+        return winapi::window::window<wchar_t>(
+            winapi::window::window_handle::foster_handle(hwnd));
     else
-        return boost::optional< winapi::gui::window<wchar_t> >();
+        return boost::optional< winapi::window::window<wchar_t> >();
 }
 
 }} // namespace winapi::com

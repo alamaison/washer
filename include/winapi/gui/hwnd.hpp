@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2010, 2011  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,12 +37,9 @@
 
 #include <boost/exception/errinfo_api_function.hpp> // errinfo_api_function
 #include <boost/exception/info.hpp> // errinfo
-#include <boost/numeric/conversion/cast.hpp> // numeric_cast
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
 
 #include <cassert> // assert
-#include <stdexcept> // logic_error
-#include <string>
 
 #include <Winuser.h> // SetWindowLongPtr, GetWindowLongPtr, GetWindowTextLength
                      // GetWindowText, SetWindowText
@@ -82,52 +79,9 @@ namespace detail {
         { return ::GetWindowLongPtrW(hwnd, index); }
         // @}
 
-        /// @name GetWindowTextLength
-        // @{
-        template<typename T>
-        inline int get_window_text_length(HWND hwnd);
-
-        template<> inline int get_window_text_length<char>(HWND hwnd)
-        { return ::GetWindowTextLengthA(hwnd); }
-
-        template<> inline int get_window_text_length<wchar_t>(HWND hwnd)
-        { return ::GetWindowTextLengthW(hwnd); }
-        // @}
-
-        /// @name GetWindowText
-        // @{
-        inline int get_window_text(
-            HWND hwnd, char* out_buffer, int out_buffer_size)
-        { return ::GetWindowTextA(hwnd, out_buffer, out_buffer_size); }
-
-        inline int get_window_text(
-            HWND hwnd, wchar_t* out_buffer, int out_buffer_size)
-        { return ::GetWindowTextW(hwnd, out_buffer, out_buffer_size); }
-        // @}
-        // @}
-
-        /// @name SetWindowText
-        // @{
-        inline BOOL set_window_text(HWND hwnd, const char* text)
-        { return ::SetWindowTextA(hwnd, text); }
-
-        inline BOOL set_window_text(HWND hwnd, const wchar_t* text)
-        { return ::SetWindowTextW(hwnd, text); }
-        // @}
 
     }
 
-    /**
-     * Set a window's text.
-     */
-    template<typename T>
-    inline void window_text(HWND hwnd, const std::basic_string<T>& text)
-    {
-        if (!native::set_window_text(hwnd, text.c_str()))
-            BOOST_THROW_EXCEPTION(
-                boost::enable_error_info(winapi::last_error()) <<
-                boost::errinfo_api_function("SetWindowText"));
-    }
 }
 
 /**
@@ -188,113 +142,6 @@ inline U window_field(HWND hwnd, int field, bool no_throw=false)
 
     return reinterpret_cast<U>(value);
 }
-
-/**
- * The *lower bound* on the length of a window's text.
- *
- * In other words, the text may actually be shorter but never longer.
- */
-template<typename T>
-inline size_t window_text_length(HWND hwnd)
-{
-    ::SetLastError(0);
-
-    int cch = detail::native::get_window_text_length<T>(hwnd);
-
-    if (cch < 0)
-        BOOST_THROW_EXCEPTION(
-            std::logic_error("impossible (negative) text length"));
-    if (cch == 0 && ::GetLastError() != 0)
-        BOOST_THROW_EXCEPTION(
-            boost::enable_error_info(winapi::last_error()) <<
-            boost::errinfo_api_function("GetWindowTextLength"));
-
-    return boost::numeric_cast<size_t>(cch);
-}
-
-/**
- * Is the window theoretically visible?
- *
- * It may be obscured but not hidden.
- */
-inline bool is_window_visible(HWND hwnd)
-{
-    return ::IsWindowVisible(hwnd) != 0;
-}
-
-/**
- * Show or hide a window.
- *
- * @returns  Previous visibility.
- */
-inline bool set_window_visibility(HWND hwnd, bool visible)
-{
-    return ::ShowWindow(hwnd, (visible) ? SW_SHOW : SW_HIDE) != 0;
-}
-
-/**
- * Is the window able to respond to they keyboard and mouse?
- *
- * Some types of window, e.g., buttons, may have a visible difference when
- * they are disabled usch as being greyed out.
- */
-inline bool is_window_enabled(HWND hwnd)
-{
-    return ::IsWindowEnabled(hwnd) != 0;
-}
-
-/**
- * Enable or disable a window.
- *
- * @returns  Previous state.
- */
-inline bool set_window_enablement(HWND hwnd, bool enable)
-{
-    return ::EnableWindow(hwnd, enable) == 0;
-}
-
-/**
- * A window's text from its handle.
- */
-template<typename T>
-inline std::basic_string<T> window_text(HWND hwnd)
-{
-    std::vector<T> buffer(window_text_length<T>(hwnd) + 1); // +space for NULL
-
-    ::SetLastError(0);
-
-    int cch = detail::native::get_window_text(
-        hwnd, (buffer.empty()) ? NULL : &buffer[0],
-        boost::numeric_cast<int>(buffer.size()));
-
-    if (cch < 0)
-        BOOST_THROW_EXCEPTION(
-            std::logic_error("impossible (negative) text length"));
-    if (cch == 0 && ::GetLastError() != 0)
-        BOOST_THROW_EXCEPTION(
-            boost::enable_error_info(winapi::last_error()) <<
-            boost::errinfo_api_function("GetWindowText"));
-
-    assert((unsigned long)cch <= buffer.size());
-
-    if (buffer.empty())
-        return std::basic_string<T>();
-    else
-        return std::basic_string<T>(
-            &buffer[0],  boost::numeric_cast<size_t>(cch));
-}
-
-/**
- * Set a window's text (ANSI version).
- */
-inline void window_text(HWND hwnd, const std::string& text)
-{ return detail::window_text(hwnd, text); }
-
-/**
- * Set a window's text.
- */
-inline void window_text(HWND hwnd, const std::wstring& text)
-{ return detail::window_text(hwnd, text); }
 
 }} // namespace winapi::gui
 

@@ -132,7 +132,7 @@ public:
      * @param ole_site         OLE site.  Something to do with modal behaviour.
      */
     progress(
-        const boost::optional< window<wchar_t> >& parent,
+        const boost::optional< winapi::window::window<wchar_t> >& parent,
         const std::wstring& title,
         BOOST_SCOPED_ENUM(modality) modality,
         BOOST_SCOPED_ENUM(time_estimation) time_estimation,
@@ -169,7 +169,7 @@ public:
      */
     progress(
         comet::com_ptr<IProgressDialog> progress,
-        const boost::optional< window<wchar_t> >& parent,
+        const boost::optional< winapi::window::window<wchar_t> >& parent,
         const std::wstring& title,
         BOOST_SCOPED_ENUM(modality) modality,
         BOOST_SCOPED_ENUM(time_estimation) time_estimation,
@@ -268,7 +268,7 @@ public:
      * displaying other dialogues, to use as a parent for other dialogues
      * or to force the dialogue to appear earlier than it otherwise might.
      */
-    boost::optional< winapi::gui::window<wchar_t> > window()
+    boost::optional< winapi::window::window<wchar_t> > window()
     {
         return winapi::com::window_from_ole_window(m_progress);
     }
@@ -281,7 +281,7 @@ private:
      * Common constructor.
      */
     void _init(
-        const boost::optional< winapi::gui::window<wchar_t> >& parent,
+        const boost::optional< winapi::window::window<wchar_t> >& parent,
         const std::wstring& title,
         BOOST_SCOPED_ENUM(modality) modality,
         BOOST_SCOPED_ENUM(time_estimation) time_estimation,
