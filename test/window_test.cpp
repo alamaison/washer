@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2010, 2011  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,8 +38,8 @@
 
 #include <string>
 
-using winapi::gui::hwnd_t;
 using winapi::gui::window;
+using winapi::gui::windows::window_handle;
 
 using boost::shared_ptr;
 
@@ -51,39 +51,39 @@ namespace {
 
     typedef boost::mpl::list<char, wchar_t> api_types;
 
-    template<typename T> hwnd_t create(DWORD style);
+    template<typename T> window_handle create(DWORD style);
 
     template<>
-    hwnd_t create<wchar_t>(DWORD style)
+    window_handle create<wchar_t>(DWORD style)
     {
         HWND h = ::CreateWindowExW(
             0, L"STATIC", L"test ", style, 0, 0, 100, 100, NULL, NULL,
             NULL, NULL);
         BOOST_REQUIRE(h);
-        return hwnd_t(h, ::DestroyWindow);
+        return window_handle::adopt_handle(h);
     }
 
     template<>
-    hwnd_t create<char>(DWORD style)
+    window_handle create<char>(DWORD style)
     {
         HWND h = ::CreateWindowExA(
             0, "STATIC", "test ", style, 0, 0, 100, 100, NULL, NULL,
             NULL, NULL);
         BOOST_REQUIRE(h);
-        return hwnd_t(h, ::DestroyWindow);
+        return window_handle::adopt_handle(h);
     }
 
 }
 
 /**
- * A window must not try to destroy a Win32 window passed as a raw HWND.
+ * A window must not try to destroy a Win32 window passed as a fostered handle.
  */
-BOOST_AUTO_TEST_CASE_TEMPLATE( create_raw, T, api_types )
+BOOST_AUTO_TEST_CASE_TEMPLATE( create_fostered, T, api_types )
 {
-    hwnd_t h = create<T>(0);
+    window_handle h = create<T>(0);
 
     {
-        window<T> w(h.get());
+        window<T> w(window_handle::foster_handle(h.get()));
     }
 
     BOOST_REQUIRE(::IsWindow(h.get()));
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( create_raw, T, api_types )
  */
 BOOST_AUTO_TEST_CASE_TEMPLATE( is_visible_true, T, api_types )
 {
-    hwnd_t h = create<T>(WS_VISIBLE);
+    window_handle h = create<T>(WS_VISIBLE);
     window<T> w(h);
     BOOST_CHECK(w.is_visible());
 }
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( is_visible_true, T, api_types )
  */
 BOOST_AUTO_TEST_CASE_TEMPLATE( is_visible_false, T, api_types )
 {
-    hwnd_t h = create<T>(0);
+    window_handle h = create<T>(0);
     window<T> w(h);
     BOOST_CHECK(!w.is_visible());
 }

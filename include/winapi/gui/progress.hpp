@@ -119,7 +119,7 @@ public:
      *
      * It will be hidden and destroyed when this object is destroyed.
      *
-     * @param hwnd_parent      Parent window.
+     * @param parent           Parent window.
      * @param title            Text for the progress window's title bar.
      * @param modality         Modal relationship of dialogue to its parent
      *                         window.
@@ -132,7 +132,8 @@ public:
      * @param ole_site         OLE site.  Something to do with modal behaviour.
      */
     progress(
-        HWND hwnd_parent, const std::wstring& title,
+        const boost::optional< window<wchar_t> >& parent,
+        const std::wstring& title,
         BOOST_SCOPED_ENUM(modality) modality,
         BOOST_SCOPED_ENUM(time_estimation) time_estimation,
         BOOST_SCOPED_ENUM(bar_type) bar_type,
@@ -142,7 +143,7 @@ public:
         : m_progress(comet::com_ptr<IProgressDialog>(CLSID_ProgressDialog))
     {
         _init(
-            hwnd_parent, title, modality, time_estimation, bar_type,
+            parent, title, modality, time_estimation, bar_type,
             minimisable, cancellability, ole_site);
     }
 
@@ -152,7 +153,7 @@ public:
      * @param progress         The existing IProgressDialog.  This object will 
      *                         display the dialogue and hide it when the object
      *                         is destroyed.
-     * @param hwnd_parent      Parent window.
+     * @param parent           Parent window.
      * @param title            Text for the progress window's title bar.
      * @param modality         Modal relationship of dialogue to its parent
      *                         window.
@@ -167,7 +168,8 @@ public:
      * @todo  What happens if the dialog is already started?
      */
     progress(
-        comet::com_ptr<IProgressDialog> progress, HWND hwnd_parent,
+        comet::com_ptr<IProgressDialog> progress,
+        const boost::optional< window<wchar_t> >& parent,
         const std::wstring& title,
         BOOST_SCOPED_ENUM(modality) modality,
         BOOST_SCOPED_ENUM(time_estimation) time_estimation,
@@ -182,7 +184,7 @@ public:
                 std::invalid_argument("Progress dialog required"));
 
         _init(
-            hwnd_parent, title, modality, time_estimation, bar_type,
+            parent, title, modality, time_estimation, bar_type,
             minimisable, cancellability, ole_site);
     }
 
@@ -279,7 +281,8 @@ private:
      * Common constructor.
      */
     void _init(
-        HWND hwnd_parent, const std::wstring& title,
+        const boost::optional< winapi::gui::window<wchar_t> >& parent,
+        const std::wstring& title,
         BOOST_SCOPED_ENUM(modality) modality,
         BOOST_SCOPED_ENUM(time_estimation) time_estimation,
         BOOST_SCOPED_ENUM(bar_type) bar_type,
@@ -295,7 +298,7 @@ private:
                 com_error_from_interface(m_progress, hr));
 
         hr = m_progress->StartProgressDialog(
-            hwnd_parent, ole_site.get(),
+            (parent) ? parent->hwnd() : NULL, ole_site.get(),
             _options_to_progress_flags(
                 modality, time_estimation, bar_type, minimisable,
                 cancellability),

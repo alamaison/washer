@@ -86,7 +86,8 @@ inline boost::optional< winapi::gui::window<wchar_t> > window_from_ole_window(
     }
 
     if (hwnd)
-        return winapi::gui::window<wchar_t>(hwnd);
+        return winapi::gui::window<wchar_t>(
+            winapi::gui::windows::window_handle::foster_handle(hwnd));
     else
         return boost::optional< winapi::gui::window<wchar_t> >();
 }

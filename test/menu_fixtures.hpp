@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2012, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -121,7 +121,7 @@ namespace detail {
                 boost::enable_error_info(winapi::last_error()) <<
                 boost::errinfo_api_function("CreateWindowEx"));
 
-        return gui::window<>(gui::hwnd_t(hwnd, ::DestroyWindow));
+        return gui::window<>(gui::windows::window_handle::adopt_handle(hwnd));
     }
 
     template<typename AorW>

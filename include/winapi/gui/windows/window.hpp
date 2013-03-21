@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2010, 2011  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,9 +36,9 @@
 #include <winapi/gui/detail/window_win32.hpp> // set_menu, get_window_rect
 #include <winapi/gui/hwnd.hpp> // HWND-manipulating functions
 #include <winapi/gui/menu/menu.hpp> // menu_bar
+#include <winapi/gui/windows/window_handle.hpp>
 
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
-#include <boost/type_traits/remove_pointer.hpp> // remove_pointer
 
 #include <cassert> // assert
 #include <stdexcept> // logic_error
@@ -46,8 +46,6 @@
 
 namespace winapi {
 namespace gui {
-
-typedef boost::shared_ptr<boost::remove_pointer<HWND>::type> hwnd_t;
 
 namespace detail {
 
@@ -103,39 +101,12 @@ class window
 {
 public:
 
-    /**
-     * Wrap a window and take ownership of its underlying Win32 object.
-     *
-     * This is the safest of the two constructors as it makes sure the window
-     * is destroyed after the wrapper is destroyed.  The Win32 window must not
-     * be destroyed after passing to this constructor.  Doing so will likely
-     * result in a crash.
-     */
-    explicit window(hwnd_t hwnd) : m_hwnd(hwnd) {}
-
-    /**
-     * Wrap a raw HWND without controlling its lifetime.
-     *
-     * The main purpose of this constructor is to access and modify a window
-     * that we didn't create and whose lifetime we don't own.  An example
-     * would be an HWND passed to us by the windows API.
-     *
-     * This constructor fakes a shared_ptr to the window by creating an hwnd_t
-     * with a destructor that doesn't destroy the window.
-     *
-     * The Win32 window must outlive this wrapper.  If any methods are called
-     * after it is destroyed it will likely result in a crash.
-     *
-     * A safer option is to use the constructor that takes a shared_ptr
-     * (hwnd_t) directly.  This will keep the window alive at least as long
-     * as the wrapper.
-     */
-    explicit window(HWND hwnd) : m_hwnd(hwnd, detail::null_deleter()) {}
+    explicit window(windows::window_handle handle) : m_handle(handle) {}
 
     bool is_visible() const
     {
         throw_if_invalid();
-        return is_window_visible(m_hwnd.get());
+        return is_window_visible(m_handle.get());
     }
 
     /**
@@ -146,13 +117,13 @@ public:
     bool visible(bool state)
     {
         throw_if_invalid();
-        return set_window_visibility(m_hwnd.get(), state);
+        return set_window_visibility(m_handle.get(), state);
     }
 
     bool is_enabled() const
     {
         throw_if_invalid();
-        return is_window_enabled(m_hwnd.get());
+        return is_window_enabled(m_handle.get());
     }
 
     /**
@@ -163,7 +134,7 @@ public:
     bool enable(bool state)
     {
         throw_if_invalid();
-        return set_window_enablement(m_hwnd.get(), state);
+        return set_window_enablement(m_handle.get(), state);
     }
 
     /**
@@ -179,7 +150,7 @@ public:
     std::basic_string<U> text() const
     {
         throw_if_invalid();
-        return window_text<U>(m_hwnd.get());
+        return window_text<U>(m_handle.get());
     }
 
     /// Change window text.
@@ -191,7 +162,7 @@ public:
     rectangle position() const
     {
         rectangle rect;
-        detail::win32::get_window_rect(m_hwnd.get(), rect.out());
+        detail::win32::get_window_rect(m_handle.get(), rect.out());
         return rect;
     }
 
@@ -211,7 +182,7 @@ public:
      */
     WNDPROC window_procedure()
     {
-        return window_field<T, WNDPROC>(m_hwnd.get(), GWLP_WNDPROC);
+        return window_field<T, WNDPROC>(m_handle.get(), GWLP_WNDPROC);
     }
 
     /**
@@ -225,10 +196,10 @@ public:
      */
     WNDPROC change_window_procedure(WNDPROC new_wndproc)
     {
-        return set_window_field<T>(m_hwnd.get(), GWLP_WNDPROC, new_wndproc);
+        return set_window_field<T>(m_handle.get(), GWLP_WNDPROC, new_wndproc);
     }
 
-    HWND hwnd() const { return m_hwnd.get(); }
+    HWND hwnd() const { return m_handle.get(); }
 
 private:
 
@@ -244,21 +215,21 @@ private:
     void generic_text(const std::basic_string<U>& new_text)
     {
         throw_if_invalid();
-        return window_text(m_hwnd.get(), new_text);
+        return window_text(m_handle.get(), new_text);
     }
 
     void throw_if_invalid() const
     {
-        if (!m_hwnd)
+        if (!m_handle.get())
             BOOST_THROW_EXCEPTION(invalid_window_error());
 
         // This additional check is not reliable enough to put in a release
         // build because I don't understand the MSDN remarks regarding
         // threading
-        assert(::IsWindow(m_hwnd.get()));
+        assert(::IsWindow(m_handle.get()));
     }
 
-    hwnd_t m_hwnd;
+    windows::window_handle m_handle;
 };
 
 }} // namespace winapi::gui

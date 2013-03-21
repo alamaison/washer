@@ -99,8 +99,15 @@ source_group(winapi\\gui\\menu\\item FILES ${LIBRARY_SOURCES_gui_item})
 set(LIBRARY_SOURCES_gui_windows
   ${LIBRARY_DIRECTORY}/gui/windows/dialog.hpp
   ${LIBRARY_DIRECTORY}/gui/windows/icon.hpp
-  ${LIBRARY_DIRECTORY}/gui/windows/window.hpp)
+  ${LIBRARY_DIRECTORY}/gui/windows/window.hpp
+  ${LIBRARY_DIRECTORY}/gui/windows/window_handle.hpp)
 source_group(winapi\\gui\\windows FILES ${LIBRARY_SOURCES_gui_windows})
+
+set(LIBRARY_SOURCES_gui_windows_detail
+  ${LIBRARY_DIRECTORY}/gui/windows/detail/window.hpp
+  ${LIBRARY_DIRECTORY}/gui/windows/detail/window_win32.hpp)
+source_group(
+  winapi\\gui\\windows\\detail FILES ${LIBRARY_SOURCES_gui_windows_detail})
 
 set(LIBRARY_SOURCES_shell
   ${LIBRARY_DIRECTORY}/shell/folder_error_adapters.hpp
@@ -126,6 +133,7 @@ add_custom_target(winapi SOURCES
   ${LIBRARY_SOURCES_gui_menu_detail}
   ${LIBRARY_SOURCES_gui_item}
   ${LIBRARY_SOURCES_gui_windows}
+  ${LIBRARY_SOURCES_gui_windows_detail}
   ${LIBRARY_SOURCES_shell})
 
 add_subdirectory(test)
