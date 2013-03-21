@@ -39,7 +39,9 @@
 #include <boost/exception/errinfo_api_function.hpp> // errinfo_api_function
 #include <boost/exception/info.hpp> // errinfo
 #include <boost/filesystem/path.hpp> // wpath
+#if (BOOST_VERSION >= 104800)
 #include <boost/move/move.hpp>
+#endif
 #include <boost/noncopyable.hpp> // noncopyable
 #include <boost/optional.hpp>
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
@@ -188,6 +190,8 @@ public:
             minimisable, cancellability, ole_site);
     }
 
+#if (BOOST_VERSION >= 104800)
+
     // Move constructor
     progress(BOOST_RV_REF(progress) other) : m_progress(other.m_progress)
     {
@@ -205,6 +209,8 @@ public:
         }
         return *this;
     }
+
+#endif
 
     ~progress()
     {
@@ -275,7 +281,9 @@ public:
 
 private:
     
+#if (BOOST_VERSION >= 104800)
     BOOST_MOVABLE_BUT_NOT_COPYABLE(progress)
+#endif
 
     /**
      * Common constructor.

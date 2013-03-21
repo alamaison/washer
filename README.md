@@ -35,10 +35,6 @@ winapi depends on some third-party libraries.
     building the test suite requires version 1.40 or above as previous
     versions lack Boost.Test.
 
-    Currently, winapi depends on Boost.Filesystem v2 so you will have
-    to define `BOOST_FILESYSTEM_VERSION=2`.  We hope to fix this in
-    due course.
-
   * [Comet] is a very clever, portable C++ library for Microsoft COM
     development.  COM is used for parts of the Windows API so we use
     Comet to wrap those bits. We have been using our own

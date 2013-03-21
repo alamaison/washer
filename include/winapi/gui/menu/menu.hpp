@@ -65,8 +65,12 @@ typedef basic_menu<
 
 }}} // namespace winapi::gui::menu
 
+#if (BOOST_VERSION >= 104900)
+// Not sure when Collection was added but 1.49 will do
 BOOST_CONCEPT_ASSERT((boost::Collection<winapi::gui::menu::menu>));
 BOOST_CONCEPT_ASSERT((boost::Collection<winapi::gui::menu::menu_bar>));
+#endif
+
 BOOST_CONCEPT_ASSERT((
     boost_concepts::ReadableIterator<winapi::gui::menu::menu::iterator>));
 BOOST_CONCEPT_ASSERT((
