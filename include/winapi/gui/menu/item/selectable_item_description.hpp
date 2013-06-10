@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2012, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -105,16 +105,6 @@ public:
      * Instead, items can be force-highlighted once in the menu
      * (HiliteMenuItem) and tested for their highlight state to react to UI.
      */
-
-private:
-
-    /**
-     * Win32 representation of the menu-bar item as a completed MENUITEMINFO.
-     *
-     * Classes that implement menu items expose themselves to the menu and
-     * menu-bar classes through this method.
-     */
-    virtual MENUITEMINFOW as_menuiteminfo() const = 0;
 };
 
 }}} // namespace winapi::gui::menu

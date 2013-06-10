@@ -608,4 +608,78 @@ BOOST_AUTO_TEST_CASE( mixed_items )
     m[3].accept(make_button_test(string_button_test(L"Lalala")));
 }
 
+
+namespace {
+
+    class valid_sub_menu_test
+    {
+    public:
+
+        typedef void result_type;
+
+        void operator()(sub_menu_item& sub_menu)
+        {
+            BOOST_CHECK(sub_menu.menu().valid());
+        }
+
+        template<typename T>
+        void operator()(T&)
+        {
+            BOOST_FAIL("Wrong item type");
+        }
+    };
+
+}
+
+/**
+ * This tests a bug where the lifetime of a submenu was not maintained
+ * properly.
+ *
+ * The submenu and the submenu description went out of scope after being
+ * inserted into the parent but the parent did not keep the underlying menu
+ * alive.  The result was that attempting to use the submenu, after retrieving
+ * from the parent, caused an assertion.
+ */
+BOOST_AUTO_TEST_CASE( sub_menu_lifetime )
+{
+    menu_bar bar;
+
+    // The submenu is inserted but both the sub-menu object and its
+    // description go out of scope before the code retrieves the submenu
+    // again via the parent.
+    {
+        sub_menu_item_description d(
+            string_button_description(L"Bert"), menu());
+
+        bar.insert(d);
+    }
+
+    item sub_menu = bar[0];
+    sub_menu.accept(valid_sub_menu_test());
+}
+
+/**
+ * This tests relates to the one above.
+ *
+ * The submenu, when inserted gives its lifetime over to the containing
+ * menu.  But copies of the submenu may have been made before it was inserted
+ * so it must be communicated to all the copies that the menu owns them now.
+ * Otherwise they will try to destroy the menu again.
+ */
+BOOST_AUTO_TEST_CASE( sub_menu_lifetime_sharing )
+{
+    sub_menu_item_description d(
+            string_button_description(L"Bert"), menu());
+
+    // The submenu is inserted but both the sub-menu object and its
+    // description go out of scope before the code retrieves the submenu
+    // again via the parent.
+    {
+        menu_bar bar;
+        sub_menu_item_description e = d;
+
+        bar.insert(e);
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END();

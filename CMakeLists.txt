@@ -10,12 +10,13 @@ link_libraries(Shlwapi)
 
 set(Boost_USE_STATIC_LIBS TRUE)
 set(Boost_DETAILED_FAILURE_MSG TRUE)
-set(Boost_ADDITIONAL_VERSIONS 1.46.1)
+set(Boost_ADDITIONAL_VERSIONS 1.46.1 1.50 1.50.0 1.51 1.51.0)
 find_package(
   Boost 1.40 REQUIRED
   COMPONENTS filesystem system)
 link_directories(${Boost_LIBRARY_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../comet/include)
 
 # Find comet library - not required for much of the Windows API
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})

@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2012, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,6 +32,8 @@
 #ifndef WINAPI_GUI_MENU_ITEM_ITEM_DESCRIPTION_HPP
 #define WINAPI_GUI_MENU_ITEM_ITEM_DESCRIPTION_HPP
 #pragma once
+
+#include <boost/function.hpp>
 
 #include <cassert> // assert
 
@@ -88,14 +90,17 @@ public:
     }
 
 private:
-
+    
     /**
-     * Win32 representation of the menu item as a completed MENUITEMINFO.
+     * Transfers ownership of the underlying item to a parent menu.
      *
      * Classes that implement menu items expose themselves to the menu class
-     * through this method.
+     * through this method.  If they own resources that the menu takes control
+     * of, such as submenus, they must also take care to release their
+     * ownership of these resources before returning.
      */
-    virtual MENUITEMINFOW as_menuiteminfo() const = 0;
+    virtual void do_insertion_and_relinquish_resources(
+        const boost::function<void(const MENUITEMINFOW&)>& inserter) const = 0;
 
     virtual item_description* do_clone() const = 0;
 };

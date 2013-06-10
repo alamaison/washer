@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2012, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,6 +41,8 @@
 
 #include <Windows.h> // MENUITEMINFO
 
+#include <cassert> // assert
+
 namespace winapi {
 namespace gui {
 namespace menu {
@@ -66,7 +68,10 @@ public:
         m_button(button.clone()),
         m_menu(menu),
         m_selectability(selectability::default_state),
-        m_checkedness(check_mark::default_state) {}
+        m_checkedness(check_mark::default_state)
+    {
+        assert(m_menu.valid() || !"Constructed from invalid menu");
+    }
 
     sub_menu_item_description() : m_id(0) {}
 
@@ -92,12 +97,25 @@ public:
 
 private:
 
+    virtual void do_insertion_and_relinquish_resources(
+        const boost::function<void(const MENUITEMINFOW&)>& inserter) const
+    {
+        inserter(as_menuiteminfo());
+        m_menu.m_menu.release();
+    }
+
+    virtual sub_menu_item_description* do_clone() const
+    {
+        return new sub_menu_item_description(*this);
+    }
+
     MENUITEMINFOW as_menuiteminfo() const
     {
         MENUITEMINFOW info = m_button->as_menuiteminfo();
 
         info.fMask |= MIIM_SUBMENU | MIIM_ID;
         info.wID = m_id;
+        assert(m_menu.valid() || !"Invalid menu");
         info.hSubMenu = m_menu.handle().get();
 
         if (m_selectability != selectability::default_state ||
@@ -110,11 +128,6 @@ private:
         detail::adjust_checkedness(m_checkedness, info);
 
         return info;
-    }
-
-    virtual sub_menu_item_description* do_clone() const
-    {
-        return new sub_menu_item_description(*this);
     }
 
     UINT m_id;

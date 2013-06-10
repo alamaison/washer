@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2012, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,9 +34,12 @@
 #pragma once
 
 #include <winapi/gui/menu/detail/menu.hpp> // safe_destroy_menu
+#include <winapi/gui/menu/detail/menu_win32.hpp> // is_menu
 
 #include <boost/shared_ptr.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
+
+#include <cassert> // assert
 
 namespace winapi {
 namespace gui {
@@ -54,22 +57,63 @@ class menu_handle
     typedef boost::shared_ptr<boost::remove_pointer<HMENU>::type>
         shared_menu_handle;
 
+    // Because shared_ptr doesn't let us release, but we really have to be
+    // able to to hand ownership to objects we don't manage, (don't worry,
+    // the valid() method of basic_menu catches the stragglers by throwing
+    // if we try to use them after they have gone away) we use this class
+    // to change the behaviour of the deleter when we need to release.
+    class settable_deleter
+    {
+    public:
+        settable_deleter(bool do_delete) : m_do_delete(do_delete) {}
+
+        void operator()(HMENU raw_handle)
+        {
+            if (m_do_delete)
+            {
+                detail::safe_destroy_menu(raw_handle);
+            }
+        }
+
+        void set_deletion(bool do_delete)
+        {
+            m_do_delete = do_delete;
+        }
+
+    private:
+        bool m_do_delete;
+    };
+
 public:
 
     static menu_handle foster_handle(HMENU handle)
     {
+        assert(detail::win32::is_menu(handle) || !"Must be valid handle");
         return menu_handle(
-            shared_menu_handle(handle, detail::no_destroy_menu));
+            shared_menu_handle(handle, settable_deleter(false)));
     }
 
     static menu_handle adopt_handle(HMENU handle)
     {
+        assert(detail::win32::is_menu(handle) || !"Must be valid handle");
         return menu_handle(
-            shared_menu_handle(handle, detail::safe_destroy_menu));
+            shared_menu_handle(handle, settable_deleter(true)));
     }
 
     HMENU get() const
     {
+        return m_handle.get();
+    }
+
+    /**
+     * Gives up this object's ownership, if any, of the menu.
+     *
+     * If the menu handle is adopted, this converts it to a fostered handle.
+     * If the menu handle is already fostered, this simply returns it.
+     */
+    HMENU release()
+    {
+        boost::get_deleter<settable_deleter>(m_handle)->set_deletion(false);
         return m_handle.get();
     }
 
