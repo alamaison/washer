@@ -3,7 +3,12 @@ language: cpp
 env:
   - CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++
   
-script: cmake --build .
+script:
+  - cmake .
+  - cmake --build .
+  - cmake --build . --target RUN_TESTS
+  - cmake --build . --target RUN_UNICODE_TESTS
+  - cmake --build . --target RUN_WIN9X_TESTS
 
 before_install:
   - sudo apt-get update -qq
