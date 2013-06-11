@@ -1,0 +1,12 @@
+language: cpp
+compiler:
+  - gcc
+
+env:
+  - CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++
+  
+script: cmake --build .
+
+before_install:
+  - sudo apt-get install -qq binutils-mingw-w64-i686 gcc-mingw-w64-i686 g++-mingw-w64-i686 wine
+  - git submodule update --init --recursive
