@@ -3,14 +3,23 @@ language: cpp
 env:
   - CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++
   
-script:
-  - cmake .
-  - cmake --build .
-  - cmake --build . --target RUN_TESTS
-  - cmake --build . --target RUN_UNICODE_TESTS
-  - cmake --build . --target RUN_WIN9X_TESTS
 
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq binutils-mingw-w64-i686 gcc-mingw-w64-i686 g++-mingw-w64-i686
+  - git clone -b stable https://github.com/mxe/mxe.git
+  - cd mxe
+  - export MXE_ROOT=`pwd`
+  - make gcc boost
+  - export PATH=$MXE_ROOT/usr/bin:$PATH
+  - ls -l $MXE_ROOT
+  - cd ..
   - git submodule update --init --recursive
+
+script:
+  - export CMAKE_FLAGS=-DCMAKE_TOOLCHAIN_FILE=$MXE_ROOT/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake
+  - cmake $CMAKE_FLAGS .
+  - cmake $CMAKE_FLAGS --build .
+  - cmake $CMAKE_FLAGS --build . --target RUN_TESTS
+  - cmake $CMAKE_FLAGS --build . --target RUN_UNICODE_TESTS
+  - cmake $CMAKE_FLAGS --build . --target RUN_WIN9X_TESTS
