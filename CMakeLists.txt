@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.6)
 
 project(winapi)
 
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
 set(INCLUDE_DIRECTORY include)
 set(LIBRARY_DIRECTORY ${INCLUDE_DIRECTORY}/winapi)
 
@@ -19,7 +21,6 @@ include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../comet/include)
 
 # Find comet library - not required for much of the Windows API
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 find_package(Comet)
 if(COMET_FOUND)
   include_directories(${COMET_INCLUDE_DIRS})
@@ -125,7 +126,7 @@ set(LIBRARY_SOURCES_window_detail
   ${LIBRARY_DIRECTORY}/window/detail/window_win32.hpp)
 source_group(
   winapi\\window\\detail FILES ${LIBRARY_SOURCES_window_detail})
-  
+
 add_custom_target(winapi SOURCES
   ${LIBRARY_SOURCES}
   ${LIBRARY_SOURCES_com}
