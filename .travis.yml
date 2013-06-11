@@ -14,7 +14,7 @@ compiler:
 
 env:
   global:
-    - OPTIONS="-DCMAKE_TOOLCHAIN_FILE=../i686-w64-mingw32.cmake"
+    - OPTIONS="-DCMAKE_TOOLCHAIN_FILE=../cmake/i686-w64-mingw32.cmake"
     - DEPENDS="binutils-mingw-w64-i686 gcc-mingw-w64-i686 g++-mingw-w64-i686 wine"
   matrix:
     - BUILD_TYPE=Debug
