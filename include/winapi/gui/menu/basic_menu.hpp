@@ -145,7 +145,7 @@ public:
      */
     void insert(const description_type& item, const iterator& position)
     {
-        insert_at_position(item, position - begin());
+        insert_at_position(item, boost::numeric_cast<UINT>(position - begin()));
     }
 
     /**
