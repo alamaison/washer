@@ -39,7 +39,7 @@
 #include <boost/exception/info.hpp> // errinfo
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
 
-#include <Winuser.h> // SetWindowLongPtr, GetWindowLongPtr, GetWindowTextLength
+#include <winuser.h> // SetWindowLongPtr, GetWindowLongPtr, GetWindowTextLength
                      // GetWindowText, SetWindowText, DestroyWindow, SetMenu,
                      // GetWidowRect
 

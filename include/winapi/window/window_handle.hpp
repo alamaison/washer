@@ -39,7 +39,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
 
-#include <Windows.h> // HWND
+#include <windows.h> // HWND
 
 namespace winapi {
 namespace window {

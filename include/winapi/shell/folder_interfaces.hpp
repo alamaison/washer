@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2010, 2011  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,12 +34,12 @@
 #pragma once
 
 #include <ole2.h> // basic COM types
-#include <ObjIdl.h> // IBindCtx
+#include <objidl.h> // IBindCtx
 #if defined(__MINGW32__)
 #include <shlobj.h> // IEnumIDList, IDLIST, ITEMID
 #else
 #include <shobjidl.h> // IEnumIDList
-#include <ShTypes.h> // IDLIST, ITEMID
+#include <shtypes.h> // IDLIST, ITEMID
 #endif
 
 namespace winapi {

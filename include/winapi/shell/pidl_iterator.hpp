@@ -5,7 +5,8 @@
 
     @if license
 
-    Copyright (C) 2010, 2011, 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2012, 2013
+    Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -43,8 +44,8 @@
 #ifndef STRICT_TYPED_ITEMIDS
 #error Currently, winapi requires strict PIDL types: define STRICT_TYPED_ITEMIDS
 #endif
-#include <Shlobj.h> // ILCloneFirst
-#include <ShTypes.h> // Raw PIDL types
+#include <shlobj.h> // ILCloneFirst
+#include <shtypes.h> // Raw PIDL types
 
 namespace winapi {
 namespace shell {

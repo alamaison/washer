@@ -35,7 +35,7 @@
 
 #include <winapi/gui/menu/item/item_description.hpp>
 
-#include <Windows.h> // MENUITEMINFO
+#include <windows.h> // MENUITEMINFO
 
 namespace winapi {
 namespace gui {

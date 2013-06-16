@@ -37,7 +37,7 @@
 
 #include <cassert> // assert
 
-#include <Windows.h> // MENUITEMINFO
+#include <windows.h> // MENUITEMINFO
 
 namespace winapi {
 namespace gui {

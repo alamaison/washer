@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2012, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@
 #include <cassert> // assert
 #include <stdexcept> // invalid_argument
 
-#include <Windows.h> // MENUITEMINFO, HBITMAP
+#include <windows.h> // MENUITEMINFO, HBITMAP
 
 namespace winapi {
 namespace gui {

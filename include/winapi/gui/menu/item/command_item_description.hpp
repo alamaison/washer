@@ -40,7 +40,7 @@
                                                // adjust_checkedness
 #include <winapi/gui/menu/item/selectable_item_description.hpp>
 
-#include <Windows.h> // MENUITEMINFO
+#include <windows.h> // MENUITEMINFO
 
 namespace winapi {
 namespace gui {

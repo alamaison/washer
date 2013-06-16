@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2010, 2011  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
 #include <boost/type_traits/remove_pointer.hpp> // remove_pointer
 
-#include <Windows.h> // LoadLibrary, FreeLibrary, GetProcAddress,
+#include <windows.h> // LoadLibrary, FreeLibrary, GetProcAddress,
                      // GetModuleHandle, GetModuleFileName
 
 namespace winapi {

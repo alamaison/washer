@@ -5,7 +5,8 @@
 
     @if license
 
-    Copyright (C) 2009, 2010, 2011  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2009, 2010, 2011, 2013
+    Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,8 +46,8 @@
 #include <string>
 #include <vector>
 
-#include <Objbase.h> // GetRunningObjectTable
-#include <Windows.h> // WideCharToMultiByte
+#include <objbase.h> // GetRunningObjectTable
+#include <windows.h> // WideCharToMultiByte
 
 namespace winapi {
 namespace test {

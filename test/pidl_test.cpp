@@ -5,7 +5,8 @@
 
     @if license
 
-    Copyright (C) 2010, 2011, 2012  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2012, 2013
+    Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,7 +39,7 @@
 #include <boost/shared_ptr.hpp>  // shared_ptr
 #include <boost/numeric/conversion/cast.hpp>  // numeric_cast
 
-#include <ShlObj.h>  // ILClone etc.
+#include <shlobj.h>  // ILClone etc.
 
 #include <cstring> // memset, memcpy
 #include <stdexcept> // logic_error

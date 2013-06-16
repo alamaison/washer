@@ -38,7 +38,7 @@
 
 #include <comet/ptr.h> // com_ptr
 
-#include <OleIdl.h> // IOleWindow, IOleInPlaceFrame
+#include <oleidl.h> // IOleWindow, IOleInPlaceFrame
 #include <shobjidl.h> // IShellView
 
 template<> struct comet::comtype<IOleWindow>

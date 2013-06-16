@@ -41,7 +41,7 @@
 
 #include <cassert> // assert
 
-#include <Winuser.h> // SetWindowLongPtr, GetWindowLongPtr, GetWindowTextLength
+#include <winuser.h> // SetWindowLongPtr, GetWindowLongPtr, GetWindowTextLength
                      // GetWindowText, SetWindowText
 namespace winapi {
 namespace gui {

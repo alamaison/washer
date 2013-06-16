@@ -53,7 +53,7 @@
 #include <stdexcept> // invalid_argument
 #include <string>
 
-#include <ShlObj.h> // IProgressDialog
+#include <shlobj.h> // IProgressDialog
 
 
 template<> struct comet::comtype<IProgressDialog>

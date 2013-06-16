@@ -45,7 +45,7 @@
 
 #include <algorithm> // find_if
 
-#include <Windows.h> // MENUITEMINFO
+#include <windows.h> // MENUITEMINFO
 
 namespace winapi {
 namespace window {

@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2009, 2010, 2011, 2012
+    Copyright (C) 2009, 2010, 2011, 2012, 2013
     Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
@@ -43,13 +43,13 @@
 #include <exception> // bad_alloc
 #include <stdexcept> // invalid_argument, logic_error
 
-#include <Objbase.h> // CoTaskMemAlloc/Free
+#include <objbase.h> // CoTaskMemAlloc/Free
 
 #ifndef STRICT_TYPED_ITEMIDS
 #error Currently, winapi requires strict PIDL types: define STRICT_TYPED_ITEMIDS
 #endif
 
-#include <ShTypes.h> // Raw PIDL types
+#include <shtypes.h> // Raw PIDL types
 
 namespace winapi {
 namespace shell {
