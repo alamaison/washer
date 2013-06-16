@@ -4,8 +4,8 @@
 #  COMET_INCLUDE_DIRS - The Comet include directories
 
 find_path(COMET_INCLUDE_DIR comet/comet.h
-          HINTS ${COMET_ROOT}/include)
-          
+          HINTS ${COMET_ROOT}/include /comet/include)
+
 set(COMET_INCLUDE_DIRS ${COMET_INCLUDE_DIR})
 
 include(FindPackageHandleStandardArgs)

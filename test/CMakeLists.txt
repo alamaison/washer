@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.6)
 
 project(test)
 
-include_directories(comet/include)
 link_libraries(Shlwapi)
 
 set(Boost_USE_STATIC_LIBS TRUE)
@@ -13,6 +12,13 @@ find_package(
   COMPONENTS filesystem system unit_test_framework)
 link_directories(${Boost_LIBRARY_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
+
+
+# Find comet library - required for the tests
+find_package(Comet REQUIRED)
+if(COMET_FOUND)
+  include_directories(${COMET_INCLUDE_DIRS})
+endif()
 
 add_definitions(-DWIN32_LEAN_AND_MEAN -DSTRICT_TYPED_ITEMIDS)
 

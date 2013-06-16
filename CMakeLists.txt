@@ -18,7 +18,6 @@ find_package(
   COMPONENTS filesystem system)
 link_directories(${Boost_LIBRARY_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../comet/include)
 
 # Find comet library - not required for much of the Windows API
 find_package(Comet)
