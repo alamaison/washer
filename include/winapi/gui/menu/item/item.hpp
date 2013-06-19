@@ -59,6 +59,18 @@ namespace detail {
     typename Visitor::result_type do_sub_menu_item_accept(
         const item_position&, Visitor&);
 
+    template<typename Visitor>
+    typename Visitor::result_type do_const_command_item_accept(
+        const item_position&, Visitor&);
+
+    template<typename Visitor>
+    typename Visitor::result_type do_const_separator_item_accept(
+        const item_position&, Visitor&);
+
+    template<typename Visitor>
+    typename Visitor::result_type do_const_sub_menu_item_accept(
+        const item_position&, Visitor&);
+
 }
 
 /**
@@ -129,6 +141,41 @@ public:
             else
             {
                 return do_command_item_accept(m_item, visitor);
+            }
+        }
+    }
+
+    
+    /**
+     * Accept a visitor to access type-safe, immutable view of the menu item.
+     *
+     * Visitors passed to this method must provide at least one
+     * implementation of `operator()` that can accept arguments of types
+     * `const separator_item&`, `const command_item&` and 
+     * `const sub_menu_item&` as well as a `result_type` type.
+     */
+    template<typename Visitor>
+    typename Visitor::result_type accept(Visitor visitor) const
+    {
+        // As above, but presents the concrete items to the visitor as
+        // const items.
+
+        const MENUITEMINFOW info =
+            m_item.get_menuiteminfo(MIIM_TYPE | MIIM_SUBMENU);
+
+        if (info.fType & MFT_SEPARATOR)
+        {
+            return do_const_separator_item_accept(m_item, visitor);
+        }
+        else
+        {
+            if (info.hSubMenu)
+            {
+                return do_const_sub_menu_item_accept(m_item, visitor);
+            }
+            else
+            {
+                return do_const_command_item_accept(m_item, visitor);
             }
         }
     }

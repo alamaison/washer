@@ -115,6 +115,14 @@ namespace detail {
         return visitor(item_view);
     }
 
+    template<typename Visitor>
+    inline typename Visitor::result_type do_const_command_item_accept(
+        const item_position& item, Visitor& visitor)
+    {
+        const command_item item_view(item);
+        return visitor(item_view);
+    }
+
 }
 
 }}} // namespace winapi::gui::menu

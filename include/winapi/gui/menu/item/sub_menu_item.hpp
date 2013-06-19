@@ -122,6 +122,14 @@ namespace detail {
         return visitor(item_view);
     }
 
+    template<typename Visitor>
+    inline typename Visitor::result_type do_const_sub_menu_item_accept(
+        const item_position& item, Visitor& visitor)
+    {
+        const sub_menu_item item_view(item);
+        return visitor(item_view);
+    }
+
 }
 
 }}} // namespace winapi::gui::menu

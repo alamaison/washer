@@ -61,7 +61,10 @@ BOOST_SCOPED_ENUM_START(expected_case)
 {
     separator,
     command,
-    sub
+    sub,
+    const_separator,
+    const_command,
+    const_sub
 };
 BOOST_SCOPED_ENUM_END;
 
@@ -113,6 +116,75 @@ public:
     void operator()(sub_menu_item&)
     {
         BOOST_REQUIRE(m_case == expected_case::sub);
+    }
+
+private:
+
+    BOOST_SCOPED_ENUM(expected_case) m_case;
+};
+
+class const_void_test_visitor : public menu_visitor<>
+{
+public:
+
+    const_void_test_visitor(BOOST_SCOPED_ENUM(expected_case) c)
+        : m_case(c) {}
+
+    void operator()(const separator_item&)
+    {
+        BOOST_REQUIRE(m_case == expected_case::const_separator);
+    }
+
+    void operator()(const command_item&)
+    {
+        BOOST_REQUIRE(m_case == expected_case::const_command);
+    }
+
+    void operator()(const sub_menu_item&)
+    {
+        BOOST_REQUIRE(m_case == expected_case::const_sub);
+    }
+
+private:
+
+    BOOST_SCOPED_ENUM(expected_case) m_case;
+};
+
+class const_and_nonconst_void_test_visitor : public menu_visitor<>
+{
+public:
+
+    const_and_nonconst_void_test_visitor(
+        BOOST_SCOPED_ENUM(expected_case) c) : m_case(c) {}
+
+    void operator()(separator_item&)
+    {
+        BOOST_REQUIRE(m_case == expected_case::separator);
+    }
+
+    void operator()(command_item&)
+    {
+        BOOST_REQUIRE(m_case == expected_case::command);
+    }
+
+    void operator()(sub_menu_item&)
+    {
+        BOOST_REQUIRE(m_case == expected_case::sub);
+    }
+
+    void operator()(const separator_item&)
+    {
+        BOOST_REQUIRE(m_case == expected_case::const_separator);
+    }
+
+    void operator()(const command_item&)
+    {
+        BOOST_REQUIRE(m_case == expected_case::const_command);
+    }
+
+    void operator()(const sub_menu_item&)
+    {
+        BOOST_REQUIRE(m_case == expected_case::const_sub);
     }
 
 private:
@@ -178,6 +250,29 @@ BOOST_AUTO_TEST_CASE( visit_separator )
         "separator");
 }
 
+BOOST_AUTO_TEST_CASE( visit_separator_const_correctness )
+{
+    menu m;
+    m.insert(separator_item_description());
+
+    const item ci = m[0];
+
+    // Const items should accept a visitor that only gives access to const items
+    ci.accept(const_void_test_visitor(expected_case::const_separator));
+
+    // Const items should not accept a non-const visitor so the following
+    // should cause a compile error
+    //ci.accept(void_test_visitor(expected_case::separator));
+
+    // It should accept a visitor with both const and non-const items but only
+    // fire the methods giving access to the const items
+    ci.accept(
+        const_and_nonconst_void_test_visitor(expected_case::const_separator));
+
+    // The non-const items should be equally happy with a const-only visitor
+    m[0].accept(const_void_test_visitor(expected_case::const_separator));
+}
+
 BOOST_AUTO_TEST_CASE_TEMPLATE( visit_command, F, menu_with_handle_creator_fixtures )
 {
     F::menu_type m = F::create_menu_to_test().menu();
@@ -194,6 +289,29 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( visit_command, F, menu_with_handle_creator_fixtur
     BOOST_CHECK_EQUAL(
         m[0].accept(semi_inheritance_test_visitor(expected_case::command)),
         "command-or-sub_menu");
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE( visit_command_const_correctness, F, menu_with_handle_creator_fixtures )
+{
+    F::menu_type m = F::create_menu_to_test().menu();
+    m.insert(command_item_description(string_button_description(L"Bob"), 42));
+
+    const item ci = m[0];
+
+    // Const items should accept a visitor that only gives access to const items
+    ci.accept(const_void_test_visitor(expected_case::const_command));
+
+    // Const items should not accept a non-const visitor so the following
+    // should cause a compile error
+    //ci.accept(void_test_visitor(expected_case::command));
+
+    // It should accept a visitor with both const and non-const items but only
+    // fire the methods giving access to the const items
+    ci.accept(
+        const_and_nonconst_void_test_visitor(expected_case::const_command));
+
+    // The non-const items should be equally happy with a const-only visitor
+    m[0].accept(const_void_test_visitor(expected_case::const_command));
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE( visit_sub_menu, F, menu_with_handle_creator_fixtures )
@@ -214,6 +332,32 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( visit_sub_menu, F, menu_with_handle_creator_fixtu
     BOOST_CHECK_EQUAL(
         m[0].accept(semi_inheritance_test_visitor(expected_case::sub)),
         "command-or-sub_menu");
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(
+    visit_sub_menu_const_correctness, F, menu_with_handle_creator_fixtures )
+{
+    F::menu_type m = F::create_menu_to_test().menu();
+    menu s;
+    s.insert(command_item_description(string_button_description(L"Pop"), 7));
+    m.insert(sub_menu_item_description(string_button_description(L"Bob"), s));
+
+    const item ci = m[0];
+
+    // Const items should accept a visitor that only gives access to const items
+    ci.accept(const_void_test_visitor(expected_case::const_sub));
+
+    // Const items should not accept a non-const visitor so the following
+    // should cause a compile error
+    //ci.accept(void_test_visitor(expected_case::sub));
+
+    // It should accept a visitor with both const and non-const items but only
+    // fire the methods giving access to the const items
+    ci.accept(
+        const_and_nonconst_void_test_visitor(expected_case::const_sub));
+
+    // The non-const items should be equally happy with a const-only visitor
+    m[0].accept(const_void_test_visitor(expected_case::const_sub));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
