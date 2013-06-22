@@ -54,7 +54,6 @@ source_group(winapi\\detail FILES ${LIBRARY_SOURCES_detail})
 set(LIBRARY_SOURCES_gui
   ${LIBRARY_DIRECTORY}/gui/commands.hpp
   ${LIBRARY_DIRECTORY}/gui/hwnd.hpp
-  ${LIBRARY_DIRECTORY}/gui/icon.hpp
   ${LIBRARY_DIRECTORY}/gui/message_box.hpp
   ${LIBRARY_DIRECTORY}/gui/messages.hpp
   ${LIBRARY_DIRECTORY}/gui/progress.hpp
@@ -67,6 +66,10 @@ set(LIBRARY_SOURCES_gui_menu
   ${LIBRARY_DIRECTORY}/gui/menu/menu_handle.hpp
   ${LIBRARY_DIRECTORY}/gui/menu/visitor.hpp)
 source_group(winapi\\gui\\menu FILES ${LIBRARY_SOURCES_gui_menu})
+
+set(LIBRARY_SOURCES_gui_icon
+  ${LIBRARY_DIRECTORY}/gui/icon/icon.hpp)
+source_group(winapi\\gui\\icon FILES ${LIBRARY_SOURCES_gui_icon})
 
 set(LIBRARY_SOURCES_gui_menu_button
   ${LIBRARY_DIRECTORY}/gui/menu/button/bitmap_button.hpp
@@ -132,6 +135,7 @@ add_custom_target(winapi SOURCES
   ${LIBRARY_SOURCES_com}
   ${LIBRARY_SOURCES_detail}
   ${LIBRARY_SOURCES_gui}
+  ${LIBRARY_SOURCES_gui_icon}
   ${LIBRARY_SOURCES_gui_menu}
   ${LIBRARY_SOURCES_gui_menu_button}
   ${LIBRARY_SOURCES_gui_menu_detail}

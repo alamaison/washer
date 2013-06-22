@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2010, 2011  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,19 +29,16 @@
     @endif
 */
 
-#include <winapi/gui/icon.hpp> // test subject
+#include <winapi/gui/icon/icon.hpp> // test subject
 
 #include <boost/test/unit_test.hpp>
 
 #include <string>
 
-using winapi::gui::load_icon;
 using winapi::gui::standard_icon_type;
 
 using std::string;
 using std::wstring;
-
-BOOST_AUTO_TEST_SUITE(icon_tests)
 
 namespace {
 
@@ -64,6 +61,8 @@ namespace {
         return icon;
     }
 }
+
+BOOST_AUTO_TEST_SUITE(standard_icon_tests)
 
 /**
  * Load each type of system icon.
