@@ -40,6 +40,7 @@
 #include <winapi/gui/menu/item/selectable_item_description.hpp>
 
 #pragma warning(push)
+#pragma warning(disable : 4100) // unreferenced formal parameter
 #pragma warning(disable : 4510)
 #pragma warning(disable : 4610)
 #include <boost/concept/assert.hpp> // BOOST_CONCEPT_ASSERT
