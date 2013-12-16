@@ -59,28 +59,6 @@ namespace test {
 
 namespace detail {
 
-    inline LRESULT CALLBACK wnd_proc(
-        HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
-    {
-        switch (msg)
-        {
-        case WM_CLOSE:
-            ::DestroyWindow(hwnd);
-            return 1;
-
-        case WM_DESTROY:
-            if (!::GetParent(hwnd))
-            {
-                ::PostQuitMessage(0);
-            }
-            return 1;
-
-        default:
-            ::SetForegroundWindow(hwnd);
-            return ::DefWindowProcW(hwnd, msg, wparam, lparam);
-        }
-    }
-
     inline void pump_thread_messages()
     {
         MSG msg = MSG();
@@ -101,14 +79,13 @@ namespace detail {
         WNDCLASSEXW window_class = WNDCLASSEXW();
         window_class.cbSize = sizeof(WNDCLASSEXW);
         window_class.lpszClassName = L"testclass";
-        window_class.lpfnWndProc = &wnd_proc;
+        window_class.lpfnWndProc = ::DefWindowProcW;
 
-        ::RegisterClassExW(&window_class);
-        //ATOM klass = ::RegisterClassExW(&window_class);
-        //if (klass == 0)
-        //    BOOST_THROW_EXCEPTION(
-        //        boost::enable_error_info(winapi::last_error()) <<
-        //        boost::errinfo_api_function("RegisterClassEx"));
+        ATOM klass = ::RegisterClassExW(&window_class);
+        if (klass == 0 && ::GetLastError() != ERROR_CLASS_ALREADY_EXISTS)
+            BOOST_THROW_EXCEPTION(
+                boost::enable_error_info(winapi::last_error()) <<
+                boost::errinfo_api_function("RegisterClassEx"));
 
         HWND hwnd = ::CreateWindowExW(
             0L, L"testclass", L"", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,
