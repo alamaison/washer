@@ -46,16 +46,36 @@ set(TEST_SOURCES
 
 include(max_warnings)
 
+
+# DLL used for DLL-function load testing
+
+include(GenerateExportHeader)
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR}) # for load_test_dll_export.h
+
+add_library(
+  load_test_dll SHARED
+  load_test_dll/load_test_dll.h
+  load_test_dll/load_test_dll.cpp)
+
+generate_export_header(load_test_dll)
+
+# End DLL
+
+
 add_executable(tests ${TEST_SOURCES})
+target_link_libraries(tests load_test_dll)
 get_target_property(test_EXE tests LOCATION)
 
 add_executable(tests_unicode ${TEST_SOURCES})
+target_link_libraries(tests_unicode load_test_dll)
 get_target_property(test_unicode_EXE tests_unicode LOCATION)
 set_target_properties(
   tests_unicode PROPERTIES
   COMPILE_DEFINITIONS _UNICODE)
 
 add_executable(tests_win9x ${TEST_SOURCES})
+target_link_libraries(tests_win9x load_test_dll)
 get_target_property(test_win9x_EXE tests_win9x LOCATION)
 set_target_properties(
   tests_win9x PROPERTIES

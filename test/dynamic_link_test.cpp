@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2010, 2011  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,6 +28,8 @@
 
     @endif
 */
+
+#include "load_test_dll_export.h"
 
 #include <winapi/dynamic_link.hpp> // test subject
 
@@ -123,26 +125,67 @@ BOOST_AUTO_TEST_CASE( current_module_handle )
     BOOST_CHECK(hinst);
 }
 
+//
+// The following tests use a custom DLL to test loading functions from a DLL
+// by name.  We use our own DLL, rather than a system one, so that we can
+// detect if the DLL handle is released too early.  System DLLs are often
+// loaded all over the place so the function calls would succeed even if we
+// release our handle too soon.
+//
+// IMPORTANT: For this to work, we must not keep the DLL loaded for longer
+// than a single test case.
+//
+
 /**
  * Call known function using dynamic binding.
  */
-BOOST_AUTO_TEST_CASE( proc_address )
+BOOST_AUTO_TEST_CASE( load_function )
 {
-    boost::function<int (int)> func;
-    func = winapi::proc_address<int (WINAPI *)(int)>(
-        "user32.dll", "GetKeyboardType");
-    BOOST_CHECK_EQUAL(func(0), ::GetKeyboardType(0));
+    boost::function<char*()> func;
+
+    func = winapi::load_function<char*()>("load_test_dll.dll", "test_function");
+    BOOST_CHECK_EQUAL(func(), "Ran DLL function successfully");
 }
 
 /**
  * Call known function using dynamic binding.
  */
-BOOST_AUTO_TEST_CASE( proc_address_w )
+BOOST_AUTO_TEST_CASE( load_function_w )
 {
-    boost::function<int (int)> func;
-    func = winapi::proc_address<int (WINAPI *)(int)>(
-        L"user32.dll", "GetKeyboardType");
-    BOOST_CHECK_EQUAL(func(0), ::GetKeyboardType(0));
+    boost::function<char*()> func;
+
+    func = winapi::load_function<char*()>(
+        L"load_test_dll.dll", "test_function");
+    BOOST_CHECK_EQUAL(func(), "Ran DLL function successfully");
+}
+
+/**
+ * Call known function using dynamic binding, passing an argument.
+ *
+ * Tests that our signature template handles an argument correctly.
+ */
+BOOST_AUTO_TEST_CASE( load_unary_function )
+{
+    boost::function<int(int)> func;
+
+    func = winapi::load_function<int(int)>(
+        L"load_test_dll.dll", "unary_test_function");
+    BOOST_CHECK_EQUAL(func(10), 20);
+}
+
+/**
+ * Call known function using dynamic binding, passing two arguments.
+ *
+ * Tests that our signature template handles different number of arguments
+ * (not straightforward with C++).
+ */
+BOOST_AUTO_TEST_CASE( load_binary_function )
+{
+    boost::function<int(int,int)> func;
+
+    func = winapi::load_function<int(int,int)>(
+        L"load_test_dll.dll", "binary_test_function");
+    BOOST_CHECK_EQUAL(func(7,3), 21);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

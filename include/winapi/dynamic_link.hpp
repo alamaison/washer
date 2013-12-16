@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2010, 2011  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@
 #include <boost/exception/errinfo_file_name.hpp> // errinfo_file_name
 #include <boost/exception/errinfo_api_function.hpp> // errinfo_api_function
 #include <boost/filesystem.hpp> // basic_path, path
+#include <boost/function.hpp>
 #include <boost/numeric/conversion/cast.hpp>  // numeric_cast
 #include <boost/shared_ptr.hpp> // shared_ptr
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
@@ -251,6 +252,10 @@ inline T proc_address(HMODULE hmod, const std::string& name)
 /**
  * Dynamically bind to function given by name.
  *
+ * @warning  It is the caller's responsibility to ensure that module `hmod`
+ *           remains alive for the duration of any calls to the returned
+ *           function.
+ *
  * @param hmod  Module defining the requested function.
  * @param name  Name of the function.
  * @returns  Pointer to the function with signature T.
@@ -263,22 +268,52 @@ inline T proc_address(hmodule hmod, const std::string& name)
 
 namespace detail {
 
+    // The purpose of this class is to link the library lifetime to the
+    // lifetime of the callable.  This prevents the loaded function being called
+    // after the library it was loaded having been unloaded
+    template<typename Signature>
+    class library_function
+    {
+    public:
+        library_function(hmodule library, const std::string& function_name)
+            :
+        m_library(library),
+        m_function(
+            ::winapi::proc_address<Signature*>(m_library, function_name))
+        {}
+
+        operator Signature*() const
+        {
+            return m_function;
+        }
+
+    private:
+        hmodule m_library;
+        Signature* m_function;
+    };
+
     /**
      * Dynamically bind to function given by name.
      */
 #if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION > 2
-    template<typename T>
-    inline T proc_address(
-        const boost::filesystem::path& library_path, const std::string& name)
+    template<typename Signature>
+    inline boost::function<Signature> load_function(
+        const boost::filesystem::path& library_path,
+        const std::string& function_name)
 #else
     template<typename T, typename String, typename Traits>
-    inline T proc_address(
+    inline boost::function<Signature> load_function(
         const boost::filesystem::basic_path<String, Traits>& library_path,
-        const std::string& name)
+        const std::string& function_name)
 #endif
     {
-        return ::winapi::proc_address<T>(
-            ::winapi::load_library(library_path), name);
+        hmodule library = ::winapi::load_library(library_path);
+
+        // Embed the module handle in the callable we return, so that the
+        // module remains loaded for the lifetime of the call.
+        boost::function<Signature> f =
+            library_function<Signature>(library, function_name);
+        return f;
     }
 }
 
@@ -288,12 +323,12 @@ namespace detail {
  * @param library_path  Path or filename of the DLL exporting the
                         requested function.
  * @param name          Name of the function.
- * @returns  Pointer to the function with signature T.
+ * @returns  Callable that invokes loaded function with given `Signature`.
  */
-template<typename T>
-inline T proc_address(
+template<typename Signature>
+inline boost::function<Signature> load_function(
     const boost::filesystem::path& library_path, const std::string& name)
-{ return detail::proc_address<T>(library_path, name); }
+{ return detail::load_function<Signature>(library_path, name); }
 
 /**
  * Dynamically bind to function given by name.
@@ -301,14 +336,13 @@ inline T proc_address(
  * @param library_path  Path or filename of the DLL exporting the
                         requested function.
  * @param name          Name of the function.
- * @returns  Pointer to the function with signature T.
+ * @returns  Callable that invokes loaded function with given `Signature`.
  */
-
 #if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION < 3
 template<typename T>
-inline T proc_address(
+inline boost::function<Signature> load_function(
     const boost::filesystem::wpath& library_path, const std::string& name)
-{ return detail::proc_address<T>(library_path, name); }
+{ return detail::load_function<Signature>(library_path, name); }
 #endif
 
 } // namespace winapi
