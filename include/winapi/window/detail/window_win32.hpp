@@ -53,7 +53,7 @@ inline void destroy_window(HWND hwnd)
     if (!::DestroyWindow(hwnd))
         BOOST_THROW_EXCEPTION(
             boost::enable_error_info(winapi::last_error()) <<
-            boost::errinfo_api_function("DestroyMenu"));
+            boost::errinfo_api_function("DestroyWindow"));
 }
 
 inline void set_menu(HWND hwnd, HMENU hmenu)
