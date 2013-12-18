@@ -261,15 +261,25 @@ namespace detail {
 
 namespace button_type
 {
+    //
+    // IMPORTANT: These have to match the Windows IDs for the common buttons
+    // because that's what TaskDialogIndirect returns as the value of
+    // `which_button`.  The callbacks are registered by the values of this
+    // enum, so to be able to match `which_button` to the corresponding
+    // callback, we either needed a conversion function or the values have
+    // to be the same.  We went for the latter.
+    //
+
     enum type
     {
-        ok,
-        cancel,
-        yes,
-        no,
-        retry,
-        close
+        ok = IDOK,
+        cancel = IDCANCEL,
+        yes = IDYES,
+        no = IDNO,
+        retry = IDRETRY,
+        close = IDCLOSE
     };
+    
 }
 
 namespace icon_type
@@ -827,6 +837,9 @@ public:
                 boost::errinfo_api_function("TaskDialogIndirect"));
 
         assert(!m_callbacks.empty()); // windows will add a button if we didn't
+        
+        // Every button must have a callback
+        assert(m_callbacks.find(which_button) != m_callbacks.end());
 
         return m_callbacks[which_button]();
     }
