@@ -33,24 +33,30 @@
 #define WINAPI_GUI_TASK_DIALOG_HPP
 #pragma once
 
+#include <winapi/com/catch.hpp> // WINAPI_COM_CATCH
 #include <winapi/dynamic_link.hpp> // proc_address
+#include <winapi/message.hpp> // send_message
+#include <winapi/window/window.hpp>
 
 #include <boost/exception/errinfo_api_function.hpp> // errinfo_api_function
 #include <boost/exception/info.hpp> // errinfo
 #include <boost/integer_traits.hpp> // integer_traits
 #include <boost/function.hpp> // function
+#include <boost/make_shared.hpp>
 #include <boost/numeric/conversion/cast.hpp> // numeric_cast
+#include <boost/shared_ptr.hpp>
+#include <boost/thread/thread.hpp>
 #include <boost/throw_exception.hpp> // BOOST_THROW_EXCEPTION
 
 #include <comet/error.h>
 
 #include <algorithm> // transform
 #include <cassert> // assert
+#include <map>
 #include <stdexcept> // invalid_argument
 #include <string>
-#include <vector>
-#include <map>
 #include <utility> // pair
+#include <vector>
 
 #include <commctrl.h> // TASKDIALOG values
 
@@ -353,6 +359,227 @@ namespace detail {
 }
 
 /**
+ * Show progress as a marquee bar.
+ */
+class marquee_progress
+{
+public:
+    
+    /**
+     * Marquee updates animation at default intervals.
+     */
+    marquee_progress() : m_update_interval(0) {}
+
+    /**
+     * Marquee updates animation at intervals of `update_interval` milliseconds.
+     */
+    marquee_progress(UINT update_interval) 
+        : m_update_interval(update_interval) {}
+
+    /// @cond INTERNAL
+    // Limits library-internal access to selected privates
+    // See http://stackoverflow.com/q/3217390/67013.
+    class access_attorney
+    {
+        friend class progress_bar;
+    public:
+
+        static void call(
+            const marquee_progress& progress, ::winapi::window::window<> dialog,
+            bool change_type)
+        {
+            progress(dialog, change_type);
+        }
+
+    };
+    /// @endcond
+
+private:
+
+    friend class access_attorney;
+
+    void operator()(::winapi::window::window<> dialog, bool change_type) const
+    {
+        if (change_type)
+        {
+            ::winapi::send_message<wchar_t, BOOL>(
+                dialog.hwnd(), TDM_SET_MARQUEE_PROGRESS_BAR, TRUE, 0);
+        }
+
+        ::winapi::send_message<wchar_t, BOOL>(
+            dialog.hwnd(), TDM_SET_PROGRESS_BAR_MARQUEE, TRUE, m_update_interval);
+    }
+
+    UINT m_update_interval;
+};
+
+/**
+ * Show progress as a position along a range.
+ */
+class range_progress
+{
+public:
+    
+    /**
+     * Progress it at default position.
+     */
+    range_progress() : m_initial(0U), m_current(0U), m_end(0U) {}
+
+    /**
+     * Progress is at position `current` between `initial` and `end`.
+     */
+    range_progress(UINT initial, UINT current, UINT end)
+        : m_initial(initial), m_current(current), m_end(end) {}
+
+    /// @cond INTERNAL
+    // Limits library-internal access to selected privates
+    // See http://stackoverflow.com/q/3217390/67013.
+    class access_attorney
+    {
+        friend class progress_bar;
+    public:
+
+        static void call(
+            const range_progress& progress, ::winapi::window::window<> dialog,
+            bool change_type)
+        {
+            progress(dialog, change_type);
+        }
+
+    };
+    /// @endcond
+
+private:
+
+    friend class access_attorney;
+
+    void operator()(::winapi::window::window<> dialog, bool change_type) const
+    {
+        if (change_type)
+        {
+            ::winapi::send_message<wchar_t, BOOL>(
+                dialog.hwnd(), TDM_SET_MARQUEE_PROGRESS_BAR, FALSE, 0);
+        }
+
+        ::winapi::send_message<wchar_t, BOOL>(
+            dialog.hwnd(), TDM_SET_PROGRESS_BAR_RANGE, 0,
+            MAKELPARAM(m_initial, m_end));
+        ::winapi::send_message<wchar_t, BOOL>(
+            dialog.hwnd(), TDM_SET_PROGRESS_BAR_POS, m_current, 0);
+    }
+
+    UINT m_initial;
+    UINT m_current;
+    UINT m_end;
+};
+
+/**
+ * Progress-updating mechanism of a task dialog.
+ */
+class progress_bar
+{
+    enum current_type
+    {
+        range,
+        marquee
+    };
+
+public:
+
+    // We track the last type of progress set on this dialog, rather than blindly
+    // re-setting the type when doing the update, because re-setting the type
+    // also briefly resets the position, interrupting the smooth motion of the
+    // progress bars.
+
+    /**
+     * Set progress to the given position in range.
+     *
+     * If called when the progress display is a marquee, this changes the type
+     * a range-based display.
+     *
+     * If it was already a range-based display, this just updates the position
+     * and range.
+     */
+    void operator()(const range_progress& update)
+    {
+        range_progress::access_attorney::call(
+            update, m_dialog_window, m_current_type != range);
+
+        m_current_type = range;
+    }
+
+    /**
+     * Set the progress bar to a marquee.
+     *
+     * If called when the progress display is a normal progress bar, this changes
+     * the display to a marquee. 
+     *
+     * If the display was already a marquee, this resets the marquee animation
+     * to the beginning of the sweep.  Therefore, in the absence of intervening
+     * calls that set the progress to a range-based display, the caller should
+     * only call this method once, unless they really want the marquee sweep to
+     * restart.
+     */
+    void operator()(const marquee_progress& update)
+    {
+        marquee_progress::access_attorney::call(
+            update, m_dialog_window, m_current_type != marquee);
+
+        m_current_type = marquee;
+    }
+
+    /// @cond INTERNAL
+    /// Limits access to private constructor
+    class access_attorney
+    {
+        template<typename T, typename Impl>
+        friend class task_dialog;
+
+    public:
+        static progress_bar call(const winapi::window::window<>& dialog_window)
+        {
+            return progress_bar(dialog_window);
+        }
+    };
+    /// @endcond
+
+private:
+
+    friend class access_attorney;
+
+    progress_bar(const winapi::window::window<>& dialog_window) :
+       m_dialog_window(dialog_window), m_current_type(range) {}
+
+    winapi::window::window<> m_dialog_window;
+    current_type m_current_type;
+};
+
+/**
+ * Executes the given callable on a new thread to update the task dialog
+ * progress bar.
+ *
+ * Will start executing the callable once the task dialog starts and hands this
+ * object a progress bar update object.
+ */
+class async_progress_updater
+{
+public:
+
+    async_progress_updater(
+        const boost::function<void(const progress_bar&)> updater) :
+    m_updater(updater) {}
+
+    void operator()(const progress_bar& bar)
+    {
+        boost::thread(m_updater, bar).detach();
+    }
+
+private:
+
+    boost::function<void(const progress_bar&)> m_updater;
+};
+
+/**
  * Wrapper around the Windows TaskDialog.
  *
  * It calls TaskDialogIndirect by binding to it dynamically so will fail
@@ -424,6 +651,8 @@ public:
         // basic
         TASKDIALOGCONFIG tdc = {0};
         tdc.cbSize = sizeof(TASKDIALOGCONFIG);
+        tdc.pfCallback = callback_dethunker;
+        tdc.lpCallbackData = reinterpret_cast<LONG_PTR>(this);
 
         tdc.hwndParent = m_hwnd;
 
@@ -506,6 +735,16 @@ public:
             if (!m_expander_label_expanded.empty())
                 tdc.pszExpandedControlText =
                     m_expander_label_expanded.c_str();
+        }
+
+        if (m_bar_creation_callback)
+        {
+            // The callback being set means the user asked for a progress bar
+            tdc.dwFlags |= TDF_SHOW_PROGRESS_BAR;
+
+            // It doesn't matter that we don't say if it's a marquee here.
+            // That will be set when the caller uses the `progress_bar` that
+            // we hand them later
         }
 
         int which_button;
@@ -625,6 +864,23 @@ public:
         m_expander_label_expanded = expander_label_expanded;
     }
 
+    /**
+     * Includes a progress bar in the interface of the dialog being created.
+     *
+     * @param bar_creation_callback
+     *     A callable which will receive interface to the progress bar once
+     *     it is created.  This interface is how the caller can update
+     *     the progress bar.
+     */
+    void include_progress_bar(
+        const boost::function<void (const progress_bar&)>&
+            bar_creation_callback)
+    {
+        // Setting this doubles as a boolean flag to tell dialog-creation
+        // logic to set the progress flag
+        m_bar_creation_callback = bar_creation_callback;
+    }
+
 private:
     HWND m_hwnd;
     std::wstring m_main_instruction;
@@ -653,7 +909,55 @@ private:
     std::wstring m_expander_label_expanded;
     // @}
 
+    boost::optional<boost::function<void (const progress_bar&)>>
+        m_bar_creation_callback;
+
+    boost::optional<winapi::window::window<>> m_running_dialog;
+
     static T button_noop() { return T(); }
+
+    static HRESULT CALLBACK callback_dethunker(
+        HWND dialog_window, UINT notification, WPARAM wparam, LPARAM lparam,
+        LONG_PTR thunked_this) throw()
+    {
+        task_dialog* this_td = reinterpret_cast<task_dialog*>(thunked_this);
+
+        try
+        {
+            return this_td->callback(
+                dialog_window, notification, wparam, lparam);
+        }
+        WINAPI_COM_CATCH();
+    }
+
+    HRESULT callback(
+        HWND dialog_window, UINT notification,
+        WPARAM /*wparam*/, LPARAM /*lparam*/)
+    {
+        switch (notification)
+        {
+        case TDN_CREATED:
+            m_running_dialog = winapi::window::window<>(
+                winapi::window::window_handle::foster_handle(dialog_window));
+
+            if (m_bar_creation_callback)
+            {
+                assert(m_running_dialog);
+
+                (*m_bar_creation_callback)(
+                    progress_bar::access_attorney::call(*m_running_dialog));
+            }
+            return S_OK;
+
+        case TDN_DESTROYED:
+            assert(dialog_window == *m_running_dialog);
+            m_running_dialog = boost::optional<winapi::window::window<>>();
+            return S_OK;
+
+        default:
+            return S_OK;
+        }
+    }
 };
 
 }}} // namespace winapi::gui::task_dialog

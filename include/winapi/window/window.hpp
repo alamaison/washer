@@ -204,6 +204,16 @@ public:
             m_handle.get(), GWLP_WNDPROC, new_wndproc);
     }
 
+    bool operator==(window other) const
+    {
+        return m_handle.get() == other.m_handle.get();
+    }
+
+    bool operator==(HWND handle) const
+    {
+        return handle == m_handle.get();
+    }
+
     HWND hwnd() const { return m_handle.get(); }
 
 private:
@@ -236,6 +246,12 @@ private:
 
     window_handle m_handle;
 };
+
+template<typename T>
+bool operator==(HWND handle, const window<T>& other)
+{
+    return other == handle;
+}
 
 }} // namespace winapi::window
 

@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2010, 2011  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@
 #include <winapi/gui/task_dialog.hpp> // test subject
 
 #include <boost/test/unit_test.hpp>
+#include <boost/thread/thread.hpp> // boost::this_thread
 
 BOOST_AUTO_TEST_SUITE(task_dialog_tests)
 
@@ -183,6 +184,143 @@ BOOST_AUTO_TEST_CASE( create_with_custom_expander )
         winapi::gui::task_dialog::expansion_position::default,
         winapi::gui::task_dialog::initial_expansion_state::default,
         L"Here be there &dragons with really really really really really long tails", L"See! &Dragons");
+    //td.show();
+}
+
+
+namespace {
+
+    void start_marquee(winapi::gui::task_dialog::progress_bar bar)
+    {
+        bar(winapi::gui::task_dialog::marquee_progress());
+    }
+
+}
+
+/**
+ * Create a TaskDialog with marquee progress.
+ *
+ * Default update frequency.
+ */
+BOOST_AUTO_TEST_CASE( create_with_marquee )
+{
+    winapi::gui::task_dialog::task_dialog<void> td(
+        NULL, L"Marquee (default update)",
+        L"We tell it to start and update with a default (unspecified) "
+        L"frequency, which should mean every 30ms.\n"
+        L"Will sit and Cylon until dialog is closed.",
+        L"create_with_marquee");
+
+    td.include_progress_bar(start_marquee);
+
+    //td.show();
+}
+
+namespace {
+
+    void start_marquee_custom(
+        winapi::gui::task_dialog::progress_bar bar)
+    {
+        bar(winapi::gui::task_dialog::marquee_progress(300));
+    }
+
+}
+
+/**
+ * Create a TaskDialog with marquee progress.
+ *
+ * Custom update frequency.
+ */
+BOOST_AUTO_TEST_CASE( create_with_marquee_custom_update )
+{
+    winapi::gui::task_dialog::task_dialog<void> td(
+        NULL, L"Marquee (custom update)",
+        L"Created dialog and set marquee progress bar in callback.\n"
+        L"We tell it to start and update with a custom 0.3s "
+        L"frequency.\n"
+        L"Will sit and Cylon (jumpily) until dialog is closed.",
+        L"create_with_marquee_custom_update");
+
+    td.include_progress_bar(start_marquee_custom);
+    //td.show();
+}
+
+namespace {
+
+    void run_progress_update(winapi::gui::task_dialog::progress_bar bar)
+    {
+        for (int i=0; i < 10; ++i)
+        {
+            bar(winapi::gui::task_dialog::range_progress(0, i, 9));
+
+            boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+        }
+    }
+
+}
+
+/**
+ * Create a TaskDialog with steady range progress.
+ */
+BOOST_AUTO_TEST_CASE( with_range_progress )
+{
+    winapi::gui::task_dialog::task_dialog<void> td(
+        NULL, L"Range progress",
+        L"When dialog created we start updating progress with "
+        L"range_progress updates.\n"
+        L"Is incremented steadily to completion.",
+        L"with_range_progress");
+
+    td.include_progress_bar(
+        winapi::gui::task_dialog::async_progress_updater(
+            run_progress_update));
+
+    //td.show();
+}
+
+namespace {
+
+    void run_changing_progress_update(
+        winapi::gui::task_dialog::progress_bar bar)
+    {
+        for (int i=0; i < 6; ++i)
+        {
+            bar(winapi::gui::task_dialog::range_progress(0, i, 9));
+
+            boost::this_thread::sleep(boost::posix_time::milliseconds(300));
+        }
+
+        bar(winapi::gui::task_dialog::marquee_progress());
+
+        boost::this_thread::sleep(boost::posix_time::milliseconds(800));
+
+        for (int i=6; i < 10; ++i)
+        {
+            bar(winapi::gui::task_dialog::range_progress(0, i, 9));
+
+            boost::this_thread::sleep(boost::posix_time::milliseconds(300));
+        }
+
+    }
+}
+
+/**
+ * Create a TaskDialog with range progress but change to marquee part way
+ * through and then change back to finish.
+ */
+BOOST_AUTO_TEST_CASE( create_with_range_progress_change_type )
+{
+    winapi::gui::task_dialog::task_dialog<void> td(
+        NULL, L"Range-marquee-range",
+        L"Start with range, and run half way.\n"
+        L"Switch to marquee Cylon for a bit.\n"
+        L"Show the range again, starting from where we left off.",
+        L"create_with_range_progress_change_type");
+
+    td.include_progress_bar(
+        winapi::gui::task_dialog::async_progress_updater(
+            run_changing_progress_update));
+
     //td.show();
 }
 
