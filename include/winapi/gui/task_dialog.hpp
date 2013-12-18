@@ -385,10 +385,9 @@ public:
     public:
 
         static void call(
-            const marquee_progress& progress, ::winapi::window::window<> dialog,
-            bool change_type)
+            const marquee_progress& progress, ::winapi::window::window<> dialog)
         {
-            progress(dialog, change_type);
+            progress(dialog);
         }
 
     };
@@ -398,16 +397,19 @@ private:
 
     friend class access_attorney;
 
-    void operator()(::winapi::window::window<> dialog, bool change_type) const
+    void operator()(::winapi::window::window<> dialog) const
     {
-        if (change_type)
-        {
-            ::winapi::send_message<wchar_t, BOOL>(
-                dialog.hwnd(), TDM_SET_MARQUEE_PROGRESS_BAR, TRUE, 0);
-        }
+        ::winapi::send_message<wchar_t, BOOL>(
+            dialog.hwnd(), TDM_SET_MARQUEE_PROGRESS_BAR, TRUE, 0);
+
+        // In case the bar is currently in one of the coloured states.
+        // These states don't work with the marquee, they just freeze it
+        ::winapi::send_message<wchar_t>(
+            dialog.hwnd(), TDM_SET_PROGRESS_BAR_STATE, PBST_NORMAL, 0);
 
         ::winapi::send_message<wchar_t, BOOL>(
-            dialog.hwnd(), TDM_SET_PROGRESS_BAR_MARQUEE, TRUE, m_update_interval);
+            dialog.hwnd(), TDM_SET_PROGRESS_BAR_MARQUEE, TRUE,
+            m_update_interval);
     }
 
     UINT m_update_interval;
@@ -421,15 +423,86 @@ class range_progress
 public:
     
     /**
-     * Progress it at default position.
+     * Progress between 0 and 100.
      */
-    range_progress() : m_initial(0U), m_current(0U), m_end(0U) {}
+    range_progress() : m_initial(0U), m_end(0U) {}
 
     /**
-     * Progress is at position `current` between `initial` and `end`.
+     * Progress at a position between `initial` and `end`.
      */
-    range_progress(UINT initial, UINT current, UINT end)
-        : m_initial(initial), m_current(current), m_end(end) {}
+    range_progress(UINT initial, UINT end)
+        : m_initial(initial), m_end(end) {}
+
+    struct bar_state
+    {
+        enum enum_t
+        {
+            normal,
+            paused,
+            errored
+        };
+    };
+
+    /**
+     * Updates range-based progress bar position and state.
+     */
+    class progress_updater
+    {
+    public:
+
+        void update_position(UINT new_position)
+        {
+            // First set the progress bar one position too far forward
+            // to work around Vista+ progress bar bug:
+            // http://news.jrsoftware.org/news/innosetup/msg62356.html
+            //
+            // If the progress bar is still completing its animation
+            // when TDM_SET_PROGRESS_BAR_STATE is sent to it, it freezes the
+            // bar at its green state instead of redrawing it in yellow
+            // or read.  The advance-retreat trick seems to make it redraw
+            // properly.
+            ::winapi::send_message<wchar_t, BOOL>(
+                m_dialog_window.hwnd(), TDM_SET_PROGRESS_BAR_POS,
+                new_position + 1, 0);
+            ::winapi::send_message<wchar_t, BOOL>(
+                m_dialog_window.hwnd(), TDM_SET_PROGRESS_BAR_POS,
+                new_position, 0);
+        }
+
+        void bar_state(bar_state::enum_t new_state)
+        {
+            int state_flag;
+
+            switch (new_state)
+            {
+            case bar_state::normal:
+                state_flag = PBST_NORMAL;
+                break;
+
+            case bar_state::paused:
+                state_flag = PBST_PAUSED;
+                break;
+
+            default:
+                assert(!"Invalid bar state");
+            case bar_state::errored:
+                state_flag = PBST_ERROR;
+                break;
+            }
+
+            ::winapi::send_message<wchar_t>(
+                m_dialog_window.hwnd(), TDM_SET_PROGRESS_BAR_STATE,
+                state_flag, 0);
+        }
+
+    private:
+        friend class range_progress;
+
+        progress_updater(const ::winapi::window::window<>& dialog)
+            : m_dialog_window(dialog) {}
+
+        ::winapi::window::window<> m_dialog_window;
+    };
 
     /// @cond INTERNAL
     // Limits library-internal access to selected privates
@@ -439,11 +512,10 @@ public:
         friend class progress_bar;
     public:
 
-        static void call(
-            const range_progress& progress, ::winapi::window::window<> dialog,
-            bool change_type)
+        static progress_updater call(
+            const range_progress& progress, ::winapi::window::window<> dialog)
         {
-            progress(dialog, change_type);
+            return progress(dialog);
         }
 
     };
@@ -453,23 +525,23 @@ private:
 
     friend class access_attorney;
 
-    void operator()(::winapi::window::window<> dialog, bool change_type) const
+    progress_updater operator()(::winapi::window::window<> dialog) const
     {
-        if (change_type)
-        {
-            ::winapi::send_message<wchar_t, BOOL>(
-                dialog.hwnd(), TDM_SET_MARQUEE_PROGRESS_BAR, FALSE, 0);
-        }
+        ::winapi::send_message<wchar_t, BOOL>(
+            dialog.hwnd(), TDM_SET_MARQUEE_PROGRESS_BAR, FALSE, 0);
+
+        ::winapi::send_message<wchar_t>(
+            dialog.hwnd(), TDM_SET_PROGRESS_BAR_STATE,
+            PBST_NORMAL, 0);
 
         ::winapi::send_message<wchar_t, BOOL>(
             dialog.hwnd(), TDM_SET_PROGRESS_BAR_RANGE, 0,
             MAKELPARAM(m_initial, m_end));
-        ::winapi::send_message<wchar_t, BOOL>(
-            dialog.hwnd(), TDM_SET_PROGRESS_BAR_POS, m_current, 0);
+
+        return progress_updater(dialog);
     }
 
     UINT m_initial;
-    UINT m_current;
     UINT m_end;
 };
 
@@ -478,34 +550,38 @@ private:
  */
 class progress_bar
 {
-    enum current_type
-    {
-        range,
-        marquee
-    };
-
 public:
 
-    // We track the last type of progress set on this dialog, rather than blindly
-    // re-setting the type when doing the update, because re-setting the type
-    // also briefly resets the position, interrupting the smooth motion of the
-    // progress bars.
 
     /**
-     * Set progress to the given position in range.
+     * Set progress to a position bar with the given range.
      *
-     * If called when the progress display is a marquee, this changes the type
-     * a range-based display.
+     * The bar begins with the position at the start of the range.  The object
+     * returned can update the position and alter its state to a `paused` colour
+     * (typically yellow) or an `errored` colour (typically red).
+     * 
+     * If called when the progress display is a marquee, this method changes
+     * the type a range-based display.
      *
-     * If it was already a range-based display, this just updates the position
-     * and range.
+     * If it was already a range-based display, this adjusts the range and
+     * resets the position to the beginning of that range.
+     *
+     * @warning  The `progress_updater` returned is only valid until the next
+     *           call to the `progress_bar` instance that created it.  Use
+     *           after the next call leads to undefined behaviour.
      */
-    void operator()(const range_progress& update)
+    range_progress::progress_updater operator()(const range_progress& update)
     {
-        range_progress::access_attorney::call(
-            update, m_dialog_window, m_current_type != range);
+        // Instead of taking and range and position every time, we take the
+        // range once and return an object to set the position.  This is
+        // because setting the range also resets the bar to the beginning until
+        // we reset the position, making the bar appear to flicker.  Doing the
+        // range once make subsequent position updates smooth.
+        //
+        // Also, this is a tidier interface as the caller doesn't have to keep
+        // the range bound around to keep passing in with the new position.
 
-        m_current_type = range;
+        return range_progress::access_attorney::call(update, m_dialog_window);
     }
 
     /**
@@ -522,10 +598,7 @@ public:
      */
     void operator()(const marquee_progress& update)
     {
-        marquee_progress::access_attorney::call(
-            update, m_dialog_window, m_current_type != marquee);
-
-        m_current_type = marquee;
+        marquee_progress::access_attorney::call(update, m_dialog_window);
     }
 
     /// @cond INTERNAL
@@ -548,10 +621,9 @@ private:
     friend class access_attorney;
 
     progress_bar(const winapi::window::window<>& dialog_window) :
-       m_dialog_window(dialog_window), m_current_type(range) {}
+       m_dialog_window(dialog_window) {}
 
     winapi::window::window<> m_dialog_window;
-    current_type m_current_type;
 };
 
 /**

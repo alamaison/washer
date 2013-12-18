@@ -249,9 +249,12 @@ namespace {
 
     void run_progress_update(winapi::gui::task_dialog::progress_bar bar)
     {
+        winapi::gui::task_dialog::range_progress::progress_updater updater =
+            bar(winapi::gui::task_dialog::range_progress(0, 9));
+
         for (int i=0; i < 10; ++i)
         {
-            bar(winapi::gui::task_dialog::range_progress(0, i, 9));
+            updater.update_position(i);
 
             boost::this_thread::sleep(boost::posix_time::milliseconds(100));
         }
@@ -283,9 +286,14 @@ namespace {
     void run_changing_progress_update(
         winapi::gui::task_dialog::progress_bar bar)
     {
+        winapi::gui::task_dialog::range_progress our_range(0, 9);
+
+        winapi::gui::task_dialog::range_progress::progress_updater updater =
+            bar(our_range);
+
         for (int i=0; i < 6; ++i)
         {
-            bar(winapi::gui::task_dialog::range_progress(0, i, 9));
+            updater.update_position(i);
 
             boost::this_thread::sleep(boost::posix_time::milliseconds(300));
         }
@@ -294,9 +302,11 @@ namespace {
 
         boost::this_thread::sleep(boost::posix_time::milliseconds(800));
 
+        updater = bar(our_range);
+
         for (int i=6; i < 10; ++i)
         {
-            bar(winapi::gui::task_dialog::range_progress(0, i, 9));
+            updater.update_position(i);
 
             boost::this_thread::sleep(boost::posix_time::milliseconds(300));
         }
@@ -320,6 +330,109 @@ BOOST_AUTO_TEST_CASE( create_with_range_progress_change_type )
     td.include_progress_bar(
         winapi::gui::task_dialog::async_progress_updater(
             run_changing_progress_update));
+
+    //td.show();
+}
+
+namespace {
+
+    void run_pause_run(
+        winapi::gui::task_dialog::progress_bar bar)
+    {
+        winapi::gui::task_dialog::range_progress::progress_updater updater =
+            bar(winapi::gui::task_dialog::range_progress(0, 9));
+
+        for (int i=0; i < 6; ++i)
+        {
+            updater.update_position(i);
+
+            boost::this_thread::sleep(boost::posix_time::milliseconds(500));
+        }
+
+        updater.bar_state(
+            winapi::gui::task_dialog::range_progress::bar_state::paused);
+
+        // It can take a long time for the bar to be redrawn with the new
+        // state
+        boost::this_thread::sleep(boost::posix_time::milliseconds(2000));
+
+        updater.bar_state(
+            winapi::gui::task_dialog::range_progress::bar_state::normal);
+
+        for (int i=6; i < 10; ++i)
+        {
+            updater.update_position(i);
+
+            boost::this_thread::sleep(boost::posix_time::milliseconds(300));
+        }
+    }
+}
+
+/**
+ * Create a TaskDialog with marquee progress but pause it and restart it.
+ */
+BOOST_AUTO_TEST_CASE( range_pause )
+{
+    winapi::gui::task_dialog::task_dialog<void> td(
+        NULL, L"Range interrupted with pause",
+        L"Start incrementing progress.\n"
+        L"Pause after a bit, then continue as normal.",
+        L"range_pause");
+
+    td.include_progress_bar(
+        winapi::gui::task_dialog::async_progress_updater(run_pause_run));
+
+    //td.show();
+}
+
+namespace {
+
+    void run_error_run(
+        winapi::gui::task_dialog::progress_bar bar)
+    {
+        winapi::gui::task_dialog::range_progress::progress_updater updater =
+            bar(winapi::gui::task_dialog::range_progress(0, 9));
+
+        for (int i=0; i < 6; ++i)
+        {
+            updater.update_position(i);
+
+            boost::this_thread::sleep(boost::posix_time::milliseconds(500));
+        }
+
+        updater.bar_state(
+            winapi::gui::task_dialog::range_progress::bar_state::errored);
+
+        // It can take a long time for the bar to be redrawn with the new
+        // state
+        boost::this_thread::sleep(boost::posix_time::milliseconds(2000));
+
+        updater.bar_state(
+            winapi::gui::task_dialog::range_progress::bar_state::normal);
+
+        for (int i=6; i < 10; ++i)
+        {
+            updater.update_position(i);
+
+            boost::this_thread::sleep(boost::posix_time::milliseconds(300));
+        }
+    }
+}
+
+/**
+ * Create a TaskDialog with marquee progress but display error before
+ * continuing.
+ */
+BOOST_AUTO_TEST_CASE( range_error )
+{
+    winapi::gui::task_dialog::task_dialog<void> td(
+        NULL, L"Range interrupted with error",
+        L"Start incrementing progress.\n"
+        L"Change to error after a bit, then continue as normal.",
+        L"range_error");
+
+    td.include_progress_bar(
+        winapi::gui::task_dialog::async_progress_updater(run_error_run));
 
     //td.show();
 }
