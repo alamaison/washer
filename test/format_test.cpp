@@ -165,7 +165,11 @@ namespace {
     basic_string<T> expected_default_date(const datetime_t& date)
     {
         SYSTEMTIME st;
-        date.to_systemtime(&st);
+
+        // The shell expects to get a UTC date and converts to local timezone
+        // for formatting.  We match that behaviour here to get the expected
+        // result.
+        date.utc_to_local().to_systemtime(&st);
 
         basic_string<T>::value_type space[] = {' ', '\0'};
 
