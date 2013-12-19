@@ -257,6 +257,7 @@ namespace detail {
                 HRESULT (const TASKDIALOGCONFIG*, int*, int*, BOOL*)>(
                 "comctl32.dll", "TaskDialogIndirect")) {}
     };
+
 }
 
 namespace button_type
@@ -366,6 +367,7 @@ namespace detail {
         tdb.pszButtonText = button.second.c_str();
         return tdb;
     }
+
 }
 
 /**
@@ -422,10 +424,10 @@ private:
  * Will start executing the callable once the task dialog starts.
  *
  * The purpose of this class is to do long-running updates to the task dialog.
- * These cannot be done in the dialog creation callback, as that would freeze
- * the dialog while the updates executed.  This class solves the problem by
- * spawning a new thread to run the updates, once the creation callback gives
- * us the task dialog object to run them on.
+ * These cannot be done in the dialog creation callback, as that would prevent
+ * the dialog from being displayed while the updates executed.  This class
+ * solves the problem by spawning a new thread to run the updates, once the
+ * creation callback gives us the task dialog object to run them on.
  */
 class async_dialog_updater
 {
@@ -739,6 +741,85 @@ private:
 };
 
 /**
+ * Represents the extended text area of a running task dialog.
+ */
+class extended_text_area
+{
+public:
+
+    void update_text(const std::wstring& new_text)
+    {
+        ::winapi::send_message<wchar_t>(
+            m_dialog_window.hwnd(), TDM_SET_ELEMENT_TEXT,
+            TDE_EXPANDED_INFORMATION, new_text.c_str());
+    }
+
+    /// @cond INTERNAL
+    /// Limits access to private constructor
+    class access_attorney
+    {
+        template<typename T, typename Impl>
+        friend class task_dialog_builder;
+
+    public:
+        static extended_text_area create(
+            const winapi::window::window<>& dialog_window)
+        {
+            return extended_text_area(dialog_window);
+        }
+    };
+    /// @endcond
+
+private:
+
+    friend class access_attorney;
+
+    extended_text_area(const winapi::window::window<>& dialog_window) :
+       m_dialog_window(dialog_window) {}
+
+    winapi::window::window<> m_dialog_window;
+};
+
+/**
+ * Executes the given callable on a new thread to update the task dialog's
+ * extended text area while the dialog is running.
+ *
+ * Will start executing the callable once the task dialog starts.
+ *
+ * The purpose of this class is to do long-running updates to the task dialog
+ * text area.  These cannot be done in the dialog creation callback, as that
+ * would prevent the dialog being displayed while the updates executed.  This
+ * class solves the problem by spawning a new thread to run the updates, once
+ * the creation callback gives us the text area object to run them on.
+ */
+class async_extended_text_updater
+{
+public:
+
+    async_extended_text_updater(
+        const boost::function<void(const extended_text_area&)> updater) :
+    m_updater(updater) {}
+
+    void operator()(const extended_text_area& text_area)
+    {
+        boost::thread(m_updater, text_area).detach();
+    }
+
+private:
+
+    boost::function<void(const extended_text_area&)> m_updater;
+};
+
+namespace detail {
+
+    // For some reason these don't work as default arguments if we template
+    // them
+    inline void task_dialog_noop(const task_dialog&) {}
+    inline void extended_text_area_noop(const extended_text_area&) {}
+
+}
+
+/**
  * Creator of running Windows Task Dialogs.
  *
  * It calls TaskDialogIndirect by binding to it dynamically so will fail
@@ -806,7 +887,7 @@ public:
         m_default_radio_button(0),
         m_expansion_state(initial_expansion_state::default),
         m_expansion_position(expansion_position::default),
-        m_dialog_creation_callback(dialog_creation_noop)
+        m_dialog_creation_callback(detail::task_dialog_noop)
         {}
 
     /**
@@ -822,8 +903,8 @@ public:
      * @returns any value returned by the clicked button's callback.
      */
     T show(
-        const boost::function<void (const task_dialog&)>&
-            dialog_creation_callback=dialog_creation_noop)
+        boost::function<void (const task_dialog&)>
+            dialog_creation_callback=detail::task_dialog_noop)
     {
         // basic
         TASKDIALOGCONFIG tdc = {0};
@@ -933,7 +1014,7 @@ public:
                 boost::enable_error_info(comet::com_error(hr)) <<
                 boost::errinfo_api_function("TaskDialogIndirect"));
 
-        m_dialog_creation_callback = dialog_creation_noop;
+        m_dialog_creation_callback = detail::task_dialog_noop;
 
         assert(!m_callbacks.empty()); // windows will add a button if we didn't
         
@@ -1039,13 +1120,16 @@ public:
         expansion_position::position position=expansion_position::default,
         initial_expansion_state::state state=initial_expansion_state::default,
         const std::wstring& expander_label_collapsed=std::wstring(),
-        const std::wstring& expander_label_expanded=std::wstring())
+        const std::wstring& expander_label_expanded=std::wstring(),
+        boost::function<void (const extended_text_area&)>
+            extended_text_creation_callback=detail::extended_text_area_noop)
     {
         m_extended_text = text;
         m_expansion_position = position;
         m_expansion_state = state;
         m_expander_label_collapsed = expander_label_collapsed;
         m_expander_label_expanded = expander_label_expanded;
+        m_expando_creation_callback = extended_text_creation_callback;
     }
 
     /**
@@ -1096,11 +1180,12 @@ private:
     boost::function<void (const task_dialog&)> m_dialog_creation_callback;
     boost::optional<boost::function<void (const progress_bar&)>>
         m_bar_creation_callback;
+    boost::optional<boost::function<void (const extended_text_area&)>>
+        m_expando_creation_callback;
 
     boost::optional<winapi::window::window<>> m_running_dialog;
 
     static T button_noop() { return T(); }
-    static void dialog_creation_noop(const task_dialog&) {}
 
     static HRESULT CALLBACK callback_dethunker(
         HWND dialog_window, UINT notification, WPARAM wparam, LPARAM lparam,
@@ -1130,6 +1215,13 @@ private:
 
             m_dialog_creation_callback(task_dialog::access_attorney::create(
                 *m_running_dialog));
+
+            if (m_expando_creation_callback)
+            {
+                (*m_expando_creation_callback)(
+                    extended_text_area::access_attorney::create(
+                        *m_running_dialog));
+            }
 
             if (m_bar_creation_callback)
             {

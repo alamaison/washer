@@ -491,4 +491,36 @@ BOOST_AUTO_TEST_CASE( dynamic_change_content )
     }
 }
 
+namespace {
+
+    void change_extended_text(
+        winapi::gui::task_dialog::extended_text_area text_area)
+    {
+        boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+        text_area.update_text(L"And\nnow\nfor\nsomething\nelse");
+    }
+}
+
+/**
+ * Change content text of dialog while running.
+ */
+BOOST_AUTO_TEST_CASE( dynamic_change_expando )
+{
+    winapi::gui::task_dialog::task_dialog_builder<void> td(
+        NULL, L"Notice how the expando text changes.",
+        L"Expand it quickly to catch it.",
+        L"dynamic_change_expando");
+
+    td.extended_text(
+        L"Hola", winapi::gui::task_dialog::expansion_position::default,
+        winapi::gui::task_dialog::initial_expansion_state::default, L"", L"",
+        winapi::gui::task_dialog::async_extended_text_updater(
+            change_extended_text));
+
+    if (false)
+    {
+        td.show();
+    }
+}
+
 BOOST_AUTO_TEST_SUITE_END();
