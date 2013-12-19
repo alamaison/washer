@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_SUITE(task_dialog_tests)
  */
 BOOST_AUTO_TEST_CASE( create )
 {
-    winapi::gui::task_dialog::task_dialog<void> td(
+    winapi::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     //td.show();
@@ -57,7 +57,7 @@ int throw_something() { throw std::exception("I throw if invoked"); }
  */
 BOOST_AUTO_TEST_CASE( create_with_buttons )
 {
-    winapi::gui::task_dialog::task_dialog<void> td(
+    winapi::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.add_button(L"Uncommon button 1", throw_something);
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE( create_with_buttons )
  */
 BOOST_AUTO_TEST_CASE( create_with_radio_buttons )
 {
-    winapi::gui::task_dialog::task_dialog<void> td(
+    winapi::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.add_radio_button(27, L"Option 1");
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE( create_with_radio_buttons )
  */
 BOOST_AUTO_TEST_CASE( create_with_collapsed_extended_text_above )
 {
-    winapi::gui::task_dialog::task_dialog<> td(
+    winapi::gui::task_dialog::task_dialog_builder<> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.extended_text(L"Detailed explanation");
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE( create_with_collapsed_extended_text_above )
  */
 BOOST_AUTO_TEST_CASE( create_with_expanded_extended_text_above )
 {
-    winapi::gui::task_dialog::task_dialog<> td(
+    winapi::gui::task_dialog::task_dialog_builder<> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.extended_text(
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE( create_with_expanded_extended_text_above )
  */
 BOOST_AUTO_TEST_CASE( create_with_collapsed_extended_text_below )
 {
-    winapi::gui::task_dialog::task_dialog<> td(
+    winapi::gui::task_dialog::task_dialog_builder<> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.extended_text(
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE( create_with_collapsed_extended_text_below )
  */
 BOOST_AUTO_TEST_CASE( create_with_expanded_extended_text_below )
 {
-    winapi::gui::task_dialog::task_dialog<> td(
+    winapi::gui::task_dialog::task_dialog_builder<> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.extended_text(
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE( create_with_expanded_extended_text_below )
  */
 BOOST_AUTO_TEST_CASE( create_with_custom_collapsed_expander )
 {
-    winapi::gui::task_dialog::task_dialog<> td(
+    winapi::gui::task_dialog::task_dialog_builder<> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.extended_text(
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE( create_with_custom_collapsed_expander )
  */
 BOOST_AUTO_TEST_CASE( create_with_custom_expanded_expander )
 {
-    winapi::gui::task_dialog::task_dialog<> td(
+    winapi::gui::task_dialog::task_dialog_builder<> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.extended_text(
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE( create_with_custom_expanded_expander )
  */
 BOOST_AUTO_TEST_CASE( create_with_custom_expander )
 {
-    winapi::gui::task_dialog::task_dialog<> td(
+    winapi::gui::task_dialog::task_dialog_builder<> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.extended_text(
@@ -204,7 +204,7 @@ namespace {
  */
 BOOST_AUTO_TEST_CASE( create_with_marquee )
 {
-    winapi::gui::task_dialog::task_dialog<void> td(
+    winapi::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Marquee (default update)",
         L"We tell it to start and update with a default (unspecified) "
         L"frequency, which should mean every 30ms.\n"
@@ -233,7 +233,7 @@ namespace {
  */
 BOOST_AUTO_TEST_CASE( create_with_marquee_custom_update )
 {
-    winapi::gui::task_dialog::task_dialog<void> td(
+    winapi::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Marquee (custom update)",
         L"Created dialog and set marquee progress bar in callback.\n"
         L"We tell it to start and update with a custom 0.3s "
@@ -267,7 +267,7 @@ namespace {
  */
 BOOST_AUTO_TEST_CASE( with_range_progress )
 {
-    winapi::gui::task_dialog::task_dialog<void> td(
+    winapi::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Range progress",
         L"When dialog created we start updating progress with "
         L"range_progress updates.\n"
@@ -320,7 +320,7 @@ namespace {
  */
 BOOST_AUTO_TEST_CASE( create_with_range_progress_change_type )
 {
-    winapi::gui::task_dialog::task_dialog<void> td(
+    winapi::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Range-marquee-range",
         L"Start with range, and run half way.\n"
         L"Switch to marquee Cylon for a bit.\n"
@@ -373,7 +373,7 @@ namespace {
  */
 BOOST_AUTO_TEST_CASE( range_pause )
 {
-    winapi::gui::task_dialog::task_dialog<void> td(
+    winapi::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Range interrupted with pause",
         L"Start incrementing progress.\n"
         L"Pause after a bit, then continue as normal.",
@@ -425,7 +425,7 @@ namespace {
  */
 BOOST_AUTO_TEST_CASE( range_error )
 {
-    winapi::gui::task_dialog::task_dialog<void> td(
+    winapi::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Range interrupted with error",
         L"Start incrementing progress.\n"
         L"Change to error after a bit, then continue as normal.",
@@ -435,6 +435,60 @@ BOOST_AUTO_TEST_CASE( range_error )
         winapi::gui::task_dialog::async_progress_updater(run_error_run));
 
     //td.show();
+}
+
+namespace {
+
+    void change_instruction(winapi::gui::task_dialog::task_dialog dialog)
+    {
+        boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+        dialog.instruction(L"And then changes to this");
+    }
+}
+
+/**
+ * Change instruction text of dialog while running.
+ */
+BOOST_AUTO_TEST_CASE( dynamic_change_instruction )
+{
+    winapi::gui::task_dialog::task_dialog_builder<void> td(
+        NULL, L"Instruction starts off like this",
+        L"Notice how the instruction text changes.",
+        L"dynamic_change_instruction");
+
+    if (false)
+    {
+        td.show(
+            winapi::gui::task_dialog::async_dialog_updater(
+                change_instruction));
+    }
+}
+
+namespace {
+
+    void change_content(winapi::gui::task_dialog::task_dialog dialog)
+    {
+        boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+        dialog.content(L"And\nnow\nfor\nsomething\nelse");
+    }
+}
+
+/**
+ * Change content text of dialog while running.
+ */
+BOOST_AUTO_TEST_CASE( dynamic_change_content )
+{
+    winapi::gui::task_dialog::task_dialog_builder<void> td(
+        NULL, L"Notice how the content changes.",
+        L"Here's the initial content.",
+        L"dynamic_change_content");
+
+    if (false)
+    {
+        td.show(
+            winapi::gui::task_dialog::async_dialog_updater(
+                change_content));
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END();

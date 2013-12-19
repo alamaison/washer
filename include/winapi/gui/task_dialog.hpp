@@ -369,6 +369,83 @@ namespace detail {
 }
 
 /**
+ * A running task dialog.
+ */
+class task_dialog
+{
+public:
+
+    void instruction(const std::wstring& new_instruction_text)
+    {
+        ::winapi::send_message<wchar_t>(
+            m_dialog_window.hwnd(), TDM_SET_ELEMENT_TEXT, TDE_MAIN_INSTRUCTION,
+            new_instruction_text.c_str());
+    }
+
+    void content(const std::wstring& new_content_text)
+    {
+        ::winapi::send_message<wchar_t>(
+            m_dialog_window.hwnd(), TDM_SET_ELEMENT_TEXT, TDE_CONTENT,
+            new_content_text.c_str());
+    }
+
+    /// @cond INTERNAL
+    /// Limits access to private constructor
+    class access_attorney
+    {
+        template<typename T, typename Impl>
+        friend class task_dialog_builder;
+
+    public:
+
+        static task_dialog create(const winapi::window::window<>& dialog_window)
+        {
+            return task_dialog(dialog_window);
+        }
+    };
+    /// @endcond
+
+private:
+
+    friend class access_attorney;
+
+    task_dialog(const winapi::window::window<>& dialog_window) :
+        m_dialog_window(dialog_window) {}
+
+    winapi::window::window<> m_dialog_window;
+};
+
+/**
+ * Executes the given callable on a new thread to update the task dialog while
+ * it's running.
+ *
+ * Will start executing the callable once the task dialog starts.
+ *
+ * The purpose of this class is to do long-running updates to the task dialog.
+ * These cannot be done in the dialog creation callback, as that would freeze
+ * the dialog while the updates executed.  This class solves the problem by
+ * spawning a new thread to run the updates, once the creation callback gives
+ * us the task dialog object to run them on.
+ */
+class async_dialog_updater
+{
+public:
+
+    async_dialog_updater(
+        const boost::function<void(const task_dialog&)> updater) :
+    m_updater(updater) {}
+
+    void operator()(const task_dialog& bar)
+    {
+        boost::thread(m_updater, bar).detach();
+    }
+
+private:
+
+    boost::function<void(const task_dialog&)> m_updater;
+};
+
+/**
  * Show progress as a marquee bar.
  */
 class marquee_progress
@@ -616,7 +693,7 @@ public:
     class access_attorney
     {
         template<typename T, typename Impl>
-        friend class task_dialog;
+        friend class task_dialog_builder;
 
     public:
         static progress_bar call(const winapi::window::window<>& dialog_window)
@@ -662,7 +739,7 @@ private:
 };
 
 /**
- * Wrapper around the Windows TaskDialog.
+ * Creator of running Windows Task Dialogs.
  *
  * It calls TaskDialogIndirect by binding to it dynamically so will fail
  * gracefully by throwing an exception on versions of Windows prior to Vista.
@@ -674,14 +751,22 @@ private:
  *              TaskDialog emulator for earlier versions of Windows).
  */
 template<typename T=void, typename Impl=detail::bind_task_dialog_indirect>
-class task_dialog
+class task_dialog_builder
 {
 public:
     typedef boost::function<T ()> button_callback;
     typedef std::pair<int, std::wstring> button;
 
     /**
-     * Create a TaskDialog.
+     * Create a TaskDialog builder.
+     *
+     * The builder take arguments that are compulsory for any task dialog.
+     *
+     * Optional properties of the task dialog can be set using the builder's
+     * methods.
+     *
+     * The builder creates the task dialog, from the compulsory arguments and
+     * any optional properties set, when the `show` method is called.
      *
      * @param parent_hwnd            Handle to parent window, may be NULL.
      * @param main_instruction       Text of main instruction line.
@@ -702,7 +787,7 @@ public:
      *                               them with the common buttons arranged
      *                               horizontally at the bottom.
      */
-    task_dialog(
+    task_dialog_builder(
         HWND parent_hwnd, const std::wstring& main_instruction,
         const std::wstring& content, const std::wstring& window_title,
         icon_type::type icon=icon_type::none,
@@ -720,15 +805,25 @@ public:
         m_default_button(0),
         m_default_radio_button(0),
         m_expansion_state(initial_expansion_state::default),
-        m_expansion_position(expansion_position::default)
+        m_expansion_position(expansion_position::default),
+        m_dialog_creation_callback(dialog_creation_noop)
         {}
 
     /**
      * Display the Task dialog and return when a button is clicked.
      *
+     * @param dialog_creation_callback
+     *     A callable that will be passed the task dialog once it is running,
+     *     allowing it to be updated dynamically.  Do not do any long-running
+     *     operation in this callback, as the dialog is not shown until it
+     *     returns.  Instead use `async_dialog_updater` to spawn an operation
+     *     on a new thread in the callback.
+     *
      * @returns any value returned by the clicked button's callback.
      */
-    T show()
+    T show(
+        const boost::function<void (const task_dialog&)>&
+            dialog_creation_callback=dialog_creation_noop)
     {
         // basic
         TASKDIALOGCONFIG tdc = {0};
@@ -829,12 +924,16 @@ public:
             // we hand them later
         }
 
+        m_dialog_creation_callback = dialog_creation_callback;
+
         int which_button;
         HRESULT hr = Impl()(&tdc, &which_button, NULL, NULL);
         if (hr != S_OK)
             BOOST_THROW_EXCEPTION(
                 boost::enable_error_info(comet::com_error(hr)) <<
                 boost::errinfo_api_function("TaskDialogIndirect"));
+
+        m_dialog_creation_callback = dialog_creation_noop;
 
         assert(!m_callbacks.empty()); // windows will add a button if we didn't
         
@@ -994,18 +1093,20 @@ private:
     std::wstring m_expander_label_expanded;
     // @}
 
+    boost::function<void (const task_dialog&)> m_dialog_creation_callback;
     boost::optional<boost::function<void (const progress_bar&)>>
         m_bar_creation_callback;
 
     boost::optional<winapi::window::window<>> m_running_dialog;
 
     static T button_noop() { return T(); }
+    static void dialog_creation_noop(const task_dialog&) {}
 
     static HRESULT CALLBACK callback_dethunker(
         HWND dialog_window, UINT notification, WPARAM wparam, LPARAM lparam,
         LONG_PTR thunked_this) throw()
     {
-        task_dialog* this_td = reinterpret_cast<task_dialog*>(thunked_this);
+        task_dialog_builder* this_td = reinterpret_cast<task_dialog_builder*>(thunked_this);
 
         try
         {
@@ -1025,9 +1126,13 @@ private:
             m_running_dialog = winapi::window::window<>(
                 winapi::window::window_handle::foster_handle(dialog_window));
 
+            assert(m_running_dialog);
+
+            m_dialog_creation_callback(task_dialog::access_attorney::create(
+                *m_running_dialog));
+
             if (m_bar_creation_callback)
             {
-                assert(m_running_dialog);
 
                 (*m_bar_creation_callback)(
                     progress_bar::access_attorney::call(*m_running_dialog));
