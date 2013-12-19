@@ -216,6 +216,10 @@ struct TASKDIALOGCONFIG
 #include <poppack.h>
 #endif
 
+#define PBST_NORMAL 0x0001
+#define PBST_ERROR 0x0002
+#define PBST_PAUSED 0x0003
+
 #endif
 
 

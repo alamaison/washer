@@ -79,7 +79,7 @@ target_link_libraries(tests_win9x load_test_dll)
 get_target_property(test_win9x_EXE tests_win9x LOCATION)
 set_target_properties(
   tests_win9x PROPERTIES
-  COMPILE_DEFINITIONS WINVER=0x0400)
+  COMPILE_DEFINITIONS "WINVER=0x0400;_WIN32_WINNT=0x0400")
 
 set(TEST_RUNNER_ARGUMENTS
   --catch_system_errors --detect_memory_leaks
