@@ -41,16 +41,16 @@ namespace detail {
     namespace native {
 
         template<typename T>
-        LRESULT send_message(
+        inline LRESULT send_message(
             HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
         template<>
-        LRESULT send_message<char>(
+        inline LRESULT send_message<char>(
             HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
         { return ::SendMessageA(hwnd, message, wparam, lparam); }
 
         template<>
-        LRESULT send_message<wchar_t>(
+        inline LRESULT send_message<wchar_t>(
             HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
         { return ::SendMessageW(hwnd, message, wparam, lparam); }
     }
