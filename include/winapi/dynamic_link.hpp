@@ -301,7 +301,7 @@ namespace detail {
         const boost::filesystem::path& library_path,
         const std::string& function_name)
 #else
-    template<typename T, typename String, typename Traits>
+    template<typename Signature, typename String, typename Traits>
     inline boost::function<Signature> load_function(
         const boost::filesystem::basic_path<String, Traits>& library_path,
         const std::string& function_name)
@@ -339,7 +339,7 @@ inline boost::function<Signature> load_function(
  * @returns  Callable that invokes loaded function with given `Signature`.
  */
 #if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION < 3
-template<typename T>
+template<typename Signature>
 inline boost::function<Signature> load_function(
     const boost::filesystem::wpath& library_path, const std::string& name)
 { return detail::load_function<Signature>(library_path, name); }
