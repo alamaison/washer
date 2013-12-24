@@ -377,6 +377,50 @@ namespace detail {
 }
 
 /**
+ * Identity of a command associated with a task dialog.
+ *
+ * This class identifies a command in a task dialog both before the dialog
+ * has been created and once it is running.
+ */
+class command_id
+{
+public:
+
+    /// @cond INTERNAL
+    /// Limits access to internals
+    class factory_attorney
+    {
+        template<typename T, typename Impl>
+        friend class task_dialog_builder;
+
+        static command_id create(int id)
+        {
+            return command_id(id);
+        }
+    };
+
+    class id_attorney
+    {
+        friend class task_dialog;
+
+        static int id(const command_id& instance)
+        {
+            return instance.m_id;
+        }
+    };
+    /// @endcond
+
+private:
+
+    friend class factory_attorney;
+    friend class id_attorney;
+
+    command_id(int id) : m_id(id) {}
+
+    int m_id;
+};
+
+/**
  * A running task dialog.
  */
 class task_dialog
@@ -395,6 +439,13 @@ public:
         ::winapi::send_message<wchar_t>(
             m_dialog_window.hwnd(), TDM_SET_ELEMENT_TEXT, TDE_CONTENT,
             new_content_text.c_str());
+    }
+
+    void invoke_command(command_id command)
+    {
+        ::winapi::send_message<wchar_t>(
+            m_dialog_window.hwnd(), TDM_CLICK_BUTTON,
+            command_id::id_attorney::id(command), 0);
     }
 
     /// @cond INTERNAL
@@ -882,9 +933,10 @@ namespace detail {
 template<typename T=void, typename Impl=detail::bind_task_dialog_indirect>
 class task_dialog_builder
 {
+    typedef std::pair<int, std::wstring> button_caption;
+
 public:
     typedef boost::function<T ()> button_callback;
-    typedef std::pair<int, std::wstring> button;
 
     /**
      * Create a TaskDialog builder.
@@ -1082,7 +1134,7 @@ public:
      *                  call to @c show().
      * @param default   If true, set this to be the default button.
      */
-    void add_button(
+    command_id add_button(
         button_type::type type, button_callback callback, bool default=false)
     {
         assert(
@@ -1093,6 +1145,8 @@ public:
         m_callbacks[type] = callback;
         if (default)
             m_default_button = type;
+
+        return command_id::factory_attorney::create(type);
     }
 
     /**
@@ -1112,7 +1166,7 @@ public:
      *                  call to @c show().
      * @param default   If true, set this to be the default button.
      */
-    void add_button(
+    command_id add_button(
         const std::wstring& caption, button_callback callback,
         bool default=false)
     {
@@ -1129,10 +1183,12 @@ public:
             boost::numeric_cast<int>(m_buttons.size());
         assert(m_callbacks.find(next_id) == m_callbacks.end());
 
-        m_buttons.push_back(button(next_id, caption));
+        m_buttons.push_back(button_caption(next_id, caption));
         m_callbacks[next_id] = callback;
         if (default)
             m_default_button = next_id;
+
+        return command_id::factory_attorney::create(next_id);
     }
 
     /**
@@ -1145,7 +1201,7 @@ public:
     void add_radio_button(
         int id, const std::wstring& caption, bool default=false)
     {
-        m_radio_buttons.push_back(button(id, caption));
+        m_radio_buttons.push_back(button_caption(id, caption));
         if (default)
             m_default_radio_button = id;
     }
@@ -1209,9 +1265,9 @@ private:
     /** @name  Button State */
     // @{
     TASKDIALOG_COMMON_BUTTON_FLAGS m_common_buttons; ///< Common dialog buttons
-    std::vector<button> m_buttons; ///< Buttons with strings owned by us
+    std::vector<button_caption> m_buttons; ///< Buttons with strings owned by us
     std::map<int, button_callback> m_callbacks; /// Map button IDs to callbacks
-    std::vector<button> m_radio_buttons; ///< Radio buttons, strings owned by us
+    std::vector<button_caption> m_radio_buttons; ///< Radio buttons, strings owned by us
     int m_default_button;
     int m_default_radio_button;
     // @}
@@ -1273,15 +1329,15 @@ private:
 
             if (m_bar_creation_callback)
             {
-
                 (*m_bar_creation_callback)(
                     progress_bar::access_attorney::call(*m_running_dialog));
             }
+
             return S_OK;
 
         case TDN_DESTROYED:
             assert(dialog_window == *m_running_dialog);
-            m_running_dialog = boost::optional<winapi::window::window<>>();
+            m_running_dialog.reset();
             return S_OK;
 
         default:

@@ -31,8 +31,13 @@
 
 #include <winapi/gui/task_dialog.hpp> // test subject
 
+#include <boost/bind/bind.hpp>
+#include <boost/noncopyable.hpp>
 #include <boost/test/unit_test.hpp>
 #include <boost/thread/thread.hpp> // boost::this_thread
+
+using boost::bind;
+using boost::noncopyable;
 
 #ifndef WINAPI_TEST_ALLOW_REQUIRES_INTERACTION
 #define WINAPI_TEST_ALLOW_REQUIRES_INTERACTION 0
@@ -585,6 +590,54 @@ BOOST_AUTO_TEST_CASE( dynamic_change_expando )
     {
         td.show();
     }
+}
+
+namespace {
+
+    void do_nothing_command() {}
+
+    void dismiss_dialog_after_pause(
+        winapi::gui::task_dialog::task_dialog dialog,
+        winapi::gui::task_dialog::command_id id)
+    {
+        boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+
+        dialog.invoke_command(id);
+    }
+}
+
+BOOST_AUTO_TEST_CASE( dismiss_common_button )
+{
+    winapi::gui::task_dialog::task_dialog_builder<void> td(
+        NULL, L"Click button programatically.",
+        L"Don't click the button, the dialog should still disappear.",
+        L"dismiss_common_button");
+
+    winapi::gui::task_dialog::command_id id = td.add_button(
+        winapi::gui::task_dialog::button_type::close,  do_nothing_command);
+
+    td.show(
+        winapi::gui::task_dialog::async_dialog_updater(
+        bind(dismiss_dialog_after_pause, _1, id)));
+
+    // If the dialog disappears without us clicking the button, it works
+}
+
+BOOST_AUTO_TEST_CASE( dismiss_custom_button )
+{
+    winapi::gui::task_dialog::task_dialog_builder<void> td(
+        NULL, L"Click button programatically.",
+        L"Don't click the button, the dialog should still disappear.",
+        L"dismiss_custom_button");
+
+    winapi::gui::task_dialog::command_id id = td.add_button(
+        L"DON'T PRESS ME",  do_nothing_command);
+
+    td.show(
+        winapi::gui::task_dialog::async_dialog_updater(
+            bind(dismiss_dialog_after_pause, _1, id)));
+
+    // If the dialog disappears without us clicking the button, it works
 }
 
 BOOST_AUTO_TEST_SUITE_END();
