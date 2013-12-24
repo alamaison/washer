@@ -34,6 +34,10 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/thread/thread.hpp> // boost::this_thread
 
+#ifndef WINAPI_TEST_ALLOW_REQUIRES_INTERACTION
+#define WINAPI_TEST_ALLOW_REQUIRES_INTERACTION 0
+#endif
+
 BOOST_AUTO_TEST_SUITE(task_dialog_tests)
 
 /**
@@ -44,7 +48,11 @@ BOOST_AUTO_TEST_CASE( create )
     winapi::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
-    //td.show();
+
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    {
+        td.show();
+    }
 }
 
 int throw_something() { throw std::exception("I throw if invoked"); }
@@ -65,7 +73,11 @@ BOOST_AUTO_TEST_CASE( create_with_buttons )
         winapi::gui::task_dialog::button_type::close, throw_something);
     td.add_button(
         L"Uncommon button\nWith another string underneath", throw_something);
-    //td.show();
+
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    {
+        td.show();
+    }
 }
 
 /**
@@ -80,7 +92,11 @@ BOOST_AUTO_TEST_CASE( create_with_radio_buttons )
     td.add_button(
         L"Uncommon button\nWith another string underneath", throw_something);
     td.add_radio_button(27, L"Option 2");
-    //td.show();
+
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    {
+        td.show();
+    }
 }
 
 /**
@@ -92,7 +108,11 @@ BOOST_AUTO_TEST_CASE( create_with_collapsed_extended_text_above )
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.extended_text(L"Detailed explanation");
-    //td.show();
+
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    {
+        td.show();
+    }
 }
 
 /**
@@ -107,7 +127,11 @@ BOOST_AUTO_TEST_CASE( create_with_expanded_extended_text_above )
         L"Detailed explanation",
         winapi::gui::task_dialog::expansion_position::above,
         winapi::gui::task_dialog::initial_expansion_state::expanded);
-    //td.show();
+
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    {
+        td.show();
+    }
 }
 
 /**
@@ -121,7 +145,11 @@ BOOST_AUTO_TEST_CASE( create_with_collapsed_extended_text_below )
     td.extended_text(
         L"Detailed explanation",
         winapi::gui::task_dialog::expansion_position::below);
-    //td.show();
+
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    {
+        td.show();
+    }
 }
 
 /**
@@ -136,7 +164,11 @@ BOOST_AUTO_TEST_CASE( create_with_expanded_extended_text_below )
         L"Detailed explanation",
         winapi::gui::task_dialog::expansion_position::below,
         winapi::gui::task_dialog::initial_expansion_state::expanded);
-    //td.show();
+
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    {
+        td.show();
+    }
 }
 
 /**
@@ -152,7 +184,11 @@ BOOST_AUTO_TEST_CASE( create_with_custom_collapsed_expander )
         winapi::gui::task_dialog::expansion_position::default,
         winapi::gui::task_dialog::initial_expansion_state::default,
         L"Here be there &dragons");
-    //td.show();
+
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    {
+        td.show();
+    }
 }
 
 /**
@@ -168,7 +204,11 @@ BOOST_AUTO_TEST_CASE( create_with_custom_expanded_expander )
         winapi::gui::task_dialog::expansion_position::default,
         winapi::gui::task_dialog::initial_expansion_state::default,
         L"", L"See! &Dragons");
-    //td.show();
+
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    {
+        td.show();
+    }
 }
 
 /**
@@ -183,8 +223,13 @@ BOOST_AUTO_TEST_CASE( create_with_custom_expander )
         L"Detailed explanation",
         winapi::gui::task_dialog::expansion_position::default,
         winapi::gui::task_dialog::initial_expansion_state::default,
-        L"Here be there &dragons with really really really really really long tails", L"See! &Dragons");
-    //td.show();
+        L"Here be there &dragons with really really really really really "
+        L"long tails", L"See! &Dragons");
+
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    {
+        td.show();
+    }
 }
 
 
@@ -213,7 +258,10 @@ BOOST_AUTO_TEST_CASE( create_with_marquee )
 
     td.include_progress_bar(start_marquee);
 
-    //td.show();
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    {
+        td.show();
+    }
 }
 
 namespace {
@@ -242,7 +290,11 @@ BOOST_AUTO_TEST_CASE( create_with_marquee_custom_update )
         L"create_with_marquee_custom_update");
 
     td.include_progress_bar(start_marquee_custom);
-    //td.show();
+
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    {
+        td.show();
+    }
 }
 
 namespace {
@@ -278,7 +330,10 @@ BOOST_AUTO_TEST_CASE( with_range_progress )
         winapi::gui::task_dialog::async_progress_updater(
             run_progress_update));
 
-    //td.show();
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    {
+        td.show();
+    }
 }
 
 namespace {
@@ -331,7 +386,10 @@ BOOST_AUTO_TEST_CASE( create_with_range_progress_change_type )
         winapi::gui::task_dialog::async_progress_updater(
             run_changing_progress_update));
 
-    //td.show();
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    {
+        td.show();
+    }
 }
 
 namespace {
@@ -382,7 +440,10 @@ BOOST_AUTO_TEST_CASE( range_pause )
     td.include_progress_bar(
         winapi::gui::task_dialog::async_progress_updater(run_pause_run));
 
-    //td.show();
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    {
+        td.show();
+    }
 }
 
 namespace {
@@ -434,7 +495,10 @@ BOOST_AUTO_TEST_CASE( range_error )
     td.include_progress_bar(
         winapi::gui::task_dialog::async_progress_updater(run_error_run));
 
-    //td.show();
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    {
+        td.show();
+    }
 }
 
 namespace {
@@ -456,7 +520,7 @@ BOOST_AUTO_TEST_CASE( dynamic_change_instruction )
         L"Notice how the instruction text changes.",
         L"dynamic_change_instruction");
 
-    if (false)
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show(
             winapi::gui::task_dialog::async_dialog_updater(
@@ -483,7 +547,7 @@ BOOST_AUTO_TEST_CASE( dynamic_change_content )
         L"Here's the initial content.",
         L"dynamic_change_content");
 
-    if (false)
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show(
             winapi::gui::task_dialog::async_dialog_updater(
@@ -517,7 +581,7 @@ BOOST_AUTO_TEST_CASE( dynamic_change_expando )
         winapi::gui::task_dialog::async_extended_text_updater(
             change_extended_text));
 
-    if (false)
+    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show();
     }
