@@ -38,11 +38,13 @@
 #include <winapi/message.hpp> // send_message
 #include <winapi/window/window.hpp>
 
+#include <boost/bind/bind.hpp>
 #include <boost/exception/errinfo_api_function.hpp> // errinfo_api_function
 #include <boost/exception/info.hpp> // errinfo
-#include <boost/integer_traits.hpp> // integer_traits
-#include <boost/function.hpp> // function
+#include <boost/function.hpp>
+#include <boost/integer_traits.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/noncopyable.hpp>
 #include <boost/numeric/conversion/cast.hpp> // numeric_cast
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/thread.hpp>
@@ -421,6 +423,33 @@ private:
     winapi::window::window<> m_dialog_window;
 };
 
+namespace detail {
+
+    /**
+     * Auto-joining RAII thread wrapper to avoid problems of non-RAII thread;
+     *
+     * See:
+     *  - http://www.open-std.org/Jtc1/sc22/wg21/docs/papers/2008/n2802.html
+     *  - http://akrzemi1.wordpress.com/2012/11/14/not-using-stdthread/
+     */
+    class raii_join_thread : private boost::noncopyable
+    {
+    public:
+        raii_join_thread(boost::function<void()> thread_executee)
+            :
+        m_thread(thread_executee) {}
+
+        ~raii_join_thread() throw()
+        {
+            m_thread.join();
+        }
+
+    private:
+        boost::thread m_thread;
+    };
+
+}
+
 /**
  * Executes the given callable on a new thread to update the task dialog while
  * it's running.
@@ -441,14 +470,19 @@ public:
         const boost::function<void(const task_dialog&)> updater) :
     m_updater(updater) {}
 
-    void operator()(const task_dialog& bar)
+    void operator()(const task_dialog& dialog)
     {
-        boost::thread(m_updater, bar).detach();
+        // raii thread will join existing thread here if this is the
+        // last reference
+
+        m_thread = boost::make_shared<detail::raii_join_thread>(
+            boost::bind(m_updater, dialog));
     }
 
 private:
 
     boost::function<void(const task_dialog&)> m_updater;
+    boost::shared_ptr<detail::raii_join_thread> m_thread;
 };
 
 /**
@@ -736,12 +770,17 @@ public:
 
     void operator()(const progress_bar& bar)
     {
-        boost::thread(m_updater, bar).detach();
+        // raii thread will join existing thread here if this is the
+        // last reference
+
+        m_thread = boost::make_shared<detail::raii_join_thread>(
+            boost::bind(m_updater, bar));
     }
 
 private:
 
     boost::function<void(const progress_bar&)> m_updater;
+    boost::shared_ptr<detail::raii_join_thread> m_thread;
 };
 
 /**
@@ -806,12 +845,17 @@ public:
 
     void operator()(const extended_text_area& text_area)
     {
-        boost::thread(m_updater, text_area).detach();
+        // raii thread will join existing thread here if this is the
+        // last reference
+
+        m_thread = boost::make_shared<detail::raii_join_thread>(
+            boost::bind(m_updater, text_area));
     }
 
 private:
 
     boost::function<void(const extended_text_area&)> m_updater;
+    boost::shared_ptr<detail::raii_join_thread> m_thread;
 };
 
 namespace detail {
