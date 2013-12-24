@@ -455,8 +455,6 @@ public:
         template<typename T, typename Impl>
         friend class task_dialog_builder;
 
-    public:
-
         static task_dialog create(const winapi::window::window<>& dialog_window)
         {
             return task_dialog(dialog_window);
@@ -560,7 +558,6 @@ public:
     class access_attorney
     {
         friend class progress_bar;
-    public:
 
         static void call(
             const marquee_progress& progress, ::winapi::window::window<> dialog)
@@ -688,7 +685,6 @@ public:
     class access_attorney
     {
         friend class progress_bar;
-    public:
 
         static progress_updater call(
             const range_progress& progress, ::winapi::window::window<> dialog)
@@ -786,7 +782,6 @@ public:
         template<typename T, typename Impl>
         friend class task_dialog_builder;
 
-    public:
         static progress_bar call(const winapi::window::window<>& dialog_window)
         {
             return progress_bar(dialog_window);
@@ -855,7 +850,6 @@ public:
         template<typename T, typename Impl>
         friend class task_dialog_builder;
 
-    public:
         static extended_text_area create(
             const winapi::window::window<>& dialog_window)
         {
