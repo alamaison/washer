@@ -45,6 +45,7 @@
 #include <boost/integer_traits.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/optional/optional.hpp>
 #include <boost/numeric/conversion/cast.hpp> // numeric_cast
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/thread.hpp>
