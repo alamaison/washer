@@ -48,7 +48,8 @@ set(LIBRARY_SOURCES_com
 source_group(winapi\\com FILES ${LIBRARY_SOURCES_com})
 
 set(LIBRARY_SOURCES_detail
-  ${LIBRARY_DIRECTORY}/detail/path_traits.hpp)
+  ${LIBRARY_DIRECTORY}/detail/path_traits.hpp
+  ${LIBRARY_DIRECTORY}/detail/remove_calling_convention.hpp)
 source_group(winapi\\detail FILES ${LIBRARY_SOURCES_detail})
 
 set(LIBRARY_SOURCES_gui

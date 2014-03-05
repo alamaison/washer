@@ -5,7 +5,8 @@
 
     @if license
 
-    Copyright (C) 2010, 2011, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2013, 2014
+    Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +34,8 @@
 #define WINAPI_DYNAMIC_LINK_HPP
 #pragma once
 
-#include "detail/path_traits.hpp" // choose_path
+#include "winapi/detail/path_traits.hpp" // choose_path
+#include "winapi/detail/remove_calling_convention.hpp"
 #include "error.hpp" // last_error
 
 #include <boost/exception/info.hpp> // errinfo
@@ -297,12 +299,16 @@ namespace detail {
      */
 #if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION > 2
     template<typename Signature>
-    inline boost::function<Signature> load_function(
+    inline boost::function<
+        typename detail::remove_calling_convention<Signature>::type>
+    load_function(
         const boost::filesystem::path& library_path,
         const std::string& function_name)
 #else
     template<typename Signature, typename String, typename Traits>
-    inline boost::function<Signature> load_function(
+    inline boost::function<
+        typename detail::remove_calling_convention<Signature>::type>
+    load_function(
         const boost::filesystem::basic_path<String, Traits>& library_path,
         const std::string& function_name)
 #endif
@@ -311,14 +317,23 @@ namespace detail {
 
         // Embed the module handle in the callable we return, so that the
         // module remains loaded for the lifetime of the call.
-        boost::function<Signature> f =
+        boost::function<
+            typename detail::remove_calling_convention<Signature>::type> f =
             library_function<Signature>(library, function_name);
         return f;
     }
+
 }
 
 /**
  * Dynamically bind to function given by name.
+ *
+ * If the function uses a non-default calling convention, specify it in the
+ * given `Signature`.  The returned function will have the same signature but
+ * with the default calling convention:
+ *
+ *     function<int(char*)> f = load_function<int __stdcall (char*)>(
+ *         "my_lib.dll", "my_func");
  *
  * @param library_path  Path or filename of the DLL exporting the
                         requested function.
@@ -326,12 +341,21 @@ namespace detail {
  * @returns  Callable that invokes loaded function with given `Signature`.
  */
 template<typename Signature>
-inline boost::function<Signature> load_function(
+inline boost::function<
+    typename detail::remove_calling_convention<Signature>::type>
+load_function(
     const boost::filesystem::path& library_path, const std::string& name)
 { return detail::load_function<Signature>(library_path, name); }
 
 /**
  * Dynamically bind to function given by name.
+ *
+ * If the function uses a non-default calling convention, specify it in the
+ * given `Signature`.  The returned function will have the same signature but
+ * with the default calling convention:
+ *
+ *     function<int(char*)> f = load_function<int __stdcall (char*)>(
+ *         "my_lib.dll", "my_func");
  *
  * @param library_path  Path or filename of the DLL exporting the
                         requested function.
@@ -340,7 +364,9 @@ inline boost::function<Signature> load_function(
  */
 #if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION < 3
 template<typename Signature>
-inline boost::function<Signature> load_function(
+inline boost::function<
+    typename detail::remove_calling_convention<Signature>::type>
+load_function(
     const boost::filesystem::wpath& library_path, const std::string& name)
 { return detail::load_function<Signature>(library_path, name); }
 #endif

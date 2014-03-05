@@ -49,16 +49,11 @@ include(max_warnings)
 
 # DLL used for DLL-function load testing
 
-include(GenerateExportHeader)
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR}) # for load_test_dll_export.h
-
 add_library(
   load_test_dll SHARED
   load_test_dll/load_test_dll.h
-  load_test_dll/load_test_dll.cpp)
-
-generate_export_header(load_test_dll)
+  load_test_dll/load_test_dll.cpp
+  load_test_dll/load_test_dll.def)
 
 # End DLL
 

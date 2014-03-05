@@ -1,0 +1,8 @@
+LIBRARY	"load_test_dll"
+EXPORTS
+    test_function
+    unary_test_function
+    binary_test_function
+    cdecl_test_function
+    stdcall_test_function
+    fastcall_test_function

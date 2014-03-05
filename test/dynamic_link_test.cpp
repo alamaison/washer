@@ -5,7 +5,8 @@
 
     @if license
 
-    Copyright (C) 2010, 2011, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2013, 2014
+    Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,8 +29,6 @@
 
     @endif
 */
-
-#include "load_test_dll_export.h"
 
 #include <winapi/dynamic_link.hpp> // test subject
 
@@ -186,6 +185,42 @@ BOOST_AUTO_TEST_CASE( load_binary_function )
     func = winapi::load_function<int(int,int)>(
         L"load_test_dll.dll", "binary_test_function");
     BOOST_CHECK_EQUAL(func(7,3), 21);
+}
+
+/**
+ * Tests that our signature template handles cdecl calling convention.
+ */
+BOOST_AUTO_TEST_CASE( load_cdecl_function )
+{
+    boost::function<int(int)> func;
+
+    func = winapi::load_function<int __cdecl (int)>(
+        L"load_test_dll.dll", "cdecl_test_function");
+    BOOST_CHECK_EQUAL(func(10), 30);
+}
+
+/**
+ * Tests that our signature template handles stdcall calling convention.
+ */
+BOOST_AUTO_TEST_CASE( load_stdcall_function )
+{
+    boost::function<int(int)> func;
+
+    func = winapi::load_function<int __stdcall (int)>(
+        L"load_test_dll.dll", "stdcall_test_function");
+    BOOST_CHECK_EQUAL(func(10), 30);
+}
+
+/**
+ * Tests that our signature template handles fastcall calling convention.
+ */
+BOOST_AUTO_TEST_CASE( load_fastcall_function )
+{
+    boost::function<int(int)> func;
+
+    func = winapi::load_function<int __fastcall (int)>(
+        L"load_test_dll.dll", "fastcall_test_function");
+    BOOST_CHECK_EQUAL(func(10), 30);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

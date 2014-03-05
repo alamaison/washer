@@ -5,7 +5,8 @@
 
     @if license
 
-    Copyright (C) 2010, 2011, 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2010, 2011, 2013, 2014
+    Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -261,7 +262,7 @@ namespace detail {
             :
         tdi_implementation(
             winapi::load_function<
-                HRESULT (const TASKDIALOGCONFIG*, int*, int*, BOOL*)>(
+                HRESULT WINAPI (const TASKDIALOGCONFIG*, int*, int*, BOOL*)>(
                 "comctl32.dll", "TaskDialogIndirect")) {}
     };
 

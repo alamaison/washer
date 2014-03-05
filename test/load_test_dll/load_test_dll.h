@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2013, 2014  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,16 +32,26 @@
 #ifndef WINAPI_TEST_LOAD_TEST_DLL_LOAD_TEST_DLL_H
 #define WINAPI_TEST_LOAD_TEST_DLL_LOAD_TEST_DLL_H
 
-#include "load_test_dll_export.h"
-
 extern "C"
 {
 
-LOAD_TEST_DLL_EXPORT char* test_function();
+// The functions must also be listed in the DEF file so that
+// GetProcAddress can find them without needed a mangled name
+// (http://stackoverflow.com/a/597573/67013). (Really only
+// stdcall and fastcall seem to need this but that's probably
+// compiler-specific)
 
-LOAD_TEST_DLL_EXPORT int unary_test_function(int);
+char* test_function();
 
-LOAD_TEST_DLL_EXPORT int binary_test_function(int, int);
+int unary_test_function(int);
+
+int binary_test_function(int, int);
+
+int __cdecl cdecl_test_function(int x);
+
+int __stdcall stdcall_test_function(int x);
+
+int __fastcall fastcall_test_function(int x);
 
 }
 
