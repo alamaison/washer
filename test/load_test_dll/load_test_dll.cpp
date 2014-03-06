@@ -5,7 +5,7 @@
 
     @if license
 
-    Copyright (C) 2013  Alexander Lamaison <awl03@doc.ic.ac.uk>
+    Copyright (C) 2013, 2014  Alexander Lamaison <awl03@doc.ic.ac.uk>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,19 +34,34 @@
 extern "C"
 {
 
-LOAD_TEST_DLL_EXPORT char* test_function()
+char* test_function()
 {
     return "Ran DLL function successfully";
 }
 
-LOAD_TEST_DLL_EXPORT int unary_test_function(int x)
+int unary_test_function(int x)
 {
     return x * 2;
 }
 
-LOAD_TEST_DLL_EXPORT int binary_test_function(int x, int y)
+int binary_test_function(int x, int y)
 {
     return x * y;
+}
+
+int __cdecl cdecl_test_function(int x)
+{
+    return x * 3;
+}
+
+int __stdcall stdcall_test_function(int x)
+{
+    return x * 3;
+}
+
+int __fastcall fastcall_test_function(int x)
+{
+    return x * 3;
 }
 
 }
