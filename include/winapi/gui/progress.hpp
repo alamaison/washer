@@ -39,6 +39,7 @@
 #include <boost/exception/errinfo_api_function.hpp> // errinfo_api_function
 #include <boost/exception/info.hpp> // errinfo
 #include <boost/filesystem/path.hpp> // wpath
+#include <boost/version.hpp>
 #if (BOOST_VERSION >= 104800)
 #include <boost/move/move.hpp>
 #endif
