@@ -1,21 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
-
-project(test)
-
-include_directories(comet/include)
-link_libraries(Shlwapi)
-
-set(Boost_USE_STATIC_LIBS TRUE)
-set(Boost_DETAILED_FAILURE_MSG TRUE)
-set(Boost_ADDITIONAL_VERSIONS 1.46.1)
-find_package(
-  Boost 1.40 REQUIRED
-  COMPONENTS filesystem system unit_test_framework)
-link_directories(${Boost_LIBRARY_DIRS})
-include_directories(${Boost_INCLUDE_DIRS})
-
-add_definitions(-DWIN32_LEAN_AND_MEAN -DSTRICT_TYPED_ITEMIDS)
-
 set(TEST_SOURCES
   fixture_permutator.hpp
   button_test_visitors.hpp
@@ -57,32 +39,34 @@ add_library(
 
 # End DLL
 
+set(Boost_USE_STATIC_LIBS TRUE)
+set(Boost_DETAILED_FAILURE_MSG TRUE)
+set(Boost_ADDITIONAL_VERSIONS 1.46.1)
+find_package(
+  Boost 1.40 REQUIRED
+  COMPONENTS filesystem system unit_test_framework)
 
 add_executable(tests ${TEST_SOURCES})
-target_link_libraries(tests load_test_dll)
-get_target_property(test_EXE tests LOCATION)
+target_include_directories(tests PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries(tests
+  PRIVATE winapi load_test_dll ${Boost_LIBRARIES})
 
 add_executable(tests_unicode ${TEST_SOURCES})
-target_link_libraries(tests_unicode load_test_dll)
-get_target_property(test_unicode_EXE tests_unicode LOCATION)
-set_target_properties(
-  tests_unicode PROPERTIES
-  COMPILE_DEFINITIONS _UNICODE)
+target_include_directories(tests_unicode PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries(tests_unicode
+  PRIVATE winapi load_test_dll ${Boost_LIBRARIES})
+target_compile_definitions(tests_unicode PRIVATE _UNICODE)
 
 add_executable(tests_win9x ${TEST_SOURCES})
-target_link_libraries(tests_win9x load_test_dll)
-get_target_property(test_win9x_EXE tests_win9x LOCATION)
-set_target_properties(
-  tests_win9x PROPERTIES
-  COMPILE_DEFINITIONS "WINVER=0x0400;_WIN32_WINNT=0x0400")
+target_include_directories(tests_win9x PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries(tests_win9x
+  PRIVATE winapi load_test_dll ${Boost_LIBRARIES})
+target_compile_definitions(tests_win9x PRIVATE WINVER=0x0400 _WIN32_WINNT=0x0400)
 
 set(TEST_RUNNER_ARGUMENTS
   --catch_system_errors --detect_memory_leaks
   --result_code=no --log_level=test_suite)
 
-add_custom_target(RUN_TESTS
-  ${test_EXE} ${TEST_RUNNER_ARGUMENTS} DEPENDS tests)
-add_custom_target(RUN_UNICODE_TESTS
-  ${test_unicode_EXE} ${TEST_RUNNER_ARGUMENTS} DEPENDS tests_unicode)
-add_custom_target(RUN_WIN9X_TESTS
-  ${test_unicode_EXE} ${TEST_RUNNER_ARGUMENTS} DEPENDS tests_win9x)
+add_test(tests tests ${TEST_RUNNER_ARGUMENTS})
+add_test(tests_unicode tests_unicode ${TEST_RUNNER_ARGUMENTS})
+add_test(tests_win9x tests_win9x ${TEST_RUNNER_ARGUMENTS})

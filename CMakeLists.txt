@@ -1,33 +1,10 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.0.0) # Interface libraries require v3
 
 project(winapi)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-
-set(INCLUDE_DIRECTORY include)
+set(INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(LIBRARY_DIRECTORY ${INCLUDE_DIRECTORY}/winapi)
-
-include_directories(${INCLUDE_DIRECTORY})
-link_libraries(Shlwapi)
-
-set(Boost_USE_STATIC_LIBS TRUE)
-set(Boost_DETAILED_FAILURE_MSG TRUE)
-set(Boost_ADDITIONAL_VERSIONS 1.46.1 1.50 1.50.0 1.51 1.51.0)
-find_package(
-  Boost 1.40 REQUIRED
-  COMPONENTS filesystem system)
-link_directories(${Boost_LIBRARY_DIRS})
-include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../comet/include)
-
-# Find comet library - not required for much of the Windows API
-find_package(Comet)
-if(COMET_FOUND)
-  include_directories(${COMET_INCLUDE_DIRS})
-endif()
-
-add_definitions(
-  -DWIN32_LEAN_AND_MEAN -DSTRICT_TYPED_ITEMIDS)
 
 set(LIBRARY_SOURCES
   ${LIBRARY_DIRECTORY}/clipboard.hpp
@@ -131,7 +108,7 @@ set(LIBRARY_SOURCES_window_detail
 source_group(
   winapi\\window\\detail FILES ${LIBRARY_SOURCES_window_detail})
 
-add_custom_target(winapi SOURCES
+add_custom_target(winapi-src SOURCES
   ${LIBRARY_SOURCES}
   ${LIBRARY_SOURCES_com}
   ${LIBRARY_SOURCES_detail}
@@ -145,6 +122,32 @@ add_custom_target(winapi SOURCES
   ${LIBRARY_SOURCES_window_detail}
   ${LIBRARY_SOURCES_shell})
 
+# Interface library for usage requirements
+
+add_library(winapi INTERFACE)
+target_include_directories(winapi INTERFACE ${INCLUDE_DIRECTORY})
+target_link_libraries(winapi INTERFACE Shlwapi)
+target_compile_definitions(winapi
+  INTERFACE
+    WIN32_LEAN_AND_MEAN
+    STRICT_TYPED_ITEMIDS)
+
+# Find comet library - not required for much of the Windows API
+find_package(Comet MODULE)
+if(COMET_FOUND)
+  target_include_directories(winapi INTERFACE ${COMET_INCLUDE_DIRS})
+endif()
+
+set(Boost_USE_STATIC_LIBS TRUE)
+set(Boost_DETAILED_FAILURE_MSG TRUE)
+set(Boost_ADDITIONAL_VERSIONS 1.46.1 1.50 1.50.0 1.51 1.51.0)
+find_package(
+  Boost 1.40 REQUIRED
+  COMPONENTS filesystem system thread date_time)
+target_include_directories(winapi INTERFACE ${Boost_INCLUDE_DIRS})
+target_link_libraries(winapi INTERFACE ${Boost_LIBRARIES})
+
+enable_testing()
 add_subdirectory(test)
 
 # Target to generate documentation with Doxygen
