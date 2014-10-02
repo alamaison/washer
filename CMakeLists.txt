@@ -133,10 +133,8 @@ target_compile_definitions(winapi
     STRICT_TYPED_ITEMIDS)
 
 # Find comet library - not required for much of the Windows API
-find_package(Comet MODULE)
-if(COMET_FOUND)
-  target_include_directories(winapi INTERFACE ${COMET_INCLUDE_DIRS})
-endif()
+find_package(Comet REQUIRED CONFIG)
+target_link_libraries(winapi INTERFACE Comet::comet)
 
 set(Boost_USE_STATIC_LIBS TRUE)
 set(Boost_DETAILED_FAILURE_MSG TRUE)
