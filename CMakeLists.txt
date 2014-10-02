@@ -147,8 +147,11 @@ find_package(
 target_include_directories(winapi INTERFACE ${Boost_INCLUDE_DIRS})
 target_link_libraries(winapi INTERFACE ${Boost_LIBRARIES})
 
-enable_testing()
-add_subdirectory(test)
+option(BUILD_TESTING "Build test suite" ON)
+if(BUILD_TESTING)
+  enable_testing()
+  add_subdirectory(test)
+endif()
 
 # Target to generate documentation with Doxygen
 option(BUILD_DOCS "Build documentation if Doxygen is available" ON)
