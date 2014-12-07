@@ -1,4 +1,4 @@
-LIBRARY	"load_test_dll"
+LIBRARY
 EXPORTS
     test_function
     unary_test_function

@@ -40,8 +40,6 @@ add_library(
 # End DLL
 
 set(Boost_USE_STATIC_LIBS TRUE)
-set(Boost_DETAILED_FAILURE_MSG TRUE)
-set(Boost_ADDITIONAL_VERSIONS 1.46.1)
 find_package(
   Boost 1.40 REQUIRED
   COMPONENTS filesystem system unit_test_framework)
@@ -50,18 +48,20 @@ add_executable(tests ${TEST_SOURCES})
 target_include_directories(tests PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(tests
   PRIVATE winapi load_test_dll ${Boost_LIBRARIES})
+target_compile_definitions(tests PRIVATE BOOST_ALL_NO_LIB=1)
 
 add_executable(tests_unicode ${TEST_SOURCES})
 target_include_directories(tests_unicode PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(tests_unicode
   PRIVATE winapi load_test_dll ${Boost_LIBRARIES})
-target_compile_definitions(tests_unicode PRIVATE _UNICODE)
+target_compile_definitions(tests_unicode PRIVATE BOOST_ALL_NO_LIB=1 _UNICODE)
 
 add_executable(tests_win9x ${TEST_SOURCES})
 target_include_directories(tests_win9x PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(tests_win9x
   PRIVATE winapi load_test_dll ${Boost_LIBRARIES})
-target_compile_definitions(tests_win9x PRIVATE WINVER=0x0400 _WIN32_WINNT=0x0400)
+target_compile_definitions(tests_win9x PRIVATE
+  BOOST_ALL_NO_LIB=1 WINVER=0x0400 _WIN32_WINNT=0x0400)
 
 set(TEST_RUNNER_ARGUMENTS
   --catch_system_errors --detect_memory_leaks

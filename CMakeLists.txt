@@ -2,6 +2,27 @@ cmake_minimum_required(VERSION 3.0.0) # Interface libraries require v3
 
 project(winapi)
 
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+
+option(BUILD_TESTING "Build test suite" ON)
+option(BUILD_DOCS "Build documentation if Doxygen is available" ON)
+
+# Package management ###########################################################
+
+include(HunterGate)
+
+HunterGate(
+   URL "https://github.com/alamaison/hunter/archive/11b85ec3b8a208573d9687217f96b5ef44bf1ef6.tar.gz"
+   SHA1 "682d7d3000a5533e19573c78dcf855d303dee312")
+
+hunter_add_package(Comet)
+hunter_add_package(Boost COMPONENTS filesystem system thread date_time)
+if(BUILD_TESTING)
+  hunter_add_package(Boost COMPONENTS test)
+endif()
+
+################################################################################
+
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(LIBRARY_DIRECTORY ${INCLUDE_DIRECTORY}/winapi)
@@ -133,26 +154,21 @@ target_compile_definitions(winapi
     STRICT_TYPED_ITEMIDS)
 
 # Find comet library - not required for much of the Windows API
-find_package(Comet REQUIRED CONFIG)
+find_package(Comet 4.0.0 REQUIRED CONFIG)
 target_link_libraries(winapi INTERFACE Comet::comet)
 
 set(Boost_USE_STATIC_LIBS TRUE)
-set(Boost_DETAILED_FAILURE_MSG TRUE)
-set(Boost_ADDITIONAL_VERSIONS 1.46.1 1.50 1.50.0 1.51 1.51.0)
 find_package(
   Boost 1.40 REQUIRED
   COMPONENTS filesystem system thread date_time)
 target_include_directories(winapi INTERFACE ${Boost_INCLUDE_DIRS})
 target_link_libraries(winapi INTERFACE ${Boost_LIBRARIES})
 
-option(BUILD_TESTING "Build test suite" ON)
 if(BUILD_TESTING)
   enable_testing()
   add_subdirectory(test)
 endif()
 
-# Target to generate documentation with Doxygen
-option(BUILD_DOCS "Build documentation if Doxygen is available" ON)
 if(BUILD_DOCS)
 
   find_package(Doxygen)
