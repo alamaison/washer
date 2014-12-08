@@ -70,7 +70,7 @@ public:
     }
 
     virtual command_item_description& selectability(
-        BOOST_SCOPED_ENUM(selectability) state)
+        BOOST_SCOPED_ENUM(winapi::gui::menu::selectability) state)
     {
         m_selectability = state;
         return *this;
@@ -118,7 +118,7 @@ private:
 
     boost::shared_ptr<button_description> m_button;
     UINT m_command_id;
-    BOOST_SCOPED_ENUM(selectability) m_selectability;
+    BOOST_SCOPED_ENUM(winapi::gui::menu::selectability) m_selectability;
     BOOST_SCOPED_ENUM(check_mark) m_checkedness;
 };
 

@@ -65,7 +65,7 @@ public:
         return m_core.id();
     }
 
-    virtual command_item& selectability(BOOST_SCOPED_ENUM(selectability) state)
+    virtual command_item& selectability(BOOST_SCOPED_ENUM(winapi::gui::menu::selectability) state)
     {
         m_core.button_state(state);
         return *this;

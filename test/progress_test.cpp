@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE( text )
 {
     progress dialogue(
         NULL, L"Test title", progress::modality::modal, 
-        progress::time_estimation::none, progress::bar_type::progress,
+        progress::time_estimation::none, progress::bar_type::finite,
         progress::minimisable::yes, progress::cancellability::cancellable);
     dialogue.line(1, L"Text 1");
     dialogue.line(2, L"Text 2");
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE( path )
 {
     progress dialogue(
         NULL, L"Test title", progress::modality::modal, 
-        progress::time_estimation::none, progress::bar_type::progress,
+        progress::time_estimation::none, progress::bar_type::finite,
         progress::minimisable::yes, progress::cancellability::cancellable);
     dialogue.line(1, L"Text 1");
     dialogue.line_compress_paths_if_needed(
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE( text_with_time )
     progress dialogue(
         NULL, L"Test title", progress::modality::modal, 
         progress::time_estimation::automatic_time_estimate,
-        progress::bar_type::progress,
+        progress::bar_type::finite,
         progress::minimisable::yes, progress::cancellability::cancellable);
     dialogue.line(1, L"Text 1");
     dialogue.line(2, L"Text 2");

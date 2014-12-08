@@ -126,7 +126,7 @@ struct cotaskmem_alloc
     {
         T* mem = reinterpret_cast<T*>(::CoTaskMemAlloc(size));
         if (!mem)
-            BOOST_THROW_EXCEPTION(std::bad_alloc("not enough memory"));
+            BOOST_THROW_EXCEPTION(std::bad_alloc());
         return mem;
     }
 
@@ -415,15 +415,15 @@ class basic_pidl
 {
 public:
 
-    typedef T                                                value_type;
-    typedef T*                                               pointer;
-    typedef const T*                                         const_pointer;
-    typedef Alloc                                            allocator;
-    typedef typename raw_pidl::traits<T>::combine_type       join_type;
-    typedef typename raw_pidl::traits<T>::combine_pidl_type  join_pidl_type;
-    typedef typename allocator::rebind<join_type>::other     join_allocator;
-    typedef typename basic_pidl<join_type, join_allocator>   join_pidl;
-    typedef typename raw_pidl::traits<T>::clone_pidl_type    foreign_pidl_type;
+    typedef T                                                     value_type;
+    typedef T*                                                    pointer;
+    typedef const T*                                              const_pointer;
+    typedef Alloc                                                 allocator;
+    typedef typename raw_pidl::traits<T>::combine_type            join_type;
+    typedef typename raw_pidl::traits<T>::combine_pidl_type       join_pidl_type;
+    typedef typename allocator::template rebind<join_type>::other join_allocator;
+    typedef typename basic_pidl<join_type, join_allocator>        join_pidl;
+    typedef typename raw_pidl::traits<T>::clone_pidl_type         foreign_pidl_type;
 
     basic_pidl() : m_pidl(NULL), m_allocator(Alloc()) {}
 
@@ -587,7 +587,7 @@ public:
      * The single child pidl of this namespace item.
      */
     inline basic_pidl<
-        ITEMID_CHILD, typename allocator::rebind<ITEMID_CHILD>::other>
+        ITEMID_CHILD, typename allocator::template rebind<ITEMID_CHILD>::other>
         last_item() const
     {
         if (empty())

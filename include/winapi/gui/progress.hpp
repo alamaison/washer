@@ -97,7 +97,7 @@ public:
 
     BOOST_SCOPED_ENUM_START(bar_type)
     {
-        progress,
+        finite,
         marquee,
         none
     };
@@ -368,7 +368,7 @@ private:
 
         switch (bar_type)
         {
-        case bar_type::progress:
+        case bar_type::finite:
             break;
         case bar_type::marquee:
             flags |= PROGDLG::MARQUEEPROGRESS;
