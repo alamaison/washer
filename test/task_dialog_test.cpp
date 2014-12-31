@@ -29,7 +29,7 @@
     @endif
 */
 
-#include <winapi/gui/task_dialog.hpp> // test subject
+#include <washer/gui/task_dialog.hpp> // test subject
 
 #include <boost/bind/bind.hpp>
 #include <boost/noncopyable.hpp>
@@ -39,8 +39,8 @@
 using boost::bind;
 using boost::noncopyable;
 
-#ifndef WINAPI_TEST_ALLOW_REQUIRES_INTERACTION
-#define WINAPI_TEST_ALLOW_REQUIRES_INTERACTION 0
+#ifndef WASHER_TEST_ALLOW_REQUIRES_INTERACTION
+#define WASHER_TEST_ALLOW_REQUIRES_INTERACTION 0
 #endif
 
 BOOST_AUTO_TEST_SUITE(task_dialog_tests)
@@ -50,11 +50,11 @@ BOOST_AUTO_TEST_SUITE(task_dialog_tests)
  */
 BOOST_AUTO_TEST_CASE( create )
 {
-    winapi::gui::task_dialog::task_dialog_builder<void> td(
+    washer::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show();
     }
@@ -70,16 +70,16 @@ int throw_something() { throw std::exception("I throw if invoked"); }
  */
 BOOST_AUTO_TEST_CASE( create_with_buttons )
 {
-    winapi::gui::task_dialog::task_dialog_builder<void> td(
+    washer::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.add_button(L"Uncommon button 1", throw_something);
     td.add_button(
-        winapi::gui::task_dialog::button_type::close, throw_something);
+        washer::gui::task_dialog::button_type::close, throw_something);
     td.add_button(
         L"Uncommon button\nWith another string underneath", throw_something);
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show();
     }
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE( create_with_buttons )
  */
 BOOST_AUTO_TEST_CASE( create_with_radio_buttons )
 {
-    winapi::gui::task_dialog::task_dialog_builder<void> td(
+    washer::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.add_radio_button(27, L"Option 1");
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE( create_with_radio_buttons )
         L"Uncommon button\nWith another string underneath", throw_something);
     td.add_radio_button(27, L"Option 2");
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show();
     }
@@ -109,12 +109,12 @@ BOOST_AUTO_TEST_CASE( create_with_radio_buttons )
  */
 BOOST_AUTO_TEST_CASE( create_with_collapsed_extended_text_above )
 {
-    winapi::gui::task_dialog::task_dialog_builder<> td(
+    washer::gui::task_dialog::task_dialog_builder<> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.extended_text(L"Detailed explanation");
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show();
     }
@@ -125,15 +125,15 @@ BOOST_AUTO_TEST_CASE( create_with_collapsed_extended_text_above )
  */
 BOOST_AUTO_TEST_CASE( create_with_expanded_extended_text_above )
 {
-    winapi::gui::task_dialog::task_dialog_builder<> td(
+    washer::gui::task_dialog::task_dialog_builder<> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.extended_text(
         L"Detailed explanation",
-        winapi::gui::task_dialog::expansion_position::above,
-        winapi::gui::task_dialog::initial_expansion_state::expanded);
+        washer::gui::task_dialog::expansion_position::above,
+        washer::gui::task_dialog::initial_expansion_state::expanded);
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show();
     }
@@ -144,14 +144,14 @@ BOOST_AUTO_TEST_CASE( create_with_expanded_extended_text_above )
  */
 BOOST_AUTO_TEST_CASE( create_with_collapsed_extended_text_below )
 {
-    winapi::gui::task_dialog::task_dialog_builder<> td(
+    washer::gui::task_dialog::task_dialog_builder<> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.extended_text(
         L"Detailed explanation",
-        winapi::gui::task_dialog::expansion_position::below);
+        washer::gui::task_dialog::expansion_position::below);
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show();
     }
@@ -162,15 +162,15 @@ BOOST_AUTO_TEST_CASE( create_with_collapsed_extended_text_below )
  */
 BOOST_AUTO_TEST_CASE( create_with_expanded_extended_text_below )
 {
-    winapi::gui::task_dialog::task_dialog_builder<> td(
+    washer::gui::task_dialog::task_dialog_builder<> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.extended_text(
         L"Detailed explanation",
-        winapi::gui::task_dialog::expansion_position::below,
-        winapi::gui::task_dialog::initial_expansion_state::expanded);
+        washer::gui::task_dialog::expansion_position::below,
+        washer::gui::task_dialog::initial_expansion_state::expanded);
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show();
     }
@@ -181,16 +181,16 @@ BOOST_AUTO_TEST_CASE( create_with_expanded_extended_text_below )
  */
 BOOST_AUTO_TEST_CASE( create_with_custom_collapsed_expander )
 {
-    winapi::gui::task_dialog::task_dialog_builder<> td(
+    washer::gui::task_dialog::task_dialog_builder<> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.extended_text(
         L"Detailed explanation",
-        winapi::gui::task_dialog::expansion_position::default,
-        winapi::gui::task_dialog::initial_expansion_state::default,
+        washer::gui::task_dialog::expansion_position::default,
+        washer::gui::task_dialog::initial_expansion_state::default,
         L"Here be there &dragons");
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show();
     }
@@ -201,16 +201,16 @@ BOOST_AUTO_TEST_CASE( create_with_custom_collapsed_expander )
  */
 BOOST_AUTO_TEST_CASE( create_with_custom_expanded_expander )
 {
-    winapi::gui::task_dialog::task_dialog_builder<> td(
+    washer::gui::task_dialog::task_dialog_builder<> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.extended_text(
         L"Detailed explanation",
-        winapi::gui::task_dialog::expansion_position::default,
-        winapi::gui::task_dialog::initial_expansion_state::default,
+        washer::gui::task_dialog::expansion_position::default,
+        washer::gui::task_dialog::initial_expansion_state::default,
         L"", L"See! &Dragons");
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show();
     }
@@ -221,17 +221,17 @@ BOOST_AUTO_TEST_CASE( create_with_custom_expanded_expander )
  */
 BOOST_AUTO_TEST_CASE( create_with_custom_expander )
 {
-    winapi::gui::task_dialog::task_dialog_builder<> td(
+    washer::gui::task_dialog::task_dialog_builder<> td(
         NULL, L"Test instruction", L"Some content text\nAnd some more",
         L"Test TaskDialog");
     td.extended_text(
         L"Detailed explanation",
-        winapi::gui::task_dialog::expansion_position::default,
-        winapi::gui::task_dialog::initial_expansion_state::default,
+        washer::gui::task_dialog::expansion_position::default,
+        washer::gui::task_dialog::initial_expansion_state::default,
         L"Here be there &dragons with really really really really really "
         L"long tails", L"See! &Dragons");
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show();
     }
@@ -240,9 +240,9 @@ BOOST_AUTO_TEST_CASE( create_with_custom_expander )
 
 namespace {
 
-    void start_marquee(winapi::gui::task_dialog::progress_bar bar)
+    void start_marquee(washer::gui::task_dialog::progress_bar bar)
     {
-        bar(winapi::gui::task_dialog::marquee_progress());
+        bar(washer::gui::task_dialog::marquee_progress());
     }
 
 }
@@ -254,7 +254,7 @@ namespace {
  */
 BOOST_AUTO_TEST_CASE( create_with_marquee )
 {
-    winapi::gui::task_dialog::task_dialog_builder<void> td(
+    washer::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Marquee (default update)",
         L"We tell it to start and update with a default (unspecified) "
         L"frequency, which should mean every 30ms.\n"
@@ -263,7 +263,7 @@ BOOST_AUTO_TEST_CASE( create_with_marquee )
 
     td.include_progress_bar(start_marquee);
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show();
     }
@@ -272,9 +272,9 @@ BOOST_AUTO_TEST_CASE( create_with_marquee )
 namespace {
 
     void start_marquee_custom(
-        winapi::gui::task_dialog::progress_bar bar)
+        washer::gui::task_dialog::progress_bar bar)
     {
-        bar(winapi::gui::task_dialog::marquee_progress(300));
+        bar(washer::gui::task_dialog::marquee_progress(300));
     }
 
 }
@@ -286,7 +286,7 @@ namespace {
  */
 BOOST_AUTO_TEST_CASE( create_with_marquee_custom_update )
 {
-    winapi::gui::task_dialog::task_dialog_builder<void> td(
+    washer::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Marquee (custom update)",
         L"Created dialog and set marquee progress bar in callback.\n"
         L"We tell it to start and update with a custom 0.3s "
@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE( create_with_marquee_custom_update )
 
     td.include_progress_bar(start_marquee_custom);
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show();
     }
@@ -304,10 +304,10 @@ BOOST_AUTO_TEST_CASE( create_with_marquee_custom_update )
 
 namespace {
 
-    void run_progress_update(winapi::gui::task_dialog::progress_bar bar)
+    void run_progress_update(washer::gui::task_dialog::progress_bar bar)
     {
-        winapi::gui::task_dialog::range_progress::progress_updater updater =
-            bar(winapi::gui::task_dialog::range_progress(0, 9));
+        washer::gui::task_dialog::range_progress::progress_updater updater =
+            bar(washer::gui::task_dialog::range_progress(0, 9));
 
         for (int i=0; i < 10; ++i)
         {
@@ -324,7 +324,7 @@ namespace {
  */
 BOOST_AUTO_TEST_CASE( with_range_progress )
 {
-    winapi::gui::task_dialog::task_dialog_builder<void> td(
+    washer::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Range progress",
         L"When dialog created we start updating progress with "
         L"range_progress updates.\n"
@@ -332,10 +332,10 @@ BOOST_AUTO_TEST_CASE( with_range_progress )
         L"with_range_progress");
 
     td.include_progress_bar(
-        winapi::gui::task_dialog::async_progress_updater(
+        washer::gui::task_dialog::async_progress_updater(
             run_progress_update));
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show();
     }
@@ -344,11 +344,11 @@ BOOST_AUTO_TEST_CASE( with_range_progress )
 namespace {
 
     void run_changing_progress_update(
-        winapi::gui::task_dialog::progress_bar bar)
+        washer::gui::task_dialog::progress_bar bar)
     {
-        winapi::gui::task_dialog::range_progress our_range(0, 9);
+        washer::gui::task_dialog::range_progress our_range(0, 9);
 
-        winapi::gui::task_dialog::range_progress::progress_updater updater =
+        washer::gui::task_dialog::range_progress::progress_updater updater =
             bar(our_range);
 
         for (int i=0; i < 6; ++i)
@@ -358,7 +358,7 @@ namespace {
             boost::this_thread::sleep(boost::posix_time::milliseconds(300));
         }
 
-        bar(winapi::gui::task_dialog::marquee_progress());
+        bar(washer::gui::task_dialog::marquee_progress());
 
         boost::this_thread::sleep(boost::posix_time::milliseconds(800));
 
@@ -380,7 +380,7 @@ namespace {
  */
 BOOST_AUTO_TEST_CASE( create_with_range_progress_change_type )
 {
-    winapi::gui::task_dialog::task_dialog_builder<void> td(
+    washer::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Range-marquee-range",
         L"Start with range, and run half way.\n"
         L"Switch to marquee Cylon for a bit.\n"
@@ -388,10 +388,10 @@ BOOST_AUTO_TEST_CASE( create_with_range_progress_change_type )
         L"create_with_range_progress_change_type");
 
     td.include_progress_bar(
-        winapi::gui::task_dialog::async_progress_updater(
+        washer::gui::task_dialog::async_progress_updater(
             run_changing_progress_update));
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show();
     }
@@ -400,10 +400,10 @@ BOOST_AUTO_TEST_CASE( create_with_range_progress_change_type )
 namespace {
 
     void run_pause_run(
-        winapi::gui::task_dialog::progress_bar bar)
+        washer::gui::task_dialog::progress_bar bar)
     {
-        winapi::gui::task_dialog::range_progress::progress_updater updater =
-            bar(winapi::gui::task_dialog::range_progress(0, 9));
+        washer::gui::task_dialog::range_progress::progress_updater updater =
+            bar(washer::gui::task_dialog::range_progress(0, 9));
 
         for (int i=0; i < 6; ++i)
         {
@@ -413,14 +413,14 @@ namespace {
         }
 
         updater.bar_state(
-            winapi::gui::task_dialog::range_progress::bar_state::paused);
+            washer::gui::task_dialog::range_progress::bar_state::paused);
 
         // It can take a long time for the bar to be redrawn with the new
         // state
         boost::this_thread::sleep(boost::posix_time::milliseconds(2000));
 
         updater.bar_state(
-            winapi::gui::task_dialog::range_progress::bar_state::normal);
+            washer::gui::task_dialog::range_progress::bar_state::normal);
 
         for (int i=6; i < 10; ++i)
         {
@@ -436,16 +436,16 @@ namespace {
  */
 BOOST_AUTO_TEST_CASE( range_pause )
 {
-    winapi::gui::task_dialog::task_dialog_builder<void> td(
+    washer::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Range interrupted with pause",
         L"Start incrementing progress.\n"
         L"Pause after a bit, then continue as normal.",
         L"range_pause");
 
     td.include_progress_bar(
-        winapi::gui::task_dialog::async_progress_updater(run_pause_run));
+        washer::gui::task_dialog::async_progress_updater(run_pause_run));
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show();
     }
@@ -454,10 +454,10 @@ BOOST_AUTO_TEST_CASE( range_pause )
 namespace {
 
     void run_error_run(
-        winapi::gui::task_dialog::progress_bar bar)
+        washer::gui::task_dialog::progress_bar bar)
     {
-        winapi::gui::task_dialog::range_progress::progress_updater updater =
-            bar(winapi::gui::task_dialog::range_progress(0, 9));
+        washer::gui::task_dialog::range_progress::progress_updater updater =
+            bar(washer::gui::task_dialog::range_progress(0, 9));
 
         for (int i=0; i < 6; ++i)
         {
@@ -467,14 +467,14 @@ namespace {
         }
 
         updater.bar_state(
-            winapi::gui::task_dialog::range_progress::bar_state::errored);
+            washer::gui::task_dialog::range_progress::bar_state::errored);
 
         // It can take a long time for the bar to be redrawn with the new
         // state
         boost::this_thread::sleep(boost::posix_time::milliseconds(2000));
 
         updater.bar_state(
-            winapi::gui::task_dialog::range_progress::bar_state::normal);
+            washer::gui::task_dialog::range_progress::bar_state::normal);
 
         for (int i=6; i < 10; ++i)
         {
@@ -491,16 +491,16 @@ namespace {
  */
 BOOST_AUTO_TEST_CASE( range_error )
 {
-    winapi::gui::task_dialog::task_dialog_builder<void> td(
+    washer::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Range interrupted with error",
         L"Start incrementing progress.\n"
         L"Change to error after a bit, then continue as normal.",
         L"range_error");
 
     td.include_progress_bar(
-        winapi::gui::task_dialog::async_progress_updater(run_error_run));
+        washer::gui::task_dialog::async_progress_updater(run_error_run));
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show();
     }
@@ -508,7 +508,7 @@ BOOST_AUTO_TEST_CASE( range_error )
 
 namespace {
 
-    void change_instruction(winapi::gui::task_dialog::task_dialog dialog)
+    void change_instruction(washer::gui::task_dialog::task_dialog dialog)
     {
         boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
         dialog.instruction(L"And then changes to this");
@@ -520,22 +520,22 @@ namespace {
  */
 BOOST_AUTO_TEST_CASE( dynamic_change_instruction )
 {
-    winapi::gui::task_dialog::task_dialog_builder<void> td(
+    washer::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Instruction starts off like this",
         L"Notice how the instruction text changes.",
         L"dynamic_change_instruction");
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show(
-            winapi::gui::task_dialog::async_dialog_updater(
+            washer::gui::task_dialog::async_dialog_updater(
                 change_instruction));
     }
 }
 
 namespace {
 
-    void change_content(winapi::gui::task_dialog::task_dialog dialog)
+    void change_content(washer::gui::task_dialog::task_dialog dialog)
     {
         boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
         dialog.content(L"And\nnow\nfor\nsomething\nelse");
@@ -547,15 +547,15 @@ namespace {
  */
 BOOST_AUTO_TEST_CASE( dynamic_change_content )
 {
-    winapi::gui::task_dialog::task_dialog_builder<void> td(
+    washer::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Notice how the content changes.",
         L"Here's the initial content.",
         L"dynamic_change_content");
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show(
-            winapi::gui::task_dialog::async_dialog_updater(
+            washer::gui::task_dialog::async_dialog_updater(
                 change_content));
     }
 }
@@ -563,7 +563,7 @@ BOOST_AUTO_TEST_CASE( dynamic_change_content )
 namespace {
 
     void change_extended_text(
-        winapi::gui::task_dialog::extended_text_area text_area)
+        washer::gui::task_dialog::extended_text_area text_area)
     {
         boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
         text_area.update_text(L"And\nnow\nfor\nsomething\nelse");
@@ -575,18 +575,18 @@ namespace {
  */
 BOOST_AUTO_TEST_CASE( dynamic_change_expando )
 {
-    winapi::gui::task_dialog::task_dialog_builder<void> td(
+    washer::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Notice how the expando text changes.",
         L"Expand it quickly to catch it.",
         L"dynamic_change_expando");
 
     td.extended_text(
-        L"Hola", winapi::gui::task_dialog::expansion_position::default,
-        winapi::gui::task_dialog::initial_expansion_state::default, L"", L"",
-        winapi::gui::task_dialog::async_extended_text_updater(
+        L"Hola", washer::gui::task_dialog::expansion_position::default,
+        washer::gui::task_dialog::initial_expansion_state::default, L"", L"",
+        washer::gui::task_dialog::async_extended_text_updater(
             change_extended_text));
 
-    if (WINAPI_TEST_ALLOW_REQUIRES_INTERACTION)
+    if (WASHER_TEST_ALLOW_REQUIRES_INTERACTION)
     {
         td.show();
     }
@@ -597,8 +597,8 @@ namespace {
     void do_nothing_command() {}
 
     void dismiss_dialog_after_pause(
-        winapi::gui::task_dialog::task_dialog dialog,
-        winapi::gui::task_dialog::command_id id)
+        washer::gui::task_dialog::task_dialog dialog,
+        washer::gui::task_dialog::command_id id)
     {
         boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
 
@@ -608,16 +608,16 @@ namespace {
 
 BOOST_AUTO_TEST_CASE( dismiss_common_button )
 {
-    winapi::gui::task_dialog::task_dialog_builder<void> td(
+    washer::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Click button programatically.",
         L"Don't click the button, the dialog should still disappear.",
         L"dismiss_common_button");
 
-    winapi::gui::task_dialog::command_id id = td.add_button(
-        winapi::gui::task_dialog::button_type::close,  do_nothing_command);
+    washer::gui::task_dialog::command_id id = td.add_button(
+        washer::gui::task_dialog::button_type::close,  do_nothing_command);
 
     td.show(
-        winapi::gui::task_dialog::async_dialog_updater(
+        washer::gui::task_dialog::async_dialog_updater(
         bind(dismiss_dialog_after_pause, _1, id)));
 
     // If the dialog disappears without us clicking the button, it works
@@ -625,16 +625,16 @@ BOOST_AUTO_TEST_CASE( dismiss_common_button )
 
 BOOST_AUTO_TEST_CASE( dismiss_custom_button )
 {
-    winapi::gui::task_dialog::task_dialog_builder<void> td(
+    washer::gui::task_dialog::task_dialog_builder<void> td(
         NULL, L"Click button programatically.",
         L"Don't click the button, the dialog should still disappear.",
         L"dismiss_custom_button");
 
-    winapi::gui::task_dialog::command_id id = td.add_button(
+    washer::gui::task_dialog::command_id id = td.add_button(
         L"DON'T PRESS ME",  do_nothing_command);
 
     td.show(
-        winapi::gui::task_dialog::async_dialog_updater(
+        washer::gui::task_dialog::async_dialog_updater(
             bind(dismiss_dialog_after_pause, _1, id)));
 
     // If the dialog disappears without us clicking the button, it works

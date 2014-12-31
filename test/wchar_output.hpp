@@ -29,11 +29,11 @@
     @endif
 */
 
-#ifndef WINAPI_TEST_WCHAR_OUTPUT_HPP
-#define WINAPI_TEST_WCHAR_OUTPUT_HPP
+#ifndef WASHER_TEST_WCHAR_OUTPUT_HPP
+#define WASHER_TEST_WCHAR_OUTPUT_HPP
 #pragma once
 
-#include <winapi/error.hpp> // last_error
+#include <washer/error.hpp> // last_error
 
 #include <boost/filesystem.hpp> // wpath
 #include <boost/numeric/conversion/cast.hpp> // numeric_cast
@@ -48,7 +48,7 @@
 #include <Objbase.h> // GetRunningObjectTable
 #include <Windows.h> // WideCharToMultiByte
 
-namespace winapi {
+namespace washer {
 namespace test {
 
 namespace detail {
@@ -105,7 +105,7 @@ inline typename T::ToType convert_string(const typename T::FromType& from)
         }
     }
 
-    BOOST_THROW_EXCEPTION(winapi::last_error());
+    BOOST_THROW_EXCEPTION(washer::last_error());
 }
 
 /**
@@ -123,7 +123,7 @@ namespace std {
     inline std::ostream& operator<<(
         std::ostream& out, const std::wstring& wide_in)
     {
-        out << winapi::test::wide_string_to_utf8(wide_in);
+        out << washer::test::wide_string_to_utf8(wide_in);
         return out;
     }
 
@@ -143,4 +143,3 @@ namespace std {
 }
 
 #endif
-

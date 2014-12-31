@@ -33,23 +33,23 @@
 #include "menu_fixtures.hpp" // test_bitmap
 #include "wchar_output.hpp" // wchar_t test output
 
-#include <winapi/gui/menu/button/bitmap_button.hpp>
-#include <winapi/gui/menu/button/bitmap_button_description.hpp>
-#include <winapi/gui/menu/button/owner_drawn_button.hpp>
-#include <winapi/gui/menu/button/owner_drawn_button_description.hpp>
-#include <winapi/gui/menu/button/string_button.hpp>
-#include <winapi/gui/menu/button/string_button_description.hpp>
-#include <winapi/gui/menu/item/command_item_description.hpp>
-#include <winapi/gui/menu/item/separator_item.hpp>
-#include <winapi/gui/menu/visitor.hpp> // test subject
+#include <washer/gui/menu/button/bitmap_button.hpp>
+#include <washer/gui/menu/button/bitmap_button_description.hpp>
+#include <washer/gui/menu/button/owner_drawn_button.hpp>
+#include <washer/gui/menu/button/owner_drawn_button_description.hpp>
+#include <washer/gui/menu/button/string_button.hpp>
+#include <washer/gui/menu/button/string_button_description.hpp>
+#include <washer/gui/menu/item/command_item_description.hpp>
+#include <washer/gui/menu/item/separator_item.hpp>
+#include <washer/gui/menu/visitor.hpp> // test subject
 
 #include <boost/detail/scoped_enum_emulation.hpp> // BOOST_SCOPED_ENUM
 #include <boost/test/unit_test.hpp>
 
 #include <string>
 
-using namespace winapi::gui::menu;
-using namespace winapi::test;
+using namespace washer::gui::menu;
+using namespace washer::test;
 
 using std::string;
 

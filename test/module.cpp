@@ -29,5 +29,5 @@
     @endif
 */
 
-#define BOOST_TEST_MODULE winapi tests
+#define BOOST_TEST_MODULE washer tests
 #include <boost/test/unit_test.hpp>

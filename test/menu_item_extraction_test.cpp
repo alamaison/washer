@@ -35,16 +35,16 @@
 #include "menu_fixtures.hpp"
 #include "wchar_output.hpp" // wchar_t test output
 
-#include <winapi/gui/menu/menu.hpp> // test subject
+#include <washer/gui/menu/menu.hpp> // test subject
 
 #include <boost/mpl/vector.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <string>
 
-using namespace winapi::gui::menu;
-using namespace winapi::test;
-namespace win32 = winapi::gui::menu::detail::win32;
+using namespace washer::gui::menu;
+using namespace washer::test;
+namespace win32 = washer::gui::menu::detail::win32;
 
 using std::string;
 using std::wstring;
@@ -182,7 +182,7 @@ struct old_style_bitmap_command : public F
 /**
  * Inserts string command using the new API.
  *
- * This specifies the MIIM_TYPE flag because it is using the (legacy) 
+ * This specifies the MIIM_TYPE flag because it is using the (legacy)
  * whole-button bitmap.
  */
 template<typename F>

@@ -29,8 +29,8 @@
     @endif
 */
 
-#ifndef WINAPI_TEST_FIXTURE_COMBINATOR_HPP
-#define WINAPI_TEST_FIXTURE_COMBINATOR_HPP
+#ifndef WASHER_TEST_FIXTURE_COMBINATOR_HPP
+#define WASHER_TEST_FIXTURE_COMBINATOR_HPP
 #pragma once
 
 #include <boost/mpl/apply.hpp>
@@ -40,7 +40,7 @@
 #include <boost/mpl/push_back.hpp>
 #include <boost/mpl/vector.hpp>
 
-namespace winapi {
+namespace washer {
 namespace test {
 
 namespace detail {

@@ -32,23 +32,23 @@
 #include "menu_fixtures.hpp"
 #include "wchar_output.hpp" // wchar_t test output
 
-#include <winapi/gui/menu/item/command_item.hpp>
-#include <winapi/gui/menu/item/command_item_description.hpp>
-#include <winapi/gui/menu/item/item.hpp> // test subject
-#include <winapi/gui/menu/item/separator_item.hpp>
-#include <winapi/gui/menu/item/separator_item_description.hpp>
-#include <winapi/gui/menu/item/sub_menu_item.hpp>
-#include <winapi/gui/menu/item/sub_menu_item_description.hpp>
-#include <winapi/gui/menu/visitor.hpp> // test subject
+#include <washer/gui/menu/item/command_item.hpp>
+#include <washer/gui/menu/item/command_item_description.hpp>
+#include <washer/gui/menu/item/item.hpp> // test subject
+#include <washer/gui/menu/item/separator_item.hpp>
+#include <washer/gui/menu/item/separator_item_description.hpp>
+#include <washer/gui/menu/item/sub_menu_item.hpp>
+#include <washer/gui/menu/item/sub_menu_item_description.hpp>
+#include <washer/gui/menu/visitor.hpp> // test subject
 
 #include <boost/detail/scoped_enum_emulation.hpp> // BOOST_SCOPED_ENUM
 #include <boost/test/unit_test.hpp>
 
 #include <string>
 
-using namespace winapi::gui::menu;
-using winapi::test::menu_ownership_fixtures;
-using winapi::test::menu_with_handle_creator_fixtures;
+using namespace washer::gui::menu;
+using washer::test::menu_ownership_fixtures;
+using washer::test::menu_with_handle_creator_fixtures;
 
 using std::string;
 

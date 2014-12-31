@@ -31,9 +31,9 @@
 
 #include "wchar_output.hpp" // wstring output
 
-#include <winapi/shell/pidl_iterator.hpp> // test subject
+#include <washer/shell/pidl_iterator.hpp> // test subject
 
-#include <winapi/shell/shell.hpp> // special_folder_pidl
+#include <washer/shell/shell.hpp> // special_folder_pidl
 
 #include <boost/numeric/conversion/cast.hpp> // numeric_cast
 #include <boost/test/unit_test.hpp>
@@ -42,8 +42,8 @@
 #include <cstring> // strlen
 #include <vector>
 
-using namespace winapi::shell::pidl;
-using winapi::shell::special_folder_pidl;
+using namespace washer::shell::pidl;
+using washer::shell::special_folder_pidl;
 
 using boost::numeric_cast;
 using boost::test_tools::predicate_result;
@@ -76,7 +76,7 @@ namespace {
         pidl->mkid.cb = numeric_cast<USHORT>(pidl_length - sizeof(SHITEMID));
         return cpidl_t(pidl);
     }
-    
+
     /**
      * Check that the PIDL contains the text we expect.
      */

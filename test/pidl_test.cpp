@@ -29,7 +29,7 @@
     @endif
 */
 
-#include <winapi/shell/pidl.hpp>  // test subject
+#include <washer/shell/pidl.hpp>  // test subject
 
 #include <boost/test/unit_test.hpp>
 #include <boost/test/test_case_template.hpp>
@@ -45,7 +45,7 @@
 #include <string>
 #include <vector>
 
-using namespace winapi::shell::pidl;
+using namespace washer::shell::pidl;
 
 using boost::lexical_cast;
 using boost::numeric_cast;

@@ -29,13 +29,13 @@
     @endif
 */
 
-#include <winapi/gui/progress.hpp> // test subject
+#include <washer/gui/progress.hpp> // test subject
 
 #include <comet/util.h> // auto_coinit
 
 #include <boost/test/unit_test.hpp>
 
-using winapi::gui::progress;
+using washer::gui::progress;
 
 using comet::auto_coinit;
 
@@ -60,7 +60,7 @@ BOOST_FIXTURE_TEST_SUITE(progress_tests, com_fixture)
 BOOST_AUTO_TEST_CASE( text )
 {
     progress dialogue(
-        NULL, L"Test title", progress::modality::modal, 
+        NULL, L"Test title", progress::modality::modal,
         progress::time_estimation::none, progress::bar_type::finite,
         progress::minimisable::yes, progress::cancellability::cancellable);
     dialogue.line(1, L"Text 1");
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE( text )
 BOOST_AUTO_TEST_CASE( path )
 {
     progress dialogue(
-        NULL, L"Test title", progress::modality::modal, 
+        NULL, L"Test title", progress::modality::modal,
         progress::time_estimation::none, progress::bar_type::finite,
         progress::minimisable::yes, progress::cancellability::cancellable);
     dialogue.line(1, L"Text 1");
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE( path )
 BOOST_AUTO_TEST_CASE( text_with_time )
 {
     progress dialogue(
-        NULL, L"Test title", progress::modality::modal, 
+        NULL, L"Test title", progress::modality::modal,
         progress::time_estimation::automatic_time_estimate,
         progress::bar_type::finite,
         progress::minimisable::yes, progress::cancellability::cancellable);
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE( text_with_time )
 BOOST_AUTO_TEST_CASE( text_with_time_and_marquee )
 {
     progress dialogue(
-        NULL, L"Test title", progress::modality::modal, 
+        NULL, L"Test title", progress::modality::modal,
         progress::time_estimation::automatic_time_estimate,
         progress::bar_type::marquee,
         progress::minimisable::yes, progress::cancellability::cancellable);
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE( text_with_time_and_marquee )
 BOOST_AUTO_TEST_CASE( text_with_time_only )
 {
     progress dialogue(
-        NULL, L"Test title", progress::modality::modal, 
+        NULL, L"Test title", progress::modality::modal,
         progress::time_estimation::automatic_time_estimate,
         progress::bar_type::none,
         progress::minimisable::yes, progress::cancellability::cancellable);

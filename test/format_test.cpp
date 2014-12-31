@@ -31,7 +31,7 @@
 
 #include "wchar_output.hpp" // wstring output
 
-#include <winapi/shell/format.hpp> // test subject
+#include <washer/shell/format.hpp> // test subject
 
 #include <comet/datetime.h> // datetime_t
 
@@ -40,8 +40,8 @@
 #include <string>
 #include <vector>
 
-using winapi::shell::format_date_time;
-using winapi::shell::format_filesize_kilobytes;
+using washer::shell::format_date_time;
+using washer::shell::format_filesize_kilobytes;
 
 using comet::datetime_t;
 

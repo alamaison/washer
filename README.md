@@ -1,4 +1,4 @@
-winapi: a lightweight C++ wrapper for the Windows API
+Washer: a lightweight C++ wrapper for the Windows API
 ========================================================
 
 > **IMPORTANT**: You do **not** have to build this library before
@@ -6,12 +6,12 @@ winapi: a lightweight C++ wrapper for the Windows API
 > are developed this way and it makes them much easier to reuse -
 > something we _really_ want to encourage.
 
-What is winapi?
+What is Washer?
 ---------------
 
-The Microsoft Windows API, aka Win32, is a large beast written in a
+The Microsoft Windows API, aka Win32, is large and written in a
 way that suits C programmers but doesn't really fit with the modern
-C++ way of working.  winapi aims to wrap parts of it to be easier to
+C++ way of working.  Washer aims to wrap parts of it to be easier to
 use for any programmer familiar with the C++ standard library (aka the
 STL).
 
@@ -28,26 +28,24 @@ Dependencies
 ------------
 
 Inevitably, in a world where we are trying to encourage code reuse,
-winapi depends on some third-party libraries.
+Washer depends on some third-party libraries.
 
   * [Boost] is fast becoming essential to any modern C++ development
-    and winapi uses it heavily.  Any recent version should do although
+    and Washer uses it heavily.  Any recent version should do although
     building the test suite requires version 1.40 or above as previous
     versions lack Boost.Test.
 
   * [Comet] is a very clever, portable C++ library for Microsoft COM
     development.  COM is used for parts of the Windows API so we use
-    Comet to wrap those bits. We have been using our own
-    [private fork] for development so it may be best to use that.
+    Comet to wrap those bits.
 
 [Boost]:        http://www.boost.org
-[Comet]:        http://bitbucket.org/sofusmortensen/comet
-[private fork]: http://bitbucket.org/alamaison/swish_comet
+[Comet]:        http://github.com/alamaison/comet
 
 Usage
 -----
 
-Just download the dependencies, add `winapi/include` to your
+Just download the dependencies, add `washer/include` to your
 compiler's include path and you are ready to go.  The library is
 documented inline and you can use [Doxygen] to generate documentation
 for it if you want.
@@ -82,7 +80,7 @@ The [OpenSSL] library is incompatible with the GPL license because it
 contains an advertising clause.  However lots of useful, open source
 software (including our own projects) need to use it and currently the
 alternatives aren't quite up to scratch.  As we want these projects to
-be able to reuse winapi, we have added this exception to the GPL - a
+be able to reuse Washer, we have added this exception to the GPL - a
 common technique used by other projects such as [wget].
 
 If [GnuTLS] improves to the point where OpenSSL is no longer

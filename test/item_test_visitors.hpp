@@ -29,35 +29,35 @@
     @endif
 */
 
-#ifndef WINAPI_TEST_MENU_ITEM_TEST_VISITORS_HPP
-#define WINAPI_TEST_MENU_ITEM_TEST_VISITORS_HPP
+#ifndef WASHER_TEST_MENU_ITEM_TEST_VISITORS_HPP
+#define WASHER_TEST_MENU_ITEM_TEST_VISITORS_HPP
 #pragma once
 
 #include "wchar_output.hpp" // wchar_t test output
 
-#include <winapi/gui/menu/item/command_item.hpp>
-#include <winapi/gui/menu/item/separator_item.hpp>
-#include <winapi/gui/menu/item/sub_menu_item.hpp>
-#include <winapi/gui/menu/menu.hpp> // menu
-#include <winapi/gui/menu/visitor.hpp> // menu_visitor
+#include <washer/gui/menu/item/command_item.hpp>
+#include <washer/gui/menu/item/separator_item.hpp>
+#include <washer/gui/menu/item/sub_menu_item.hpp>
+#include <washer/gui/menu/menu.hpp> // menu
+#include <washer/gui/menu/visitor.hpp> // menu_visitor
 
 #include <boost/test/unit_test.hpp>
 
 #include <string>
 
-namespace winapi {
+namespace washer {
 namespace test {
 
-class selectable_state_test : public winapi::gui::menu::menu_visitor<>
+class selectable_state_test : public washer::gui::menu::menu_visitor<>
 {
 public:
 
-    void operator()(winapi::gui::menu::separator_item&)
+    void operator()(washer::gui::menu::separator_item&)
     {
         BOOST_FAIL("Separator unexpected");
     }
 
-    void operator()(winapi::gui::menu::selectable_item& item)
+    void operator()(washer::gui::menu::selectable_item& item)
     {
         BOOST_CHECK(item.is_selectable());
         BOOST_CHECK(!item.is_highlighted());
@@ -65,18 +65,18 @@ public:
     }
 };
 
-class selectability_test : public winapi::gui::menu::menu_visitor<>
+class selectability_test : public washer::gui::menu::menu_visitor<>
 {
 public:
 
     selectability_test(bool expected) : m_expected(expected) {}
 
-    void operator()(winapi::gui::menu::separator_item&)
+    void operator()(washer::gui::menu::separator_item&)
     {
         BOOST_FAIL("Separator unexpected");
     }
 
-    void operator()(winapi::gui::menu::selectable_item& item)
+    void operator()(washer::gui::menu::selectable_item& item)
     {
         BOOST_CHECK_EQUAL(item.is_selectable(), m_expected);
     }
@@ -85,40 +85,40 @@ private:
     bool m_expected;
 };
 
-class selectability_mutator : public winapi::gui::menu::menu_visitor<>
+class selectability_mutator : public washer::gui::menu::menu_visitor<>
 {
 public:
 
     selectability_mutator(
-        BOOST_SCOPED_ENUM(winapi::gui::menu::selectability) state)
+        BOOST_SCOPED_ENUM(washer::gui::menu::selectability) state)
         : m_selectability(state) {}
 
-    void operator()(winapi::gui::menu::separator_item&)
+    void operator()(washer::gui::menu::separator_item&)
     {
         BOOST_FAIL("Separator unexpected");
     }
 
-    void operator()(winapi::gui::menu::selectable_item& item)
+    void operator()(washer::gui::menu::selectable_item& item)
     {
         item.selectability(m_selectability);
     }
 
 private:
-    BOOST_SCOPED_ENUM(winapi::gui::menu::selectability) m_selectability;
+    BOOST_SCOPED_ENUM(washer::gui::menu::selectability) m_selectability;
 };
 
-class checkedness_test : public winapi::gui::menu::menu_visitor<>
+class checkedness_test : public washer::gui::menu::menu_visitor<>
 {
 public:
 
     checkedness_test(bool expected) : m_expected(expected) {}
 
-    void operator()(winapi::gui::menu::separator_item&)
+    void operator()(washer::gui::menu::separator_item&)
     {
         BOOST_FAIL("Separator unexpected");
     }
 
-    void operator()(winapi::gui::menu::selectable_item& item)
+    void operator()(washer::gui::menu::selectable_item& item)
     {
         BOOST_CHECK_EQUAL(item.check_mark_is_visible(), m_expected);
     }
@@ -127,85 +127,85 @@ private:
     bool m_expected;
 };
 
-class check_mutator : public winapi::gui::menu::menu_visitor<>
+class check_mutator : public washer::gui::menu::menu_visitor<>
 {
 public:
 
-    check_mutator(BOOST_SCOPED_ENUM(winapi::gui::menu::check_mark) state)
+    check_mutator(BOOST_SCOPED_ENUM(washer::gui::menu::check_mark) state)
         : m_checkedness(state) {}
 
-    void operator()(winapi::gui::menu::separator_item&)
+    void operator()(washer::gui::menu::separator_item&)
     {
         BOOST_FAIL("Separator unexpected");
     }
 
-    void operator()(winapi::gui::menu::selectable_item& item)
+    void operator()(washer::gui::menu::selectable_item& item)
     {
         item.check_mark_visibility(m_checkedness);
     }
 
 private:
-    BOOST_SCOPED_ENUM(winapi::gui::menu::check_mark) m_checkedness;
+    BOOST_SCOPED_ENUM(washer::gui::menu::check_mark) m_checkedness;
 };
 
-class is_separator_test : public winapi::gui::menu::menu_visitor<>
+class is_separator_test : public washer::gui::menu::menu_visitor<>
 {
 public:
 
-    void operator()(winapi::gui::menu::separator_item&)
+    void operator()(washer::gui::menu::separator_item&)
     {
     }
 
-    void operator()(winapi::gui::menu::command_item&)
+    void operator()(washer::gui::menu::command_item&)
     {
         BOOST_FAIL("Command item unexpected");
     }
 
-    void operator()(winapi::gui::menu::sub_menu_item&)
+    void operator()(washer::gui::menu::sub_menu_item&)
     {
         BOOST_FAIL("Sub-menu unexpected");
     }
 };
 
-class is_command_test : public winapi::gui::menu::menu_visitor<>
+class is_command_test : public washer::gui::menu::menu_visitor<>
 {
 public:
 
-    void operator()(winapi::gui::menu::separator_item&)
+    void operator()(washer::gui::menu::separator_item&)
     {
         BOOST_FAIL("Separator unexpected");
     }
 
-    void operator()(winapi::gui::menu::command_item&)
+    void operator()(washer::gui::menu::command_item&)
     {
     }
 
-    void operator()(winapi::gui::menu::sub_menu_item&)
+    void operator()(washer::gui::menu::sub_menu_item&)
     {
         BOOST_FAIL("Sub-menu unexpected");
     }
 };
 
-class is_sub_menu_test : public winapi::gui::menu::menu_visitor<>
+class is_sub_menu_test : public washer::gui::menu::menu_visitor<>
 {
 public:
 
-    void operator()(winapi::gui::menu::separator_item&)
+    void operator()(washer::gui::menu::separator_item&)
     {
         BOOST_FAIL("Separator unexpected");
     }
 
-    void operator()(winapi::gui::menu::command_item&)
+    void operator()(washer::gui::menu::command_item&)
     {
         BOOST_FAIL("Command item unexpected");
     }
 
-    void operator()(winapi::gui::menu::sub_menu_item&)
+    void operator()(washer::gui::menu::sub_menu_item&)
     {
     }
 };
 
-class id_test : public winapi::gui::menu::menu_visitor<>
+class id_test : public washer::gui::menu::menu_visitor<>
 {
 public:
     id_test(UINT id) : m_id(id) {}
@@ -220,11 +220,11 @@ private:
     UINT m_id;
 };
 
-class sub_menu_test : public winapi::gui::menu::menu_visitor<>
+class sub_menu_test : public washer::gui::menu::menu_visitor<>
 {
 public:
 
-    sub_menu_test(const winapi::gui::menu::menu& menu) : m_menu(menu) {}
+    sub_menu_test(const washer::gui::menu::menu& menu) : m_menu(menu) {}
 
     template<typename T>
     void operator()(T&)
@@ -232,35 +232,35 @@ public:
         BOOST_FAIL("Unexpected");
     }
 
-    void operator()(winapi::gui::menu::sub_menu_item& item)
+    void operator()(washer::gui::menu::sub_menu_item& item)
     {
-        winapi::gui::menu::menu submenu = item.menu();
+        washer::gui::menu::menu submenu = item.menu();
         BOOST_CHECK(submenu.valid());
 
         BOOST_CHECK(submenu == m_menu);
     }
 
 private:
-    winapi::gui::menu::menu m_menu;
+    washer::gui::menu::menu m_menu;
 };
 
 template<typename ButtonVisitor>
 class button_test :
-    public winapi::gui::menu::menu_visitor<typename ButtonVisitor::result_type>
+    public washer::gui::menu::menu_visitor<typename ButtonVisitor::result_type>
 {
 public:
 
     button_test(ButtonVisitor test) : m_test(test) {}
 
     typename ButtonVisitor::result_type operator()(
-        winapi::gui::menu::separator_item&)
+        washer::gui::menu::separator_item&)
     {
         BOOST_FAIL("Separator unexpected");
         return typename ButtonVisitor::result_type();
     }
 
     typename ButtonVisitor::result_type operator()(
-        winapi::gui::menu::selectable_item& item)
+        washer::gui::menu::selectable_item& item)
     {
         return item.button().accept(m_test);
     }

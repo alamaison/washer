@@ -29,22 +29,22 @@
     @endif
 */
 
-#ifndef WINAPI_TEST_MENU_FIXTURES_HPP
-#define WINAPI_TEST_MENU_FIXTURES_HPP
+#ifndef WASHER_TEST_MENU_FIXTURES_HPP
+#define WASHER_TEST_MENU_FIXTURES_HPP
 #pragma once
 
 #include "fixture_permutator.hpp"
 #include "wchar_output.hpp" // wchar_t test output
 
 // These are the tests subjects created by the fixtures
-#include <winapi/gui/menu/button/string_button_description.hpp>
-#include <winapi/gui/menu/item/sub_menu_item_description.hpp>
-#include <winapi/gui/menu/menu.hpp>
-#include <winapi/gui/menu/menu_handle.hpp>
+#include <washer/gui/menu/button/string_button_description.hpp>
+#include <washer/gui/menu/item/sub_menu_item_description.hpp>
+#include <washer/gui/menu/menu.hpp>
+#include <washer/gui/menu/menu_handle.hpp>
 
-#include <winapi/dynamic_link.hpp> // module_handle
-#include <winapi/error.hpp> // last_error
-#include <winapi/window/window.hpp>
+#include <washer/dynamic_link.hpp> // module_handle
+#include <washer/error.hpp> // last_error
+#include <washer/window/window.hpp>
 
 #include <boost/exception/errinfo_api_function.hpp> // errinfo_api_function
 #include <boost/exception/info.hpp> // errinfo
@@ -54,7 +54,7 @@
 
 #include <string>
 
-namespace winapi {
+namespace washer {
 namespace test {
 
 namespace detail {
@@ -70,7 +70,7 @@ namespace detail {
         }
         if (rc < 0)
             BOOST_THROW_EXCEPTION(
-                boost::enable_error_info(winapi::last_error()) <<
+                boost::enable_error_info(washer::last_error()) <<
                 boost::errinfo_api_function("GetMessage"));
     }
 
@@ -84,7 +84,7 @@ namespace detail {
         ATOM klass = ::RegisterClassExW(&window_class);
         if (klass == 0 && ::GetLastError() != ERROR_CLASS_ALREADY_EXISTS)
             BOOST_THROW_EXCEPTION(
-                boost::enable_error_info(winapi::last_error()) <<
+                boost::enable_error_info(washer::last_error()) <<
                 boost::errinfo_api_function("RegisterClassEx"));
 
         HWND hwnd = ::CreateWindowExW(
@@ -95,7 +95,7 @@ namespace detail {
         // invalid arguments
         if (hwnd == NULL)
             BOOST_THROW_EXCEPTION(
-                boost::enable_error_info(winapi::last_error()) <<
+                boost::enable_error_info(washer::last_error()) <<
                 boost::errinfo_api_function("CreateWindowEx"));
 
         return window::window<>(window::window_handle::adopt_handle(hwnd));
@@ -132,7 +132,7 @@ inline HBITMAP test_bitmap()
         LR_DEFAULTSIZE, LR_DEFAULTSIZE, LR_SHARED);
     if (bitmap == NULL)
         BOOST_THROW_EXCEPTION(
-            boost::enable_error_info(winapi::last_error()) <<
+            boost::enable_error_info(washer::last_error()) <<
             boost::errinfo_api_function("LoadImage"));
 
     return bitmap;

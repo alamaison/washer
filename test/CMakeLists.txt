@@ -47,19 +47,19 @@ find_package(
 add_executable(tests ${TEST_SOURCES})
 target_include_directories(tests PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(tests
-  PRIVATE winapi load_test_dll ${Boost_LIBRARIES})
+  PRIVATE washer load_test_dll ${Boost_LIBRARIES})
 target_compile_definitions(tests PRIVATE BOOST_ALL_NO_LIB=1)
 
 add_executable(tests_unicode ${TEST_SOURCES})
 target_include_directories(tests_unicode PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(tests_unicode
-  PRIVATE winapi load_test_dll ${Boost_LIBRARIES})
+  PRIVATE washer load_test_dll ${Boost_LIBRARIES})
 target_compile_definitions(tests_unicode PRIVATE BOOST_ALL_NO_LIB=1 _UNICODE)
 
 add_executable(tests_win9x ${TEST_SOURCES})
 target_include_directories(tests_win9x PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(tests_win9x
-  PRIVATE winapi load_test_dll ${Boost_LIBRARIES})
+  PRIVATE washer load_test_dll ${Boost_LIBRARIES})
 target_compile_definitions(tests_win9x PRIVATE
   BOOST_ALL_NO_LIB=1 WINVER=0x0400 _WIN32_WINNT=0x0400)
 

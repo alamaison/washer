@@ -31,15 +31,15 @@
 
 #include "wchar_output.hpp" // wstring output
 
-#include <winapi/window/window.hpp> // test subject
+#include <washer/window/window.hpp> // test subject
 
 #include <boost/mpl/list.hpp> // list
 #include <boost/test/unit_test.hpp>
 
 #include <string>
 
-using winapi::window::window;
-using winapi::window::window_handle;
+using washer::window::window;
+using washer::window::window_handle;
 
 using boost::shared_ptr;
 

@@ -29,7 +29,7 @@
     @endif
 */
 
-#include <winapi/global_lock.hpp> // test subject
+#include <washer/global_lock.hpp> // test subject
 
 #include <boost/shared_ptr.hpp> // shared_ptr
 #include <boost/system/system_error.hpp> // system_error
@@ -64,7 +64,7 @@ namespace {
 BOOST_AUTO_TEST_CASE( lock_memory )
 {
     hglobal global = test_global();
-    winapi::global_lock<char> lock(global.get());
+    washer::global_lock<char> lock(global.get());
     BOOST_REQUIRE(lock.get());
 
     BOOST_CHECK_EQUAL_COLLECTIONS(
@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE( lock_memory )
 BOOST_AUTO_TEST_CASE( invalid_lock )
 {
     BOOST_CHECK_THROW(
-        winapi::global_lock<char>(NULL), boost::system::system_error);
+        washer::global_lock<char>(NULL), boost::system::system_error);
 }
 
 BOOST_AUTO_TEST_SUITE_END();

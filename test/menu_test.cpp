@@ -34,15 +34,15 @@
 #include "menu_fixtures.hpp"
 #include "wchar_output.hpp" // wchar_t test output
 
-#include <winapi/gui/menu/item/command_item_description.hpp>
-#include <winapi/gui/menu/item/sub_menu_item_description.hpp>
-#include <winapi/gui/menu/menu.hpp> // test subject
+#include <washer/gui/menu/item/command_item_description.hpp>
+#include <washer/gui/menu/item/sub_menu_item_description.hpp>
+#include <washer/gui/menu/menu.hpp> // test subject
 
 #include <boost/foreach.hpp> // BOOST_FOREACH
 #include <boost/test/unit_test.hpp>
 
-using namespace winapi::gui::menu;
-using namespace winapi::test;
+using namespace washer::gui::menu;
+using namespace washer::test;
 
 namespace {
 
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( existing_command, F, menu_fixtures )
     F::test_menu t = F::create_menu_to_test();
     F::menu_type m = t.menu();
 
-    winapi::test::do_insertion(
+    washer::test::do_insertion(
         t.handle().get(), L"C", 42, NULL, MIIM_ID | miim_string, MFT_STRING);
 
     BOOST_CHECK(m.begin() != m.end());
@@ -507,7 +507,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( find, F, menu_with_handle_creator_fixtures )
 
     // No-existent item should not be found
     BOOST_CHECK(find_first_item_with_id(m.begin(), m.end(), 42) == m.end());
-     
+
     // Items outside the range should not be found
     BOOST_CHECK(find_first_item_with_id(m.begin() + 1, m.end(), 1) == m.end());
     BOOST_CHECK(find_first_item_with_id(m.begin() + 2, m.end(), 2) == m.end());
@@ -536,7 +536,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(
 
     typename F::menu_type::iterator first = find_first_item_with_id(
         m.begin(), m.end(), 2);
-    
+
     first->accept(make_button_test(string_button_test(L"Command2")));
 
     typename F::menu_type::iterator second = find_first_item_with_id(

@@ -29,7 +29,7 @@
     @endif
 */
 
-#include <winapi/hook.hpp> // test subject
+#include <washer/hook.hpp> // test subject
 
 #include <boost/system/system_error.hpp> // system_error
 #include <boost/test/unit_test.hpp>
@@ -48,7 +48,7 @@ LRESULT CALLBACK test_keyboard_proc(int nCode, WPARAM wParam, LPARAM lParam)
  */
 BOOST_AUTO_TEST_CASE( thread_hook )
 {
-    winapi::hhook hook = winapi::windows_hook(
+    washer::hhook hook = washer::windows_hook(
         WH_KEYBOARD, test_keyboard_proc);
     BOOST_CHECK(hook);
 }
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE( thread_hook )
  */
 BOOST_AUTO_TEST_CASE( global_hook )
 {
-    winapi::hhook hook = winapi::windows_global_hook(
+    washer::hhook hook = washer::windows_global_hook(
         WH_KEYBOARD_LL, test_keyboard_proc);
     BOOST_CHECK(hook);
 }
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE( global_hook )
 BOOST_AUTO_TEST_CASE( thread_hook_fail )
 {
     BOOST_CHECK_THROW(
-        winapi::windows_hook(
+        washer::windows_hook(
             WH_KEYBOARD_LL, test_keyboard_proc), boost::system::system_error);
 }
 

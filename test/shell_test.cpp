@@ -32,8 +32,8 @@
 #include "wchar_output.hpp" // wstring output
 #include "sandbox_fixture.hpp" // sandbox_fixture
 
-#include <winapi/shell/shell.hpp> // test subject
-#include <winapi/shell/shell_item.hpp> // pidl_shell_item
+#include <washer/shell/shell.hpp> // test subject
+#include <washer/shell/shell_item.hpp> // pidl_shell_item
 
 #include <comet/ptr.h> // com_ptr
 #include <comet/util.h> // auto_coinit
@@ -48,9 +48,9 @@
 using comet::auto_coinit;
 using comet::com_ptr;
 
-using namespace winapi::shell;
-using winapi::shell::pidl::apidl_t;
-using winapi::test::sandbox_fixture;
+using namespace washer::shell;
+using washer::shell::pidl::apidl_t;
+using washer::test::sandbox_fixture;
 
 using boost::filesystem::ofstream;
 using boost::filesystem::wpath;

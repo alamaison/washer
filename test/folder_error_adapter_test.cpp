@@ -29,7 +29,7 @@
     @endif
 */
 
-#include <winapi/shell/folder_error_adapters.hpp> // test subject
+#include <washer/shell/folder_error_adapters.hpp> // test subject
 
 #include <comet/bstr.h> // bstr_t
 #include <comet/ptr.h> // com_ptr
@@ -40,9 +40,9 @@
 
 #include <string>
 
-using winapi::shell::folder_error_adapter;
-using winapi::shell::folder2_error_adapter;
-using winapi::shell::shell_details_error_adapter;
+using washer::shell::folder_error_adapter;
+using washer::shell::folder2_error_adapter;
+using washer::shell::shell_details_error_adapter;
 
 using comet::com_ptr;
 using comet::com_error;

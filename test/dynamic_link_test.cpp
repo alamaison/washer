@@ -30,7 +30,7 @@
     @endif
 */
 
-#include <winapi/dynamic_link.hpp> // test subject
+#include <washer/dynamic_link.hpp> // test subject
 
 #include <boost/function.hpp> // function
 #include <boost/system/system_error.hpp> // system_error
@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_SUITE(dynamic_link_tests)
  */
 BOOST_AUTO_TEST_CASE( load_library )
 {
-    winapi::hmodule hinst = winapi::load_library("kernel32.dll");
+    washer::hmodule hinst = washer::load_library("kernel32.dll");
     BOOST_CHECK(hinst);
 }
 
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE( load_library )
  */
 BOOST_AUTO_TEST_CASE( load_library_w )
 {
-    winapi::hmodule hinst = winapi::load_library(L"kernel32.dll");
+    washer::hmodule hinst = washer::load_library(L"kernel32.dll");
     BOOST_CHECK(hinst);
 }
 
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE( load_library_w )
 BOOST_AUTO_TEST_CASE( load_library_fail )
 {
     BOOST_CHECK_THROW(
-        winapi::load_library("idontexist.dll"),
+        washer::load_library("idontexist.dll"),
         boost::system::system_error);
 }
 
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE( load_library_fail )
 BOOST_AUTO_TEST_CASE( load_library_fail_w )
 {
     BOOST_CHECK_THROW(
-        winapi::load_library(L"idontexist.dll"),
+        washer::load_library(L"idontexist.dll"),
         boost::system::system_error);
 }
 
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE( load_library_fail_w )
  */
 BOOST_AUTO_TEST_CASE( module_handle )
 {
-    HMODULE hinst = winapi::module_handle("kernel32.dll");
+    HMODULE hinst = washer::module_handle("kernel32.dll");
     BOOST_CHECK(hinst);
 }
 
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE( module_handle )
  */
 BOOST_AUTO_TEST_CASE( module_handle_w )
 {
-    HMODULE hinst = winapi::module_handle(L"kernel32.dll");
+    HMODULE hinst = washer::module_handle(L"kernel32.dll");
     BOOST_CHECK(hinst);
 }
 
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE( module_handle_w )
 BOOST_AUTO_TEST_CASE( module_handle_fail )
 {
     BOOST_CHECK_THROW(
-        winapi::module_handle("idontexist.dll"),
+        washer::module_handle("idontexist.dll"),
         boost::system::system_error);
 }
 
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE( module_handle_fail )
 BOOST_AUTO_TEST_CASE( module_handle_fail_w )
 {
     BOOST_CHECK_THROW(
-        winapi::module_handle(L"idontexist.dll"),
+        washer::module_handle(L"idontexist.dll"),
         boost::system::system_error);
 }
 
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE( module_handle_fail_w )
  */
 BOOST_AUTO_TEST_CASE( current_module_handle )
 {
-    HMODULE hinst = winapi::module_handle();
+    HMODULE hinst = washer::module_handle();
     BOOST_CHECK(hinst);
 }
 
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE( load_function )
 {
     boost::function<char*()> func;
 
-    func = winapi::load_function<char*()>("load_test_dll.dll", "test_function");
+    func = washer::load_function<char*()>("load_test_dll.dll", "test_function");
     BOOST_CHECK_EQUAL(func(), "Ran DLL function successfully");
 }
 
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE( load_function_w )
 {
     boost::function<char*()> func;
 
-    func = winapi::load_function<char*()>(
+    func = washer::load_function<char*()>(
         L"load_test_dll.dll", "test_function");
     BOOST_CHECK_EQUAL(func(), "Ran DLL function successfully");
 }
@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE( load_unary_function )
 {
     boost::function<int(int)> func;
 
-    func = winapi::load_function<int(int)>(
+    func = washer::load_function<int(int)>(
         L"load_test_dll.dll", "unary_test_function");
     BOOST_CHECK_EQUAL(func(10), 20);
 }
@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE( load_binary_function )
 {
     boost::function<int(int,int)> func;
 
-    func = winapi::load_function<int(int,int)>(
+    func = washer::load_function<int(int,int)>(
         L"load_test_dll.dll", "binary_test_function");
     BOOST_CHECK_EQUAL(func(7,3), 21);
 }
@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE( load_cdecl_function )
 {
     boost::function<int(int)> func;
 
-    func = winapi::load_function<int __cdecl (int)>(
+    func = washer::load_function<int __cdecl (int)>(
         L"load_test_dll.dll", "cdecl_test_function");
     BOOST_CHECK_EQUAL(func(10), 30);
 }
@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE( load_stdcall_function )
 {
     boost::function<int(int)> func;
 
-    func = winapi::load_function<int __stdcall (int)>(
+    func = washer::load_function<int __stdcall (int)>(
         L"load_test_dll.dll", "stdcall_test_function");
     BOOST_CHECK_EQUAL(func(10), 30);
 }
@@ -218,7 +218,7 @@ BOOST_AUTO_TEST_CASE( load_fastcall_function )
 {
     boost::function<int(int)> func;
 
-    func = winapi::load_function<int __fastcall (int)>(
+    func = washer::load_function<int __fastcall (int)>(
         L"load_test_dll.dll", "fastcall_test_function");
     BOOST_CHECK_EQUAL(func(10), 30);
 }

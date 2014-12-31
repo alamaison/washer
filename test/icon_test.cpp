@@ -29,13 +29,13 @@
     @endif
 */
 
-#include <winapi/gui/icon/icon.hpp> // test subject
+#include <washer/gui/icon/icon.hpp> // test subject
 
 #include <boost/test/unit_test.hpp>
 
 #include <string>
 
-using winapi::gui::standard_icon_type;
+using washer::gui::standard_icon_type;
 
 using std::string;
 using std::wstring;
@@ -55,7 +55,7 @@ namespace {
     {
         HICON icon = native::load_icon(
             NULL, MAKEINTRESOURCE(
-                winapi::gui::detail::icon_type_to_ici_icon_num(type)));
+                washer::gui::detail::icon_type_to_ici_icon_num(type)));
         BOOST_REQUIRE(icon);
 
         return icon;

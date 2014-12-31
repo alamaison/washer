@@ -31,7 +31,7 @@
 
 #include "wchar_output.hpp" // wstring output
 
-#include <winapi/filesystem.hpp> // test subject
+#include <washer/filesystem.hpp> // test subject
 
 #include <boost/filesystem/path.hpp> // path, wpath
 #include <boost/test/unit_test.hpp>
@@ -39,8 +39,8 @@
 #include <string>
 #include <vector>
 
-using winapi::filesystem::temporary_directory_path;
-using winapi::filesystem::unique_path;
+using washer::filesystem::temporary_directory_path;
+using washer::filesystem::unique_path;
 
 using boost::filesystem::path;
 using boost::filesystem::wpath;

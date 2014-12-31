@@ -29,11 +29,11 @@
     @endif
 */
 
-#ifndef WINAPI_TEST_SANDBOX_FIXTURE_HPP
-#define WINAPI_TEST_SANDBOX_FIXTURE_HPP
+#ifndef WASHER_TEST_SANDBOX_FIXTURE_HPP
+#define WASHER_TEST_SANDBOX_FIXTURE_HPP
 #pragma once
 
-#include <winapi/filesystem.hpp> // temporary_directory_path, unique_path
+#include <washer/filesystem.hpp> // temporary_directory_path, unique_path
 
 #include <boost/filesystem.hpp> // wpath
 #include <boost/filesystem/fstream.hpp> // wofstream
@@ -44,12 +44,12 @@
 #include <string>
 #include <vector>
 
-namespace winapi {
+namespace washer {
 namespace test {
 
 namespace detail {
 
-    const std::wstring SANDBOX_NAME = L"winapi-test-sandbox";
+    const std::wstring SANDBOX_NAME = L"washer-test-sandbox";
 
     /**
      * Return the path to the sandbox directory.
@@ -59,7 +59,7 @@ namespace detail {
         boost::shared_ptr<wchar_t> name(
             _wtempnam(NULL, SANDBOX_NAME.c_str()), free);
         BOOST_REQUIRE(name);
-        
+
         return name.get();
     }
 
@@ -118,7 +118,7 @@ public:
             "Test file must not stray outside sandbox");
 
         boost::filesystem::wpath filename =
-            winapi::filesystem::unique_path<wchar_t>();
+            washer::filesystem::unique_path<wchar_t>();
         boost::filesystem::wpath p =
 #if defined(BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION > 2
             subdirectory / (filename.wstring() + extension);
@@ -154,7 +154,7 @@ public:
             "Test directory must not stray outside sandbox");
 
         boost::filesystem::wpath p =
-            subdirectory / winapi::filesystem::unique_path<wchar_t>();
+            subdirectory / washer::filesystem::unique_path<wchar_t>();
 
         create_directory(p);
 
@@ -173,6 +173,6 @@ private:
     boost::filesystem::wpath m_sandbox;
 };
 
-}} // namespace winapi::test
+}} // namespace washer::test
 
 #endif

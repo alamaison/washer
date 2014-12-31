@@ -48,16 +48,16 @@
 #include "menu_fixtures.hpp"
 #include "wchar_output.hpp" // wchar_t test output
 
-#include <winapi/gui/menu/button/bitmap_button_description.hpp>
-#include <winapi/gui/menu/button/string_button_description.hpp>
-#include <winapi/gui/menu/item/command_item.hpp> // test subject
-#include <winapi/gui/menu/item/command_item_description.hpp> // test subject
-#include <winapi/gui/menu/item/item.hpp> // test subject
-#include <winapi/gui/menu/item/separator_item.hpp> // test subject
-#include <winapi/gui/menu/item/separator_item_description.hpp> // test subject
-#include <winapi/gui/menu/item/sub_menu_item.hpp> // test subject
-#include <winapi/gui/menu/item/sub_menu_item_description.hpp> // test subject
-#include <winapi/gui/menu/menu.hpp> // test subject
+#include <washer/gui/menu/button/bitmap_button_description.hpp>
+#include <washer/gui/menu/button/string_button_description.hpp>
+#include <washer/gui/menu/item/command_item.hpp> // test subject
+#include <washer/gui/menu/item/command_item_description.hpp> // test subject
+#include <washer/gui/menu/item/item.hpp> // test subject
+#include <washer/gui/menu/item/separator_item.hpp> // test subject
+#include <washer/gui/menu/item/separator_item_description.hpp> // test subject
+#include <washer/gui/menu/item/sub_menu_item.hpp> // test subject
+#include <washer/gui/menu/item/sub_menu_item_description.hpp> // test subject
+#include <washer/gui/menu/menu.hpp> // test subject
 
 #include <boost/mpl/aux_/config/ctps.hpp>
 #include <boost/mpl/vector/vector50.hpp> // max vector to extend
@@ -78,15 +78,15 @@ namespace mpl {
 #include BOOST_PP_ITERATE()
 }}
 
-using namespace winapi::gui::menu;
-using namespace winapi::test;
-using winapi::window::window;
+using namespace washer::gui::menu;
+using namespace washer::test;
+using washer::window::window;
 
 void use_in_context(const menu_bar& m)
 {
-    window<> w = winapi::test::detail::create_test_window();
+    window<> w = washer::test::detail::create_test_window();
     w.menu(m);
-    winapi::test::detail::show_window(w);
+    washer::test::detail::show_window(w);
 }
 
 void use_in_context(const menu& m)

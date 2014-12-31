@@ -29,29 +29,29 @@
     @endif
 */
 
-#ifndef WINAPI_TEST_MENU_BUTTON_TEST_VISITORS_HPP
-#define WINAPI_TEST_MENU_BUTTON_TEST_VISITORS_HPP
+#ifndef WASHER_TEST_MENU_BUTTON_TEST_VISITORS_HPP
+#define WASHER_TEST_MENU_BUTTON_TEST_VISITORS_HPP
 #pragma once
 
 #include "wchar_output.hpp" // wchar_t test output
 
-#include <winapi/gui/menu/button/bitmap_button.hpp>
-#include <winapi/gui/menu/button/string_button.hpp>
-#include <winapi/gui/menu/visitor.hpp>
+#include <washer/gui/menu/button/bitmap_button.hpp>
+#include <washer/gui/menu/button/string_button.hpp>
+#include <washer/gui/menu/visitor.hpp>
 
 #include <boost/test/unit_test.hpp>
 
 #include <string>
 
-namespace winapi {
+namespace washer {
 namespace test {
 
-class string_button_test : public winapi::gui::menu::menu_visitor<>
+class string_button_test : public washer::gui::menu::menu_visitor<>
 {
 public:
     string_button_test(const std::wstring& caption) : m_caption(caption) {}
 
-    void operator()(winapi::gui::menu::string_button& button)
+    void operator()(washer::gui::menu::string_button& button)
     {
         BOOST_CHECK_EQUAL(button.caption(), m_caption);
     }
@@ -66,12 +66,12 @@ private:
     std::wstring m_caption;
 };
 
-class bitmap_button_test : public winapi::gui::menu::menu_visitor<>
+class bitmap_button_test : public washer::gui::menu::menu_visitor<>
 {
 public:
     bitmap_button_test(HBITMAP bitmap) : m_bitmap(bitmap) {}
 
-    void operator()(winapi::gui::menu::bitmap_button& button)
+    void operator()(washer::gui::menu::bitmap_button& button)
     {
         BOOST_CHECK_EQUAL(button.bitmap(), m_bitmap);
     }
@@ -86,12 +86,12 @@ private:
     HBITMAP m_bitmap;
 };
 
-class string_button_mutator : public winapi::gui::menu::menu_visitor<>
+class string_button_mutator : public washer::gui::menu::menu_visitor<>
 {
 public:
     string_button_mutator(const std::wstring& caption) : m_caption(caption) {}
 
-    void operator()(winapi::gui::menu::string_button& button)
+    void operator()(washer::gui::menu::string_button& button)
     {
         button.caption(m_caption);
     }
@@ -106,12 +106,12 @@ private:
     std::wstring m_caption;
 };
 
-class bitmap_button_mutator : public winapi::gui::menu::menu_visitor<>
+class bitmap_button_mutator : public washer::gui::menu::menu_visitor<>
 {
 public:
     bitmap_button_mutator(HBITMAP bitmap) : m_bitmap(bitmap) {}
 
-    void operator()(winapi::gui::menu::bitmap_button& button)
+    void operator()(washer::gui::menu::bitmap_button& button)
     {
         button.bitmap(m_bitmap);
     }
