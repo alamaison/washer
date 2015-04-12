@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0) # Interface libraries require v3
 
-project(washer VERSION 0.1.0)
-
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 option(BUILD_TESTING "Build test suite" ON)
@@ -12,8 +10,11 @@ option(BUILD_DOCS "Build documentation if Doxygen is available" ON)
 include(HunterGate)
 
 HunterGate(
-    URL "https://github.com/ruslo/hunter/archive/v0.7.3.tar.gz"
-    SHA1 "ff6aaa393d32db13e353e4452fb679fc26e15efb")
+    URL "https://github.com/ruslo/hunter/archive/v0.8.1.tar.gz"
+    SHA1 "a9bd96ab113f3af870b13cd05cf4e75b8848cf4a"
+)
+
+project(washer VERSION 0.1.0)
 
 hunter_add_package(Comet)
 hunter_add_package(Boost COMPONENTS filesystem system thread date_time)
