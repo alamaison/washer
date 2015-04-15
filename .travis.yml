@@ -21,8 +21,12 @@ env:
     - BUILD_TYPE=Release
 
 before_install:
+  - curl -L http://www.cmake.org/files/v3.2/cmake-3.2.2-Linux-x86_64.tar.gz | tar -xz
+  - export PATH="`pwd`/cmake-3.2.2-Linux-x86_64/bin:${PATH}"
+  - which cmake
+  - cmake --version
   - sudo apt-get update -qq
-  - sudo apt-get install -qq --no-install-recommends $DEPENDS libboost-dev
+  - sudo apt-get install -qq --no-install-recommends $DEPENDS
 
 script:
   - mkdir _build

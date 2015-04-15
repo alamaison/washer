@@ -10,8 +10,8 @@ option(BUILD_DOCS "Build documentation if Doxygen is available" ON)
 include(HunterGate)
 
 HunterGate(
-    URL "https://github.com/ruslo/hunter/archive/v0.8.1.tar.gz"
-    SHA1 "a9bd96ab113f3af870b13cd05cf4e75b8848cf4a"
+    URL "https://github.com/ruslo/hunter/archive/v0.8.6.tar.gz"
+    SHA1 "774c45b3943d09386705854101bf5bbd4ce88419"
 )
 
 project(washer VERSION 0.1.0)
