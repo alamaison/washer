@@ -14,7 +14,7 @@ HunterGate(
     SHA1 "774c45b3943d09386705854101bf5bbd4ce88419"
 )
 
-project(washer VERSION 0.1.0)
+project(washer VERSION 0.1.2)
 
 hunter_add_package(Comet)
 hunter_add_package(Boost COMPONENTS filesystem system thread date_time)
@@ -128,25 +128,36 @@ target_link_libraries(washer INTERFACE ${Boost_LIBRARIES})
 
 # Package config
 
-## During package installation, install WasherConfig.cmake
-install(TARGETS washer EXPORT WasherConfig)
-install(EXPORT WasherConfig NAMESPACE Washer:: DESTINATION lib/cmake/Washer)
+set(CMAKE_CONFIG_INSTALL_DIR "lib/cmake/Washer")
 
-## Directly from build tree
-# create WasherConfig.cmake
+## During package installation, install WasherTargets.cmake
+install(TARGETS washer EXPORT WasherTargets)
+install(EXPORT WasherTargets NAMESPACE Washer::
+  DESTINATION ${CMAKE_CONFIG_INSTALL_DIR})
+
+## Register WasherConfig from build tree
 export(TARGETS washer NAMESPACE Washer:: FILE WasherConfig.cmake)
-export(PACKAGE Washer) # register it
-
-## Versioning
+export(PACKAGE Washer)
 
 include(CMakePackageConfigHelpers)
+
+## Install WasherConfig/WasherConfigVersion
+
 write_basic_package_version_file(
   ${CMAKE_CURRENT_BINARY_DIR}/WasherConfigVersion.cmake
   VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
   COMPATIBILITY SameMajorVersion)
 install(
-  FILES ${CMAKE_CURRENT_BINARY_DIR}/WasherConfigVersion.cmake
-  DESTINATION lib/cmake/Washer)
+  FILES "${CMAKE_CURRENT_BINARY_DIR}/WasherConfigVersion.cmake"
+  DESTINATION ${CMAKE_CONFIG_INSTALL_DIR})
+
+configure_package_config_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/WasherConfig.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/to-be-installed/WasherConfig.cmake"
+  INSTALL_DESTINATION ${CMAKE_CONFIG_INSTALL_DIR})
+install(
+  FILES "${CMAKE_CURRENT_BINARY_DIR}/to-be-installed/WasherConfig.cmake"
+  DESTINATION ${CMAKE_CONFIG_INSTALL_DIR})
 
 # Tests
 

@@ -1,0 +1,12 @@
+@PACKAGE_INIT@
+
+find_package(Comet 4.0.0 REQUIRED CONFIG)
+
+set(Boost_USE_STATIC_LIBS TRUE)
+find_package(
+  Boost 1.40 REQUIRED
+  COMPONENTS filesystem system thread date_time)
+
+include("${CMAKE_CURRENT_LIST_DIR}/WasherTargets.cmake")
+
+check_required_components(Washer)
