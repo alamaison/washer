@@ -8,10 +8,9 @@ option(BUILD_DOCS "Build documentation if Doxygen is available" ON)
 # Package management ###########################################################
 
 include(HunterGate)
-
 HunterGate(
-    URL "https://github.com/ruslo/hunter/archive/v0.8.6.tar.gz"
-    SHA1 "774c45b3943d09386705854101bf5bbd4ce88419"
+    URL "https://github.com/ruslo/hunter/archive/v0.14.9.tar.gz"
+    SHA1 "92ce2ee158a653080854366313e5be7230399aca"
 )
 
 project(washer VERSION 0.1.2)
@@ -121,10 +120,10 @@ target_link_libraries(washer INTERFACE Comet::comet)
 
 set(Boost_USE_STATIC_LIBS TRUE)
 find_package(
-  Boost 1.40 REQUIRED
+  Boost 1.40 REQUIRED CONFIG
   COMPONENTS filesystem system thread date_time)
-target_include_directories(washer INTERFACE ${Boost_INCLUDE_DIRS})
-target_link_libraries(washer INTERFACE ${Boost_LIBRARIES})
+target_link_libraries(washer
+  INTERFACE Boost::filesystem Boost::system Boost::thread Boost::date_time)
 
 # Package config
 

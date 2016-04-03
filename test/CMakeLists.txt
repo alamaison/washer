@@ -41,27 +41,22 @@ add_library(
 
 set(Boost_USE_STATIC_LIBS TRUE)
 find_package(
-  Boost 1.40 REQUIRED
+  Boost 1.40 REQUIRED CONFIG
   COMPONENTS filesystem system unit_test_framework)
 
 add_executable(tests ${TEST_SOURCES})
-target_include_directories(tests PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(tests
-  PRIVATE washer load_test_dll ${Boost_LIBRARIES})
-target_compile_definitions(tests PRIVATE BOOST_ALL_NO_LIB=1)
+  PRIVATE washer load_test_dll Boost::system Boost::filesystem Boost::unit_test_framework)
 
 add_executable(tests_unicode ${TEST_SOURCES})
-target_include_directories(tests_unicode PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(tests_unicode
-  PRIVATE washer load_test_dll ${Boost_LIBRARIES})
-target_compile_definitions(tests_unicode PRIVATE BOOST_ALL_NO_LIB=1 _UNICODE)
+  PRIVATE washer load_test_dll Boost::system Boost::filesystem Boost::unit_test_framework)
+target_compile_definitions(tests_unicode PRIVATE _UNICODE)
 
 add_executable(tests_win9x ${TEST_SOURCES})
-target_include_directories(tests_win9x PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(tests_win9x
-  PRIVATE washer load_test_dll ${Boost_LIBRARIES})
-target_compile_definitions(tests_win9x PRIVATE
-  BOOST_ALL_NO_LIB=1 WINVER=0x0400 _WIN32_WINNT=0x0400)
+  PRIVATE washer load_test_dll Boost::system Boost::filesystem Boost::unit_test_framework)
+target_compile_definitions(tests_win9x PRIVATE WINVER=0x0400 _WIN32_WINNT=0x0400)
 
 set(TEST_RUNNER_ARGUMENTS
   --catch_system_errors --detect_memory_leaks
