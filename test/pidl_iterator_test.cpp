@@ -86,10 +86,12 @@ namespace {
         size_t data_length =
             (pidl->mkid.cb < sizeof(USHORT)) ?
                 0 : pidl->mkid.cb - sizeof(USHORT);
-        const char* data = reinterpret_cast<const char*>(pidl) + sizeof(USHORT);
-        return boost::test_tools::tt_detail::equal_coll_impl(
-            data, data + data_length, text.c_str(),
-            text.c_str() + strlen(text.c_str()));
+        const char* data_begin = reinterpret_cast<const char*>(pidl) + sizeof(USHORT);
+		const char* data_end = data_begin + data_length;
+		const char* text_begin = text.c_str();
+		const char* text_end = text_begin + strlen(text_begin);
+		return boost::test_tools::tt_detail::equal_coll_impl()(data_begin, data_end,
+			                                                   text_begin, text_end);
     }
 
     predicate_result pidl_matches_text(

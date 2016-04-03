@@ -171,7 +171,7 @@ namespace {
     {
         const char* lhs = reinterpret_cast<const char*>(pidl1);
         const char* rhs = reinterpret_cast<const char*>(pidl2);
-        return boost::test_tools::tt_detail::equal_coll_impl(
+        return boost::test_tools::tt_detail::equal_coll_impl()(
             lhs, lhs + ::ILGetSize(pidl1),
             rhs, rhs + ::ILGetSize(pidl2));
     }
